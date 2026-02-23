@@ -18,9 +18,31 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+/**
+ * Default Breeze will redirect to /dashboard after login/register.
+ * So we keep /dashboard and redirect ikut role.
+ */
 Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+    if (auth()->check() && auth()->user()->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+
+    return redirect()->route('user.dashboard');
+})->middleware(['auth'])->name('dashboard');
+
+// USER dashboard
+Route::middleware(['auth'])->group(function () {
+    Route::get('/user/dashboard', function () {
+        return view('dashboard');
+    })->name('user.dashboard');
+});
+
+// ADMIN dashboard
+Route::middleware(['auth', 'isAdmin'])->group(function () {
+    Route::get('/admin/dashboard', function () {
+        return view('admin.dashboard');
+    })->name('admin.dashboard');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
