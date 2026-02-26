@@ -33,7 +33,7 @@ Route::get('/dashboard', function () {
 // USER dashboard
 Route::middleware(['auth'])->group(function () {
     Route::get('/user/dashboard', function () {
-        return view('dashboard');
+        return view('user.dashboard');
     })->name('user.dashboard');
 });
 

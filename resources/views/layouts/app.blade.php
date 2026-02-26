@@ -1,36 +1,52 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="csrf-token" content="{{ csrf_token() }}">
+<html lang="en" dir="ltr"
+      data-nav-layout="vertical"
+      data-theme-mode="light"
+      data-header-styles="light"
+      data-menu-styles="dark"
+      data-toggled="close">
 
-        <title>{{ config('app.name', 'Laravel') }}</title>
+<head>
+    @include('partials.head')
+</head>
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+<body class="d-flex flex-column min-vh-100">
 
-        <!-- Scripts -->
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
-            @include('layouts.navigation')
+    @include('partials.switcher')
+    @include('partials.search-modal')
 
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white dark:bg-gray-800 shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
+    {{-- Loader --}}
+    <div id="loader">
+        <img src="{{ asset('assets/images/media/loader.svg') }}" alt="">
+    </div>
+
+    <div class="page flex-grow-1">
+
+        @include('partials.header')
+
+        @auth
+            @if(auth()->user()->role === 'admin')
+                @include('partials.sidebar-admin')
+            @else
+                @include('partials.sidebar-user')
             @endif
+        @endauth
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+        <div class="main-content app-content">
+            <div class="container-fluid">
+                @yield('content')
+            </div>
         </div>
-    </body>
+
+        @include('partials.footer')
+
+    </div>
+
+    <div class="scrollToTop">
+        <span class="arrow"><i class="ri-arrow-up-s-fill fs-20"></i></span>
+    </div>
+    <div id="responsive-overlay"></div>
+
+    @include('partials.scripts')
+</body>
 </html>
