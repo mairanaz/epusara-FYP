@@ -1,7 +1,7 @@
 {{-- resources/views/partials/scripts.blade.php --}}
 
 {{-- Popper + Bootstrap --}}
-<script src="{{ asset('assets/libs/@popperjs/core/umd/popper.min.js') }}"></script>
+{{-- <script src="{{ asset('assets/libs/@popperjs/core/umd/popper.min.js') }}"></script> --}}
 <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 
 {{-- Defaultmenu / Sidebar --}}
@@ -26,8 +26,7 @@
 
 {{-- Main custom --}}
 <script src="{{ asset('assets/js/custom.js') }}"></script>
-
-<script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('assets/js/custom-switcher.min.js') }}"></script>
+
 {{-- Kalau template ada file dashboard JS (contoh: index.js), letak bawah sekali --}}
 {{-- <script src="{{ asset('assets/js/sales-dashboard.js') }}"></script> --}}

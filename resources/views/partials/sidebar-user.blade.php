@@ -19,9 +19,9 @@
                 </li>
 
                 <li class="slide">
-                    <a href="#" class="side-menu__item">
+                    <a href="{{ route('user.profile.show') }}" class="side-menu__item">
                         <i class="bx bx-user side-menu__icon"></i>
-                        <span class="side-menu__label">Profil</span>
+                        <span class="side-menu__label">Maklumat ahli</span>
                     </a>
                 </li>
 

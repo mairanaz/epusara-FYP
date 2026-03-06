@@ -262,14 +262,17 @@
             </div>
 
             {{-- Profile --}}
-            <div class="header-element">
+            <div class="header-element dropdown">
                 <a href="javascript:void(0);" class="header-link dropdown-toggle"
-                   id="mainHeaderProfile" data-bs-toggle="dropdown"
-                   data-bs-auto-close="outside" aria-expanded="false">
+                id="mainHeaderProfile"
+                data-bs-toggle="dropdown"
+                data-bs-auto-close="outside"
+                aria-expanded="false">
+
                     <div class="d-flex align-items-center">
                         <div class="me-sm-2 me-0">
                             <img src="{{ auth()->user()->avatar_url ?? asset('assets/images/faces/9.jpg') }}"
-                                 alt="img" width="32" height="32" class="rounded-circle">
+                                alt="img" width="32" height="32" class="rounded-circle">
                         </div>
                         <div class="d-sm-block d-none">
                             <p class="fw-semibold mb-0 lh-1">{{ auth()->user()->name ?? auth()->user()->email ?? 'User' }}</p>
@@ -280,7 +283,7 @@
                     </div>
                 </a>
 
-                <ul class="main-header-dropdown dropdown-menu pt-0 overflow-hidden header-profile-dropdown dropdown-menu-end"
+                <ul class="main-header-dropdown dropdown-menu pt-0 header-profile-dropdown dropdown-menu-end"
                     aria-labelledby="mainHeaderProfile">
                     <li>
                         <a class="dropdown-item d-flex" href="#">

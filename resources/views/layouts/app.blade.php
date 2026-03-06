@@ -16,9 +16,9 @@
     @include('partials.search-modal')
 
     {{-- Loader --}}
-    <div id="loader">
+  {{-- <div id="loader"> -- }}  
         <img src="{{ asset('assets/images/media/loader.svg') }}" alt="">
-    </div>
+   {{-- </div> --}} 
 
     <div class="page flex-grow-1">
 
@@ -45,8 +45,9 @@
     <div class="scrollToTop">
         <span class="arrow"><i class="ri-arrow-up-s-fill fs-20"></i></span>
     </div>
-    <div id="responsive-overlay"></div>
+    {{-- <div id="responsive-overlay"></div> --}}
 
     @include('partials.scripts')
+    
 </body>
 </html>
