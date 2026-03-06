@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\UserDependentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -28,6 +29,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/user/profile', [UserProfileController::class, 'store'])->name('user.profile.store');
     Route::get('/user/profile/edit', [UserProfileController::class, 'edit'])->name('user.profile.edit');
     Route::put('/user/profile', [UserProfileController::class, 'update'])->name('user.profile.update');
+
+    // USER DEPENDENTS / TANGGUNGAN
+    Route::resource('/user/dependents', UserDependentController::class)
+        ->names('user.dependents');
 
     // Breeze profile setting (default) - KEEP ONE ONLY
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

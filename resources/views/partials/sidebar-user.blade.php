@@ -21,7 +21,14 @@
                 <li class="slide">
                     <a href="{{ route('user.profile.show') }}" class="side-menu__item">
                         <i class="bx bx-user side-menu__icon"></i>
-                        <span class="side-menu__label">Maklumat ahli</span>
+                        <span class="side-menu__label">Maklumat Ahli</span>
+                    </a>
+                </li>
+
+                <li class="slide">
+                    <a href="{{ route('user.dependents.index') }}" class="side-menu__item">
+                        <i class="bx bx-group side-menu__icon"></i>
+                        <span class="side-menu__label">Tanggungan</span>
                     </a>
                 </li>
 
