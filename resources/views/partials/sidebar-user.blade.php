@@ -21,7 +21,7 @@
                 <li class="slide">
                     <a href="{{ route('user.profile.show') }}" class="side-menu__item">
                         <i class="bx bx-user side-menu__icon"></i>
-                        <span class="side-menu__label">Maklumat Ahli</span>
+                        <span class="side-menu__label">Profil</span>
                     </a>
                 </li>
 
@@ -29,6 +29,13 @@
                     <a href="{{ route('user.dependents.index') }}" class="side-menu__item">
                         <i class="bx bx-group side-menu__icon"></i>
                         <span class="side-menu__label">Tanggungan</span>
+                    </a>
+                </li>
+
+                <li class="slide">
+                    <a href="{{ route('user.payments.index') }}" class="side-menu__item">
+                        <i class="bx bx-credit-card side-menu__icon"></i>
+                        <span class="side-menu__label">Yuran</span>
                     </a>
                 </li>
 

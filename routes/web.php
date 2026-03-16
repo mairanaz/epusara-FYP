@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserDependentController;
+use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -33,6 +34,10 @@ Route::middleware(['auth'])->group(function () {
     // USER DEPENDENTS / TANGGUNGAN
     Route::resource('/user/dependents', UserDependentController::class)
         ->names('user.dependents');
+
+    Route::get('/user/payments', [PaymentController::class, 'index'])->name('user.payments.index');
+    Route::get('/user/payments/create', [PaymentController::class, 'create'])->name('user.payments.create');
+    Route::post('/user/payments', [PaymentController::class, 'store'])->name('user.payments.store');
 
     // Breeze profile setting (default) - KEEP ONE ONLY
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

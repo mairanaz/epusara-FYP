@@ -6,31 +6,50 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('user_profiles', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-            $table->string('nama')->nullable();
-            $table->string('no_kp')->nullable();
-            $table->string('email')->nullable();
-            $table->date('tarikh')->nullable();
-            $table->string('alamat_rumah')->nullable();
+
+            // Maklumat ahli
+            $table->string('nama');
+            $table->string('no_kp')->unique();
+            $table->date('tarikh_lahir')->nullable();
+            $table->string('agama')->default('Islam');
+            $table->string('warganegara')->default('Malaysia');
+
+            // Perhubungan
+            $table->text('alamat_rumah');
             $table->string('no_tel_rumah')->nullable();
-            $table->string('no_tel')->nullable();
+            $table->string('no_tel_bimbit');
+
+            // Kelayakan kariah
+            $table->boolean('tinggal_dalam_kariah')->default(false);
+            $table->string('tempoh_menetap')->nullable();
+
+            // Pekerjaan
             $table->string('pekerjaan')->nullable();
-            $table->string('alamat_kerja')->nullable();
+            $table->string('nama_majikan')->nullable();
+            $table->text('alamat_kerja')->nullable();
+
+            // Waris
+            $table->string('nama_waris')->nullable();
+            $table->string('hubungan_waris')->nullable();
+            $table->string('no_tel_waris')->nullable();
+            $table->text('alamat_waris')->nullable();
+
+            // Permohonan
+            $table->date('tarikh_permohonan')->nullable();
+            $table->string('status_permohonan')->default('draft');
+            $table->text('catatan_permohonan')->nullable();
+
             $table->timestamps();
-            $table->unique('user_id'); // satu user satu profile
+
+            $table->unique('user_id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('user_profiles');
