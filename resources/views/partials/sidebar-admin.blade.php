@@ -1,7 +1,9 @@
 <aside class="app-sidebar sticky" id="sidebar">
-    <div class="main-sidebar-header">
-        <a href="{{ route('admin.dashboard') }}" class="header-logo">
-            <img src="{{ asset('assets/images/brand-logos/desktop-logo.png') }}" alt="logo" class="desktop-logo">
+    <div class="main-sidebar-header d-flex align-items-center justify-content-center">
+        <a href="{{ route('admin.dashboard') }}" class="header-logo d-flex align-items-center gap-2 text-decoration-none">
+            <img src="{{ asset('assets/images/logo_rtb.jpg') }}" alt="Logo RTB"
+                 style="height: 50px; width: auto; object-fit: contain;">
+            <span style="font-size: 22px; font-weight: 800; color: #ffffff;">E-Pusara</span>
         </a>
     </div>
 
