@@ -5,12 +5,12 @@
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
         <div>
-            <h1 class="page-title fw-semibold fs-20 mb-1">Maklumat Ahli</h1>
-            <p class="text-muted mb-0">Sila semak semula maklumat profil anda sebelum menghantar permohonan.</p>
+            <h1 class="page-title fw-semibold fs-20 mb-1">Semakan Permohonan Profil</h1>
+            <p class="text-muted mb-0">Paparan lengkap maklumat permohonan pengguna.</p>
         </div>
         <div class="btn-list mt-3 mt-md-0">
-            <a class="btn btn-primary" href="{{ route('user.profile.edit') }}">
-                Edit Maklumat
+            <a href="{{ route('admin.profile.index') }}" class="btn btn-light">
+                Kembali
             </a>
         </div>
     </div>
@@ -29,23 +29,30 @@
         </div>
     @endif
 
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <div class="fw-semibold mb-2">Sila semak maklumat berikut:</div>
+            <ul class="mb-0">
+                @foreach ($errors->all() as $e)
+                    <li>{{ $e }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <div class="card border-0 shadow-sm mb-4">
         <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
             <div>
-                <h4 class="mb-1 fw-bold">{{ $profile->nama }}</h4>
+                <h4 class="fw-bold mb-1">{{ $profile->nama }}</h4>
                 <div class="text-muted mb-2">{{ $profile->no_kp }}</div>
-
                 @if($profile->status_permohonan)
                     <span class="badge bg-{{ $statusClass }}">
                         Status: {{ ucfirst(str_replace('_', ' ', $profile->status_permohonan)) }}
                     </span>
                 @else
-                    <span class="badge bg-secondary">
-                        Status: Belum Dihantar
-                    </span>
+                    <span class="badge bg-secondary">Status: Belum Dihantar</span>
                 @endif
             </div>
-
             <div class="text-md-end">
                 <small class="text-muted d-block">Tarikh Permohonan</small>
                 <span class="fw-semibold">
@@ -55,45 +62,6 @@
         </div>
     </div>
 
-    @if($canSubmit)
-        <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div>
-                Sila semak semua maklumat anda terlebih dahulu. Jika semuanya betul, klik <b>Hantar Permohonan</b> untuk dihantar kepada pihak pentadbiran.
-            </div>
-
-            <form action="{{ route('user.profile.submit') }}" method="POST" onsubmit="return confirm('Adakah anda pasti mahu menghantar permohonan ini?');">
-                @csrf
-                <button type="submit" class="btn btn-warning">
-                    Hantar Permohonan
-                </button>
-            </form>
-        </div>
-    @elseif($profile->status_permohonan === 'pending')
-        <div class="alert alert-info">
-            Permohonan anda telah dihantar dan sedang menunggu semakan pentadbiran.
-            <div class="mt-2">
-                Sila tunggu keputusan pentadbiran sebelum membuat bayaran yuran.
-            </div>
-        </div>
-    @elseif($profile->status_permohonan === 'approved')
-        <div class="alert alert-success d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div>
-                Permohonan anda telah <b>diluluskan</b>. Sila buat bayaran yuran untuk meneruskan proses pengaktifan keahlian.
-            </div>
-
-            <a href="{{ route('user.payments.create') }}" class="btn btn-success">
-                Bayar Yuran
-            </a>
-        </div>
-    @elseif($profile->status_permohonan === 'rejected')
-        <div class="alert alert-danger">
-            Permohonan anda telah ditolak.
-            @if($profile->catatan_permohonan)
-                <div class="mt-2"><b>Catatan:</b> {{ $profile->catatan_permohonan }}</div>
-            @endif
-        </div>
-    @endif
-
     <div class="row g-4">
 
         <div class="col-xl-6">
@@ -102,7 +70,7 @@
                 <div class="card-body">
                     <div class="mb-2"><b>Nama:</b> {{ $profile->nama }}</div>
                     <div class="mb-2"><b>No. MyKad:</b> {{ $profile->no_kp }}</div>
-                    <div class="mb-2"><b>Tarikh Lahir:</b> {{ optional($profile->tarikh_lahir)->format('d/m/Y') }}</div>
+                    <div class="mb-2"><b>Tarikh Lahir:</b> {{ $profile->tarikh_lahir ? \Carbon\Carbon::parse($profile->tarikh_lahir)->format('d/m/Y') : '-' }}</div>
                     <div class="mb-2"><b>Agama:</b> {{ $profile->agama }}</div>
                     <div><b>Warganegara:</b> {{ $profile->warganegara }}</div>
                 </div>
@@ -126,7 +94,7 @@
                 <div class="card-body">
                     <div class="mb-2">
                         <b>Tinggal Dalam Kariah:</b>
-                        <span class="badge bg-success">{{ $profile->tinggal_dalam_kariah ? 'Ya' : 'Tidak' }}</span>
+                        {{ $profile->tinggal_dalam_kariah ? 'Ya' : 'Tidak' }}
                     </div>
                     <div><b>Tempoh Menetap:</b> {{ $profile->tempoh_menetap }}</div>
                 </div>
@@ -193,14 +161,14 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <b>Pelan Dipilih:</b><br>
-                            {{ $paymentPlanLabel }}
+                            {{ ucfirst($profile->payment_plan ?? '-') }}
                         </div>
                         <div class="col-md-6">
                             <b>Keterangan:</b><br>
                             @if($profile->payment_plan === 'tahunan')
                                 RM20 pendaftaran + RM100 tahunan
                             @elseif($profile->payment_plan === 'bulanan')
-                                RM20 pendaftaran + RM10 bulan semasa, kemudian RM10 setiap bulan
+                                RM20 pendaftaran + RM10 bulan semasa
                             @else
                                 -
                             @endif
@@ -210,6 +178,56 @@
             </div>
         </div>
 
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-light fw-semibold">H. Status Bayaran</div>
+                <div class="card-body">
+                    @if($hasPaidPayment)
+                        <span class="badge bg-success">Sudah Dibayar</span>
+                    @else
+                        <span class="badge bg-danger">Belum Dibayar</span>
+                    @endif
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    @if($profile->status_permohonan === 'pending')
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-light fw-semibold">Tindakan Pentadbir</div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2 mb-4">
+                    <form action="{{ route('admin.profile.approve', $profile) }}" method="POST" onsubmit="return confirm('Adakah anda pasti mahu meluluskan permohonan ini?');">
+                        @csrf
+                        <button type="submit" class="btn btn-success">
+                            Luluskan Permohonan
+                        </button>
+                    </form>
+                </div>
+
+                <hr>
+
+                <form action="{{ route('admin.profile.reject', $profile) }}" method="POST" onsubmit="return confirm('Adakah anda pasti mahu menolak permohonan ini?');">
+                    @csrf
+                    <div class="mb-3">
+                        <label class="form-label">Sebab / Catatan Penolakan</label>
+                        <textarea name="catatan_permohonan"
+                                  rows="4"
+                                  class="form-control @error('catatan_permohonan') is-invalid @enderror"
+                                  placeholder="Sila nyatakan sebab permohonan ditolak">{{ old('catatan_permohonan') }}</textarea>
+                        @error('catatan_permohonan')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <button type="submit" class="btn btn-danger">
+                        Tolak Permohonan
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endif
+
 </div>
 @endsection

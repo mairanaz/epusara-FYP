@@ -4,20 +4,22 @@
 <div class="container-fluid">
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
-        <h1 class="page-title fw-semibold fs-18 mb-0">Kemaskini Maklumat Ahli</h1>
-        <div class="ms-md-1 ms-0">
-            <nav>
-                <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ route('user.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('user.profile.show') }}">Maklumat Ahli</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Kemaskini</li>
-                </ol>
-            </nav>
+        <div>
+            <h1 class="page-title fw-semibold fs-20 mb-1">Kemaskini Maklumat Ahli</h1>
+            <p class="text-muted mb-0">Sila kemaskini maklumat anda dengan tepat.</p>
         </div>
     </div>
 
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     @if ($errors->any())
         <div class="alert alert-danger">
+            <div class="fw-semibold mb-2">Sila semak maklumat berikut:</div>
             <ul class="mb-0">
                 @foreach ($errors->all() as $e)
                     <li>{{ $e }}</li>
@@ -28,63 +30,59 @@
 
     <div class="row">
         <div class="col-xl-12">
-            <div class="card custom-card">
+            <div class="card custom-card border-0 shadow-sm">
                 <div class="card-body p-0">
-                    <form method="POST" action="{{ route('user.profile.update') }}">
+                    <form action="{{ route('user.profile.update') }}" method="POST">
                         @csrf
                         @method('PUT')
 
                         <div class="p-4">
-                            <div class="row g-4">
+                            <div class="row g-3">
 
                                 <div class="col-12">
-                                    <h5 class="fw-semibold mb-3">A. Maklumat Ahli</h5>
+                                    <h5 class="fw-semibold mb-3">A. Maklumat Peribadi</h5>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Nama Penuh</label>
-                                    <input type="text"
-                                           name="nama"
+                                    <input type="text" name="nama"
                                            class="form-control @error('nama') is-invalid @enderror"
-                                           value="{{ old('nama', $profile->nama) }}"
-                                           placeholder="Sila isikan nama penuh">
+                                           value="{{ old('nama', $profile->nama) }}">
                                     @error('nama') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">No. MyKad</label>
-                                    <input type="text"
-                                           name="no_kp"
+                                    <input type="text" name="no_kp"
                                            class="form-control @error('no_kp') is-invalid @enderror"
-                                           value="{{ old('no_kp', $profile->no_kp) }}"
-                                           placeholder="Contoh: 010203040506">
+                                           value="{{ old('no_kp', $profile->no_kp) }}">
                                     @error('no_kp') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Tarikh Lahir</label>
-                                    <input type="date"
-                                           name="tarikh_lahir"
+                                    <input type="date" name="tarikh_lahir"
                                            class="form-control @error('tarikh_lahir') is-invalid @enderror"
-                                           value="{{ old('tarikh_lahir', $profile->tarikh_lahir ? \Carbon\Carbon::parse($profile->tarikh_lahir)->format('Y-m-d') : '') }}">
+                                           value="{{ old('tarikh_lahir', optional($profile->tarikh_lahir)->format('Y-m-d')) }}">
                                     @error('tarikh_lahir') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Agama</label>
-                                    <input type="text"
-                                           name="agama"
-                                           class="form-control @error('agama') is-invalid @enderror"
-                                           value="{{ old('agama', $profile->agama) }}">
+                                    <select name="agama" class="form-select @error('agama') is-invalid @enderror">
+                                        <option value="">-- Sila Pilih --</option>
+                                        <option value="Islam" {{ old('agama', $profile->agama) == 'Islam' ? 'selected' : '' }}>Islam</option>
+                                    </select>
                                     @error('agama') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Warganegara</label>
-                                    <input type="text"
-                                           name="warganegara"
-                                           class="form-control @error('warganegara') is-invalid @enderror"
-                                           value="{{ old('warganegara', $profile->warganegara) }}">
+                                    <select name="warganegara" class="form-select @error('warganegara') is-invalid @enderror">
+                                        <option value="">-- Sila Pilih --</option>
+                                        <option value="Malaysia" {{ old('warganegara', $profile->warganegara) == 'Malaysia' ? 'selected' : '' }}>Malaysia</option>
+                                        <option value="Penduduk Tetap" {{ old('warganegara', $profile->warganegara) == 'Penduduk Tetap' ? 'selected' : '' }}>Penduduk Tetap</option>
+                                    </select>
                                     @error('warganegara') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -94,30 +92,24 @@
 
                                 <div class="col-md-12">
                                     <label class="form-label">Alamat Rumah</label>
-                                    <textarea name="alamat_rumah"
-                                              rows="3"
-                                              class="form-control @error('alamat_rumah') is-invalid @enderror"
-                                              placeholder="Sila isikan alamat rumah">{{ old('alamat_rumah', $profile->alamat_rumah) }}</textarea>
+                                    <textarea name="alamat_rumah" rows="3"
+                                              class="form-control @error('alamat_rumah') is-invalid @enderror">{{ old('alamat_rumah', $profile->alamat_rumah) }}</textarea>
                                     @error('alamat_rumah') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">No. Tel Rumah</label>
-                                    <input type="text"
-                                           name="no_tel_rumah"
+                                    <input type="text" name="no_tel_rumah"
                                            class="form-control @error('no_tel_rumah') is-invalid @enderror"
-                                           value="{{ old('no_tel_rumah', $profile->no_tel_rumah) }}"
-                                           placeholder="Contoh: 03-12345678">
+                                           value="{{ old('no_tel_rumah', $profile->no_tel_rumah) }}">
                                     @error('no_tel_rumah') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">No. Telefon Bimbit</label>
-                                    <input type="text"
-                                           name="no_tel_bimbit"
+                                    <input type="text" name="no_tel_bimbit"
                                            class="form-control @error('no_tel_bimbit') is-invalid @enderror"
-                                           value="{{ old('no_tel_bimbit', $profile->no_tel_bimbit) }}"
-                                           placeholder="Contoh: 0123456789">
+                                           value="{{ old('no_tel_bimbit', $profile->no_tel_bimbit) }}">
                                     @error('no_tel_bimbit') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -127,22 +119,18 @@
 
                                 <div class="col-md-6">
                                     <label class="form-label">Tinggal Dalam Kariah?</label>
-                                    <select name="tinggal_dalam_kariah"
-                                            class="form-select @error('tinggal_dalam_kariah') is-invalid @enderror">
+                                    <select name="tinggal_dalam_kariah" class="form-select @error('tinggal_dalam_kariah') is-invalid @enderror">
                                         <option value="">-- Sila Pilih --</option>
                                         <option value="1" {{ old('tinggal_dalam_kariah', $profile->tinggal_dalam_kariah) == 1 ? 'selected' : '' }}>Ya</option>
-                                        <option value="0" {{ old('tinggal_dalam_kariah', $profile->tinggal_dalam_kariah) == 0 ? 'selected' : '' }}>Tidak</option>
                                     </select>
                                     @error('tinggal_dalam_kariah') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Tempoh Menetap</label>
-                                    <input type="text"
-                                           name="tempoh_menetap"
+                                    <input type="text" name="tempoh_menetap"
                                            class="form-control @error('tempoh_menetap') is-invalid @enderror"
-                                           value="{{ old('tempoh_menetap', $profile->tempoh_menetap) }}"
-                                           placeholder="Contoh: 5 tahun">
+                                           value="{{ old('tempoh_menetap', $profile->tempoh_menetap) }}">
                                     @error('tempoh_menetap') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -152,31 +140,25 @@
 
                                 <div class="col-md-4">
                                     <label class="form-label">Pekerjaan</label>
-                                    <input type="text"
-                                           name="pekerjaan"
+                                    <input type="text" name="pekerjaan"
                                            class="form-control @error('pekerjaan') is-invalid @enderror"
-                                           value="{{ old('pekerjaan', $profile->pekerjaan) }}"
-                                           placeholder="Contoh: Swasta / Kerajaan / Pelajar">
+                                           value="{{ old('pekerjaan', $profile->pekerjaan) }}">
                                     @error('pekerjaan') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Nama Majikan</label>
-                                    <input type="text"
-                                           name="nama_majikan"
+                                    <input type="text" name="nama_majikan"
                                            class="form-control @error('nama_majikan') is-invalid @enderror"
-                                           value="{{ old('nama_majikan', $profile->nama_majikan) }}"
-                                           placeholder="Sila isikan nama majikan">
+                                           value="{{ old('nama_majikan', $profile->nama_majikan) }}">
                                     @error('nama_majikan') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-4">
                                     <label class="form-label">Alamat Kerja</label>
-                                    <input type="text"
-                                           name="alamat_kerja"
+                                    <input type="text" name="alamat_kerja"
                                            class="form-control @error('alamat_kerja') is-invalid @enderror"
-                                           value="{{ old('alamat_kerja', $profile->alamat_kerja) }}"
-                                           placeholder="Sila isikan alamat tempat kerja">
+                                           value="{{ old('alamat_kerja', $profile->alamat_kerja) }}">
                                     @error('alamat_kerja') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -186,41 +168,40 @@
 
                                 <div class="col-md-6">
                                     <label class="form-label">Nama Waris</label>
-                                    <input type="text"
-                                           name="nama_waris"
+                                    <input type="text" name="nama_waris"
                                            class="form-control @error('nama_waris') is-invalid @enderror"
-                                           value="{{ old('nama_waris', $profile->nama_waris) }}"
-                                           placeholder="Sila isikan nama waris">
+                                           value="{{ old('nama_waris', $profile->nama_waris) }}">
                                     @error('nama_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Hubungan Waris</label>
-                                    <input type="text"
-                                           name="hubungan_waris"
-                                           class="form-control @error('hubungan_waris') is-invalid @enderror"
-                                           value="{{ old('hubungan_waris', $profile->hubungan_waris) }}"
-                                           placeholder="Contoh: Isteri / Suami / Anak">
+                                    <select name="hubungan_waris" class="form-select @error('hubungan_waris') is-invalid @enderror">
+                                        <option value="">-- Sila Pilih --</option>
+                                        <option value="Suami" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Suami' ? 'selected' : '' }}>Suami</option>
+                                        <option value="Isteri" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Isteri' ? 'selected' : '' }}>Isteri</option>
+                                        <option value="Anak" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Anak' ? 'selected' : '' }}>Anak</option>
+                                        <option value="Ibu" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Ibu' ? 'selected' : '' }}>Ibu</option>
+                                        <option value="Bapa" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Bapa' ? 'selected' : '' }}>Bapa</option>
+                                        <option value="Ibu Mertua" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Ibu Mertua' ? 'selected' : '' }}>Ibu Mertua</option>
+                                        <option value="Bapa Mertua" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Bapa Mertua' ? 'selected' : '' }}>Bapa Mertua</option>
+                                    </select>
                                     @error('hubungan_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">No. Tel Waris</label>
-                                    <input type="text"
-                                           name="no_tel_waris"
+                                    <input type="text" name="no_tel_waris"
                                            class="form-control @error('no_tel_waris') is-invalid @enderror"
-                                           value="{{ old('no_tel_waris', $profile->no_tel_waris) }}"
-                                           placeholder="Contoh: 0123456789">
+                                           value="{{ old('no_tel_waris', $profile->no_tel_waris) }}">
                                     @error('no_tel_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
                                 <div class="col-md-6">
                                     <label class="form-label">Alamat Waris</label>
-                                    <input type="text"
-                                           name="alamat_waris"
+                                    <input type="text" name="alamat_waris"
                                            class="form-control @error('alamat_waris') is-invalid @enderror"
-                                           value="{{ old('alamat_waris', $profile->alamat_waris) }}"
-                                           placeholder="Sila isikan alamat waris">
+                                           value="{{ old('alamat_waris', $profile->alamat_waris) }}">
                                     @error('alamat_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
@@ -239,22 +220,18 @@
                                             class="form-select @error('payment_plan') is-invalid @enderror"
                                             {{ $hasPaidPayments ? 'disabled' : '' }}>
                                         <option value="">-- Sila Pilih --</option>
-                                        <option value="bulanan" {{ old('payment_plan', $profile->payment_plan) == 'bulanan' ? 'selected' : '' }}>
-                                            Bulanan
-                                        </option>
-                                        <option value="tahunan" {{ old('payment_plan', $profile->payment_plan) == 'tahunan' ? 'selected' : '' }}>
-                                            Tahunan
-                                        </option>
+                                        <option value="bulanan" {{ old('payment_plan', $profile->payment_plan) == 'bulanan' ? 'selected' : '' }}>Bulanan</option>
+                                        <option value="tahunan" {{ old('payment_plan', $profile->payment_plan) == 'tahunan' ? 'selected' : '' }}>Tahunan</option>
                                     </select>
                                     @error('payment_plan') <div class="invalid-feedback">{{ $message }}</div> @enderror
 
                                     @if($hasPaidPayments)
                                         <small class="text-danger">
-                                            Pelan pembayaran tidak boleh diubah kerana anda sudah membuat bayaran.
+                                            Pelan pembayaran tidak boleh diubah kerana anda sudah mempunyai bayaran berstatus paid.
                                         </small>
                                     @else
                                         <small class="text-muted">
-                                            Anda boleh menukar pelan pembayaran selagi belum ada bayaran berstatus paid.
+                                            Anda boleh ubah pelan pembayaran selagi belum ada bayaran paid.
                                         </small>
                                     @endif
                                 </div>
@@ -269,10 +246,20 @@
                                     </div>
                                 </div>
 
+                                <div class="col-12">
+                                    <div class="form-check mt-2">
+                                        <input class="form-check-input @error('akuan') is-invalid @enderror" type="checkbox" name="akuan" value="1" id="akuan" checked>
+                                        <label class="form-check-label" for="akuan">
+                                            Saya mengesahkan maklumat yang dikemaskini adalah benar.
+                                        </label>
+                                        @error('akuan') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
 
-                        <div class="px-4 py-3 border-top border-block-start-dashed d-sm-flex justify-content-end">
+                        <div class="px-4 py-3 border-top d-sm-flex justify-content-end">
                             <a class="btn btn-light m-1" href="{{ route('user.profile.show') }}">Batal</a>
                             <button class="btn btn-primary m-1" type="submit">Kemaskini</button>
                         </div>

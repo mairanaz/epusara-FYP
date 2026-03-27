@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserDependentController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\Admin\AdminProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -30,6 +31,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/user/profile', [UserProfileController::class, 'store'])->name('user.profile.store');
     Route::get('/user/profile/edit', [UserProfileController::class, 'edit'])->name('user.profile.edit');
     Route::put('/user/profile', [UserProfileController::class, 'update'])->name('user.profile.update');
+    Route::post('/user/profile/submit', [UserProfileController::class, 'submit'])->name('user.profile.submit');
 
     // USER DEPENDENTS / TANGGUNGAN
     Route::resource('/user/dependents', UserDependentController::class)
@@ -46,10 +48,15 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ADMIN routes
-Route::middleware(['auth', 'isAdmin'])->group(function () {
-    Route::get('/admin/dashboard', function () {
+Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', function () {
         return view('admin.dashboard');
-    })->name('admin.dashboard');
+    })->name('dashboard');
+
+    Route::get('/profile', [AdminProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/{profile}', [AdminProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile/{profile}/approve', [AdminProfileController::class, 'approve'])->name('profile.approve');
+    Route::post('/profile/{profile}/reject', [AdminProfileController::class, 'reject'])->name('profile.reject');
 });
 
 require __DIR__ . '/auth.php';

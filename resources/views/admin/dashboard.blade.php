@@ -16,7 +16,7 @@
         <div class="col-xl-12">
             <div class="card custom-card">
                 <div class="card-body">
-                    Content dashboard admin kau kat sini.
+                    Content dashboard admin.
                 </div>
             </div>
         </div>

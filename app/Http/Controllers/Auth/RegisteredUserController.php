@@ -42,14 +42,9 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        event(new Registered($user));
+       event(new Registered($user));
 
-        Auth::login($user);
-
-        if (auth()->user()->role === 'admin') {
-            return redirect()->route('admin.dashboard');
-        }
-        return redirect()->route('user.dashboard');
+        return redirect()->route('login')->with('success', 'Pendaftaran berjaya. Sila login.');
         
     }
 }
