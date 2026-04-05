@@ -14,6 +14,7 @@ class UserProfile extends Model
         'nama',
         'no_kp',
         'tarikh_lahir',
+        'jantina',
         'agama',
         'warganegara',
         'alamat_rumah',
@@ -32,11 +33,14 @@ class UserProfile extends Model
         'status_permohonan',
         'catatan_permohonan',
         'payment_plan',
+        'status_kehidupan',
+        'tarikh_kematian',
     ];
 
     protected $casts = [
         'tarikh_lahir' => 'date',
         'tarikh_permohonan' => 'date',
+        'tarikh_kematian' => 'date',
         'tinggal_dalam_kariah' => 'boolean',
     ];
 

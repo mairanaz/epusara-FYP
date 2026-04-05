@@ -8,8 +8,8 @@
 
             <div class="header-element">
                 <div class="horizontal-logo">
-                    <a href="{{ auth()->check() && auth()->user()->role === 'admin' ? route('admin.dashboard') : route('user.dashboard') }}"
-                       class="header-logo">
+                    <a href="{{ auth()->check() ? (auth()->user()->role === 'admin' ? route('admin.dashboard') : route('user.dashboard')) : url('/') }}"
+                        class="header-logo">
                         <img src="{{ asset('assets/images/brand-logos/desktop-logo.png') }}" alt="logo" class="desktop-logo">
                         <img src="{{ asset('assets/images/brand-logos/toggle-logo.png') }}" alt="logo" class="toggle-logo">
                         <img src="{{ asset('assets/images/brand-logos/desktop-dark.png') }}" alt="logo" class="desktop-dark">
@@ -262,6 +262,7 @@
             </div>
 
             {{-- Profile --}}
+            @auth
             <div class="header-element dropdown">
                 <a href="javascript:void(0);" class="header-link dropdown-toggle"
                 id="mainHeaderProfile"
@@ -307,6 +308,7 @@
                     </li>
                 </ul>
             </div>
+            @endauth
 
             {{-- Switcher button (⚙️) --}}
             <div class="header-element">

@@ -79,6 +79,16 @@
                                     @error('tarikh_lahir') <div class="invalid-feedback">{{ $message }}</div> @enderror
                                 </div>
 
+                               <div class="col-md-4">
+                                    <label class="form-label">Jantina</label>
+                                    <select name="jantina" class="form-select @error('jantina') is-invalid @enderror" required>
+                                        <option value="">-- Sila Pilih --</option>
+                                        <option value="lelaki" {{ old('jantina') == 'lelaki' ? 'selected' : '' }}>Lelaki</option>
+                                        <option value="perempuan" {{ old('jantina') == 'perempuan' ? 'selected' : '' }}>Perempuan</option>
+                                    </select>
+                                    @error('jantina') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+
                                 <div class="col-md-4">
                                     <label class="form-label">Agama</label>
                                     <select name="agama" class="form-select @error('agama') is-invalid @enderror">

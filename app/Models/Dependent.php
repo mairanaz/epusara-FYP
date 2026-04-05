@@ -16,6 +16,12 @@ class Dependent extends Model
         'pasangan',
         'pertalian',
         'no_tel',
+        'status_kehidupan',
+        'tarikh_kematian',
+    ];
+
+    protected $casts = [
+        'tarikh_kematian' => 'date',
     ];
 
     public function user()

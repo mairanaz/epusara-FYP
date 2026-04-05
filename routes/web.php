@@ -4,12 +4,24 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UserDependentController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\WhatsAppController;
+use App\Http\Controllers\DeathReportController;
 use App\Http\Controllers\Admin\AdminProfileController;
+use App\Http\Controllers\Admin\AdminDeathReportController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
+
+Route::get('/whatsapp/lapor-kematian', [WhatsAppController::class, 'laporKematian'])
+    ->name('whatsapp.lapor-kematian');
+
+Route::get('/lapor-kematian', [DeathReportController::class, 'create'])
+    ->name('death-report.create');
+
+Route::post('/lapor-kematian', [DeathReportController::class, 'store'])
+    ->name('death-report.store');
 
 Route::get('/dashboard', function () {
     if (auth()->user()->role === 'admin') {
@@ -57,6 +69,12 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::get('/profile/{profile}', [AdminProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile/{profile}/approve', [AdminProfileController::class, 'approve'])->name('profile.approve');
     Route::post('/profile/{profile}/reject', [AdminProfileController::class, 'reject'])->name('profile.reject');
+
+    Route::get('/death-reports', [AdminDeathReportController::class, 'index'])->name('death-reports.index');
+    Route::get('/death-reports/{deathReport}', [AdminDeathReportController::class, 'show'])->name('death-reports.show');
+    Route::post('/death-reports/{deathReport}/verify', [AdminDeathReportController::class, 'verify'])->name('death-reports.verify');
+    Route::get('/death-reports/{deathReport}/preview/{type}', [AdminDeathReportController::class, 'preview'])
+    ->name('death-reports.preview');
 });
 
 require __DIR__ . '/auth.php';

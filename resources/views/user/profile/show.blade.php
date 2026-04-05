@@ -103,6 +103,7 @@
                     <div class="mb-2"><b>Nama:</b> {{ $profile->nama }}</div>
                     <div class="mb-2"><b>No. MyKad:</b> {{ $profile->no_kp }}</div>
                     <div class="mb-2"><b>Tarikh Lahir:</b> {{ optional($profile->tarikh_lahir)->format('d/m/Y') }}</div>
+                    <div class="mb-2"><b>Jantina:</b> {{ ucfirst($profile->jantina ?? '-') }}</div>
                     <div class="mb-2"><b>Agama:</b> {{ $profile->agama }}</div>
                     <div><b>Warganegara:</b> {{ $profile->warganegara }}</div>
                 </div>

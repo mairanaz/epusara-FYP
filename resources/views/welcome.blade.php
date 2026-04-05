@@ -350,12 +350,14 @@
 
                 @guest
                     <div class="hero-actions">
-                        <a href="{{ route('register') }}" class="btn btn-light">Daftar Sekarang</a>
-                        <a href="{{ route('login') }}" class="btn btn-outline-light">Log Masuk</a>
+                        <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-light">WhatsApp Pentadbir</a>
+                        <a href="tel:0132186469" class="btn btn-outline-light">Call Pentadbir</a>
                     </div>
                 @else
                     <div class="hero-actions">
                         <a href="{{ route('dashboard') }}" class="btn btn-light">Pergi ke Dashboard</a>
+                        <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-outline-light">WhatsApp Pentadbir</a>
+                        <a href="tel:0132186469" class="btn btn-outline-light">Call Pentadbir</a>
                     </div>
                 @endguest
             </div>
@@ -455,6 +457,7 @@
             © {{ date('Y') }} E-Pusara. Hak cipta terpelihara.
         </div>
     </footer>
+    
 
 </body>
 </html>

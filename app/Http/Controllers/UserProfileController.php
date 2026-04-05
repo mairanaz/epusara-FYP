@@ -152,6 +152,7 @@ class UserProfileController extends Controller
                 Rule::unique('user_profiles', 'no_kp')->ignore($profileId),
             ],
             'tarikh_lahir' => ['required', 'date', 'before:today'],
+            'jantina' => ['required', Rule::in(['lelaki', 'perempuan'])],
             'agama' => ['required', Rule::in(['Islam'])],
             'warganegara' => ['required', Rule::in(['Malaysia', 'Penduduk Tetap'])],
 
@@ -197,6 +198,9 @@ class UserProfileController extends Controller
 
             'tarikh_lahir.required' => 'Tarikh lahir wajib diisi.',
             'tarikh_lahir.before' => 'Tarikh lahir mesti sebelum hari ini.',
+
+            'jantina.required' => 'Jantina wajib dipilih.',
+            'jantina.in' => 'Jantina yang dipilih tidak sah.',
 
             'agama.required' => 'Agama wajib dipilih.',
             'agama.in' => 'Keahlian hanya terbuka kepada pemohon beragama Islam.',

@@ -27,6 +27,13 @@
                     </a>
                 </li>
 
+                <li class="slide">
+                    <a href="{{ route('admin.death-reports.index') }}" class="side-menu__item">
+                        <i class="bx bx-file side-menu__icon"></i>
+                        <span class="side-menu__label">Laporan Kematian</span>
+                    </a>
+                </li>
+
             </ul>
         </nav>
     </div>

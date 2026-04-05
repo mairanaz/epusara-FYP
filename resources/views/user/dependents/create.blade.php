@@ -20,6 +20,11 @@
                 </div>
             @endif
 
+            @php
+                $userGender = strtolower($gender ?? '');
+                $spouseRelation = $userGender === 'lelaki' ? 'isteri' : ($userGender === 'perempuan' ? 'suami' : '');
+            @endphp
+
             <form action="{{ route('user.dependents.store') }}" method="POST">
                 @csrf
 
@@ -36,7 +41,7 @@
 
                     <div class="col-md-6 mb-3">
                         <label>Pasangan</label>
-                        <select name="pasangan" class="form-control" required>
+                        <select name="pasangan" id="pasangan" class="form-control" required>
                             <option value="">-- Pilih --</option>
                             <option value="ya" {{ old('pasangan') == 'ya' ? 'selected' : '' }}>Ya</option>
                             <option value="tidak" {{ old('pasangan') == 'tidak' ? 'selected' : '' }}>Tidak</option>
@@ -45,13 +50,8 @@
 
                     <div class="col-md-6 mb-3">
                         <label>Pertalian</label>
-                        <select name="pertalian" class="form-control" required>
+                        <select name="pertalian" id="pertalian" class="form-control" required>
                             <option value="">-- Pilih --</option>
-                            @foreach(['suami','isteri','anak','bapa kandung','ibu kandung','bapa mertua','ibu mertua'] as $item)
-                                <option value="{{ $item }}" {{ old('pertalian') == $item ? 'selected' : '' }}>
-                                    {{ ucfirst($item) }}
-                                </option>
-                            @endforeach
                         </select>
                     </div>
 
@@ -68,4 +68,56 @@
         </div>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const pasanganSelect = document.getElementById('pasangan');
+    const pertalianSelect = document.getElementById('pertalian');
+
+    const spouseRelation = @json($spouseRelation);
+    const oldPertalian = @json(old('pertalian'));
+
+    const nonSpouseRelations = [
+        'anak',
+        'bapa kandung',
+        'ibu kandung',
+        'bapa mertua',
+        'ibu mertua'
+    ];
+
+    function formatLabel(text) {
+        return text.charAt(0).toUpperCase() + text.slice(1);
+    }
+
+    function renderPertalianOptions() {
+        const pasangan = pasanganSelect.value;
+        pertalianSelect.innerHTML = '<option value="">-- Pilih --</option>';
+
+        let options = [];
+
+        if (pasangan === 'ya') {
+            if (spouseRelation !== '') {
+                options = [spouseRelation];
+            }
+        } else if (pasangan === 'tidak') {
+            options = nonSpouseRelations;
+        }
+
+        options.forEach(function (item) {
+            const option = document.createElement('option');
+            option.value = item;
+            option.textContent = formatLabel(item);
+
+            if (oldPertalian === item) {
+                option.selected = true;
+            }
+
+            pertalianSelect.appendChild(option);
+        });
+    }
+
+    pasanganSelect.addEventListener('change', renderPertalianOptions);
+    renderPertalianOptions();
+});
+</script>
 @endsection
