@@ -35,49 +35,6 @@
         {{-- Start::header-content-right --}}
         <div class="header-content-right">
 
-            {{-- Search modal trigger --}}
-            <div class="header-element header-search">
-                <a href="javascript:void(0);" class="header-link switcher-icon"
-                    data-bs-toggle="offcanvas" data-bs-target="#switcher-canvas">
-                    <i class="bx bx-cog header-link-icon"></i>
-                </a>
-            </div>
-
-            {{-- Country selector (optional demo) --}}
-            <div class="header-element country-selector">
-                <a href="javascript:void(0);" class="header-link dropdown-toggle"
-                   data-bs-auto-close="outside" data-bs-toggle="dropdown">
-                    <img src="{{ asset('assets/images/flags/us_flag.jpg') }}" alt="img" class="rounded-circle header-link-icon">
-                </a>
-
-                <ul class="main-header-dropdown dropdown-menu dropdown-menu-end" data-popper-placement="none">
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="javascript:void(0);">
-                            <span class="avatar avatar-xs lh-1 me-2">
-                                <img src="{{ asset('assets/images/flags/us_flag.jpg') }}" alt="img">
-                            </span>
-                            English
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="javascript:void(0);">
-                            <span class="avatar avatar-xs lh-1 me-2">
-                                <img src="{{ asset('assets/images/flags/spain_flag.jpg') }}" alt="img">
-                            </span>
-                            Spanish
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex align-items-center" href="javascript:void(0);">
-                            <span class="avatar avatar-xs lh-1 me-2">
-                                <img src="{{ asset('assets/images/flags/french_flag.jpg') }}" alt="img">
-                            </span>
-                            French
-                        </a>
-                    </li>
-                </ul>
-            </div>
-
             {{-- Theme mode --}}
             <div class="header-element header-theme-mode">
                 <a href="javascript:void(0);" class="header-link layout-setting">
@@ -88,59 +45,6 @@
                         <i class="bx bx-sun header-link-icon"></i>
                     </span>
                 </a>
-            </div>
-
-            {{-- Cart (demo) - kalau tak nak boleh buang block ni --}}
-            <div class="header-element cart-dropdown">
-                <a href="javascript:void(0);" class="header-link dropdown-toggle"
-                   data-bs-auto-close="outside" data-bs-toggle="dropdown">
-                    <i class="bx bx-cart header-link-icon"></i>
-                    <span class="badge bg-primary rounded-pill header-icon-badge" id="cart-icon-badge">5</span>
-                </a>
-
-                <div class="main-header-dropdown dropdown-menu dropdown-menu-end" data-popper-placement="none">
-                    <div class="p-3">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <p class="mb-0 fs-17 fw-semibold">Cart Items</p>
-                            <span class="badge bg-success-transparent" id="cart-data">5 Items</span>
-                        </div>
-                    </div>
-                    <div><hr class="dropdown-divider"></div>
-
-                    <ul class="list-unstyled mb-0" id="header-cart-items-scroll">
-                        <li class="dropdown-item">
-                            <div class="d-flex align-items-start cart-dropdown-item">
-                                <img src="{{ asset('assets/images/ecommerce/jpg/1.jpg') }}" alt="img"
-                                     class="avatar avatar-sm avatar-rounded br-5 me-3">
-                                <div class="flex-grow-1">
-                                    <div class="d-flex align-items-start justify-content-between mb-0">
-                                        <div class="mb-0 fs-13 text-dark fw-semibold">
-                                            <a href="javascript:void(0);">SomeThing Phone</a>
-                                        </div>
-                                        <div>
-                                            <span class="text-black mb-1">$1,299.00</span>
-                                            <a href="javascript:void(0);" class="header-cart-remove float-end dropdown-item-close">
-                                                <i class="ti ti-trash"></i>
-                                            </a>
-                                        </div>
-                                    </div>
-                                    <div class="min-w-fit-content d-flex align-items-start justify-content-between">
-                                        <ul class="header-product-item d-flex">
-                                            <li>Metallic Blue</li>
-                                            <li>6gb Ram</li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
-                    </ul>
-
-                    <div class="p-3 empty-header-item border-top">
-                        <div class="d-grid">
-                            <a href="javascript:void(0);" class="btn btn-primary">Proceed to checkout</a>
-                        </div>
-                    </div>
-                </div>
             </div>
 
             {{-- Notifications --}}
@@ -193,66 +97,6 @@
                 </div>
             </div>
 
-            {{-- Shortcuts --}}
-            <div class="header-element header-shortcuts-dropdown">
-                <a href="javascript:void(0);" class="header-link dropdown-toggle"
-                   data-bs-toggle="dropdown" data-bs-auto-close="outside"
-                   id="notificationDropdown" aria-expanded="false">
-                    <i class="bx bx-grid-alt header-link-icon"></i>
-                </a>
-
-                <div class="main-header-dropdown header-shortcuts-dropdown dropdown-menu pb-0 dropdown-menu-end"
-                     aria-labelledby="notificationDropdown">
-                    <div class="p-3">
-                        <div class="d-flex align-items-center justify-content-between">
-                            <p class="mb-0 fs-17 fw-semibold">Related Apps</p>
-                        </div>
-                    </div>
-                    <div class="dropdown-divider mb-0"></div>
-
-                    <div class="main-header-shortcuts p-2" id="header-shortcut-scroll">
-                        <div class="row g-2">
-                            <div class="col-4">
-                                <a href="javascript:void(0);">
-                                    <div class="text-center p-3 related-app">
-                                        <span class="avatar avatar-sm avatar-rounded">
-                                            <img src="{{ asset('assets/images/apps/google.png') }}" alt="">
-                                        </span>
-                                        <span class="d-block fs-12">Google</span>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-4">
-                                <a href="javascript:void(0);">
-                                    <div class="text-center p-3 related-app">
-                                        <span class="avatar avatar-sm avatar-rounded">
-                                            <img src="{{ asset('assets/images/apps/calender.png') }}" alt="">
-                                        </span>
-                                        <span class="d-block fs-12">Calendar</span>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-4">
-                                <a href="javascript:void(0);">
-                                    <div class="text-center p-3 related-app">
-                                        <span class="avatar avatar-sm avatar-rounded">
-                                            <img src="{{ asset('assets/images/apps/translate.png') }}" alt="">
-                                        </span>
-                                        <span class="d-block fs-12">Translate</span>
-                                    </div>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-3 border-top">
-                        <div class="d-grid">
-                            <a href="javascript:void(0);" class="btn btn-primary">View All</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
             {{-- Fullscreen --}}
             <div class="header-element header-fullscreen">
                 <a onclick="openFullscreen();" href="javascript:void(0);" class="header-link">
@@ -289,11 +133,6 @@
                     <li>
                         <a class="dropdown-item d-flex" href="#">
                             <i class="ti ti-user-circle fs-18 me-2 op-7"></i>Profile
-                        </a>
-                    </li>
-                    <li>
-                        <a class="dropdown-item d-flex" href="#">
-                            <i class="ti ti-adjustments-horizontal fs-18 me-2 op-7"></i>Settings
                         </a>
                     </li>
                     <li><hr class="dropdown-divider"></li>

@@ -25,6 +25,9 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'account_type',
+        'linked_profile_id',
+        'linked_dependent_id',
     ];
 
     /**

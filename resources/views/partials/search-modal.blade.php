@@ -1,65 +1,84 @@
-{{-- resources/views/partials/search-modal.blade.php --}}
-<div class="modal fade" id="searchModal" tabindex="-1" aria-labelledby="searchModal" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-body">
-                <div class="input-group">
-                    <a href="javascript:void(0);" class="input-group-text" id="Search-Grid">
-                        <i class="fe fe-search header-link-icon fs-18"></i>
-                    </a>
-                    <input type="search" class="form-control border-0 px-2" placeholder="Search" aria-label="Search">
-                    <a href="javascript:void(0);" class="input-group-text" id="voice-search">
-                        <i class="fe fe-mic header-link-icon"></i>
-                    </a>
-                    <a href="javascript:void(0);" class="btn btn-light btn-icon" data-bs-toggle="dropdown" aria-expanded="false">
-                        <i class="fe fe-more-vertical"></i>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="javascript:void(0);">Action</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Another action</a></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Something else here</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="javascript:void(0);">Separated link</a></li>
-                    </ul>
-                </div>
-
-                <div class="mt-4">
-                    <p class="font-weight-semibold text-muted mb-2">Are You Looking For...</p>
-                    <span class="search-tags"><i class="fe fe-user me-2"></i>People<a href="javascript:void(0)" class="tag-addon"><i class="fe fe-x"></i></a></span>
-                    <span class="search-tags"><i class="fe fe-file-text me-2"></i>Pages<a href="javascript:void(0)" class="tag-addon"><i class="fe fe-x"></i></a></span>
-                    <span class="search-tags"><i class="fe fe-align-left me-2"></i>Articles<a href="javascript:void(0)" class="tag-addon"><i class="fe fe-x"></i></a></span>
-                    <span class="search-tags"><i class="fe fe-server me-2"></i>Tags<a href="javascript:void(0)" class="tag-addon"><i class="fe fe-x"></i></a></span>
-                </div>
-
-                <div class="my-4">
-                    <p class="font-weight-semibold text-muted mb-2">Recent Search :</p>
-                    <div class="p-2 border br-5 d-flex align-items-center text-muted mb-2 alert">
-                        <a href="javascript:void(0);"><span>Notifications</span></a>
-                        <a class="ms-auto lh-1" href="javascript:void(0);" data-bs-dismiss="alert" aria-label="Close">
-                            <i class="fe fe-x text-muted"></i>
-                        </a>
-                    </div>
-                    <div class="p-2 border br-5 d-flex align-items-center text-muted mb-2 alert">
-                        <a href="javascript:void(0);"><span>Alerts</span></a>
-                        <a class="ms-auto lh-1" href="javascript:void(0);" data-bs-dismiss="alert" aria-label="Close">
-                            <i class="fe fe-x text-muted"></i>
-                        </a>
-                    </div>
-                    <div class="p-2 border br-5 d-flex align-items-center text-muted mb-0 alert">
-                        <a href="javascript:void(0);"><span>Mail</span></a>
-                        <a class="ms-auto lh-1" href="javascript:void(0);" data-bs-dismiss="alert" aria-label="Close">
-                            <i class="fe fe-x text-muted"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <div class="modal-footer">
-                <div class="btn-group ms-auto">
-                    <button class="btn btn-sm btn-primary-light">Search</button>
-                    <button class="btn btn-sm btn-primary">Clear Recents</button>
-                </div>
-            </div>
-        </div>
+<aside class="app-sidebar sticky" id="sidebar">
+    <div class="main-sidebar-header d-flex align-items-center justify-content-center">
+        <a href="{{ route('admin.dashboard') }}" class="header-logo d-flex align-items-center gap-2 text-decoration-none">
+            <img src="{{ asset('assets/images/logo_rtb.jpg') }}" alt="Logo RTB"
+                 style="height: 50px; width: auto; object-fit: contain;">
+            <span style="font-size: 22px; font-weight: 800; color: #ffffff;">E-Pusara</span>
+        </a>
     </div>
-</div>
+
+    @php
+        $khairatOpen = request()->routeIs('admin.khairat.*') || request()->routeIs('admin.profile.*');
+        $deathReportOpen = request()->routeIs('admin.death-reports.*');
+    @endphp
+
+    <div class="main-sidebar" id="sidebar-scroll">
+        <nav class="main-menu-container nav nav-pills flex-column sub-open">
+            <ul class="main-menu">
+
+                <li class="slide__category">
+                    <span class="category-name">Admin</span>
+                </li>
+
+                {{-- Dashboard --}}
+                <li class="slide">
+                    <a href="{{ route('admin.dashboard') }}"
+                       class="side-menu__item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                        <i class="bx bx-home side-menu__icon"></i>
+                        <span class="side-menu__label">Dashboard</span>
+                    </a>
+                </li>
+
+                {{-- Pengurusan Khairat --}}
+                <li class="slide has-sub {{ $khairatOpen ? 'open' : '' }}">
+                    <a href="javascript:void(0);"
+                       class="side-menu__item {{ $khairatOpen ? 'active' : '' }}">
+                        <i class="bx bx-folder side-menu__icon"></i>
+                        <span class="side-menu__label">Pengurusan Khairat</span>
+                        <i class="fe fe-chevron-right side-menu__angle"></i>
+                    </a>
+
+                    <ul class="slide-menu child1" style="{{ $khairatOpen ? 'display:block;' : '' }}">
+                        <li class="slide">
+                            <a href="{{ route('admin.khairat.members.index') }}"
+                               class="side-menu__item {{ request()->routeIs('admin.khairat.members.*') ? 'active' : '' }}">
+                                Senarai Ahli
+                            </a>
+                        </li>
+
+                        <li class="slide">
+                            <a href="{{ route('admin.khairat.dependents.index') }}"
+                               class="side-menu__item {{ request()->routeIs('admin.khairat.dependents.*') ? 'active' : '' }}">
+                                Senarai Tanggungan
+                            </a>
+                        </li>
+
+                        <li class="slide">
+                            <a href="{{ route('admin.profile.index') }}"
+                               class="side-menu__item {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
+                                Permohonan Keahlian
+                            </a>
+                        </li>
+
+                        <li class="slide">
+                            <a href="{{ route('admin.khairat.fees.index') }}"
+                               class="side-menu__item {{ request()->routeIs('admin.khairat.fees.*') ? 'active' : '' }}">
+                                Senarai Yuran
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+
+                {{-- Laporan Kematian --}}
+                <li class="slide">
+                    <a href="{{ route('admin.death-reports.index') }}"
+                       class="side-menu__item {{ $deathReportOpen ? 'active' : '' }}">
+                        <i class="bx bx-notepad side-menu__icon"></i>
+                        <span class="side-menu__label">Laporan Kematian</span>
+                    </a>
+                </li>
+
+            </ul>
+        </nav>
+    </div>
+</aside>

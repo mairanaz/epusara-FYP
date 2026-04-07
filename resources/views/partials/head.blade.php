@@ -4,7 +4,7 @@
 
 <title>@yield('title', 'Dashboard')</title>
 
-<link rel="icon" href="{{ asset('assets/images/brand-logos/favicon.ico') }}" type="image/x-icon">
+<link rel="icon" href="{{ asset('assets/images/logo_rtb.jpg') }}" type="image/jpg">
 
 {{-- Choices JS (template letak dalam head) --}}
 <script src="{{ asset('assets/libs/choices.js/public/assets/scripts/choices.min.js') }}"></script>

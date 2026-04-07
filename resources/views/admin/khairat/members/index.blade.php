@@ -2,43 +2,43 @@
 
 @section('content')
 <style>
-    .application-page .hero-card {
+    .member-page .hero-card {
         border: 0;
         border-radius: 20px;
-        background: linear-gradient(135deg, #f59e0b, #f97316);
+        background: linear-gradient(135deg, #0d6efd, #3c8ce7);
         color: #fff;
         overflow: hidden;
         position: relative;
     }
 
-    .application-page .hero-card::after {
+    .member-page .hero-card::after {
         content: "";
         position: absolute;
-        top: -35px;
-        right: -35px;
-        width: 170px;
-        height: 170px;
+        top: -30px;
+        right: -30px;
+        width: 160px;
+        height: 160px;
         background: rgba(255,255,255,0.10);
         border-radius: 50%;
     }
 
-    .application-page .stats-card,
-    .application-page .filter-card,
-    .application-page .table-card {
+    .member-page .stats-card,
+    .member-page .filter-card,
+    .member-page .table-card {
         border: 0;
         border-radius: 18px;
         box-shadow: 0 10px 25px rgba(0,0,0,0.06);
     }
 
-    .application-page .stats-card {
+    .member-page .stats-card {
         transition: 0.25s ease;
     }
 
-    .application-page .stats-card:hover {
+    .member-page .stats-card:hover {
         transform: translateY(-4px);
     }
 
-    .application-page .stats-icon {
+    .member-page .stats-icon {
         width: 52px;
         height: 52px;
         border-radius: 14px;
@@ -48,20 +48,17 @@
         font-size: 22px;
     }
 
-    .application-page .summary-label {
-        font-size: 13px;
-        color: #6b7280;
-        margin-bottom: 6px;
+    .member-page .search-box .form-control,
+    .member-page .search-box .form-select {
+        border-radius: 12px;
+        min-height: 46px;
     }
 
-    .application-page .summary-value {
-        font-size: 24px;
-        font-weight: 800;
-        color: #111827;
-        line-height: 1;
+    .member-page .btn {
+        border-radius: 12px;
     }
 
-    .application-page .table thead th {
+    .member-page .table thead th {
         background: #f8fafc;
         border-bottom: 1px solid #e9ecef;
         font-weight: 700;
@@ -69,15 +66,33 @@
         white-space: nowrap;
     }
 
-    .application-page .table tbody tr {
+    .member-page .table tbody tr {
         transition: 0.2s ease;
     }
 
-    .application-page .table tbody tr:hover {
-        background-color: #fffaf3;
+    .member-page .table tbody tr:hover {
+        background-color: #f8fbff;
     }
 
-    .application-page .person-avatar {
+    .member-page .member-name {
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 2px;
+    }
+
+    .member-page .member-meta {
+        font-size: 13px;
+        color: #6b7280;
+    }
+
+    .member-page .status-badge {
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+
+    .member-page .member-avatar {
         width: 42px;
         height: 42px;
         border-radius: 50%;
@@ -86,29 +101,30 @@
         justify-content: center;
         font-weight: 700;
         color: #fff;
-        background: linear-gradient(135deg, #f59e0b, #fb923c);
+        background: linear-gradient(135deg, #0d6efd, #5aa9ff);
         flex-shrink: 0;
     }
 
-    .application-page .person-name {
-        font-weight: 700;
-        color: #1f2937;
-        margin-bottom: 2px;
+    .member-page .summary-label {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 6px;
     }
 
-    .application-page .person-meta {
-        font-size: 13px;
+    .member-page .summary-value {
+        font-size: 24px;
+        font-weight: 800;
+        color: #111827;
+        line-height: 1;
+    }
+
+    .member-page .empty-state {
+        padding: 40px 20px;
+        text-align: center;
         color: #6b7280;
     }
 
-    .application-page .status-badge {
-        padding: 8px 12px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 600;
-    }
-
-    .application-page .action-btn {
+    .member-page .action-btn {
         width: 38px;
         height: 38px;
         padding: 0;
@@ -117,89 +133,78 @@
         justify-content: center;
         border-radius: 10px;
     }
-
-    .application-page .search-box .form-control,
-    .application-page .search-box .form-select {
-        border-radius: 12px;
-        min-height: 46px;
-    }
-
-    .application-page .btn {
-        border-radius: 12px;
-    }
-
-    .application-page .empty-state {
-        padding: 40px 20px;
-        text-align: center;
-        color: #6b7280;
-    }
 </style>
 
 @php
-    $pendingCount = $profiles->getCollection()->where('status_permohonan', 'pending')->count();
-    $rejectedCount = $profiles->getCollection()->where('status_permohonan', 'rejected')->count();
+    $approvedCount = $members->getCollection()->where('status_permohonan', 'approved')->count();
+    $pendingCount  = $members->getCollection()->where('status_permohonan', 'pending')->count();
+    $rejectedCount = $members->getCollection()->where('status_permohonan', 'rejected')->count();
+    $activeCount   = $members->getCollection()->where('status_permohonan', 'active')->count();
 
-    function getStatusClass($status) {
+    $currentKeyword = request('search');
+    $currentStatus  = request('status');
+
+    $getStatusClass = function ($status) {
         return match($status) {
-            'pending' => 'warning text-dark',
+            'pending'  => 'warning text-dark',
             'approved' => 'success',
             'rejected' => 'danger',
-            'active' => 'primary',
-            default => 'secondary',
+            'active'   => 'primary',
+            default    => 'secondary',
         };
-    }
+    };
 
-    function getStatusLabel($status) {
+    $getStatusLabel = function ($status) {
         return match($status) {
-            'pending' => 'Menunggu',
+            'pending'  => 'Menunggu',
             'approved' => 'Diluluskan',
             'rejected' => 'Ditolak',
-            'active' => 'Aktif',
-            default => 'Belum Dihantar',
+            'active'   => 'Aktif',
+            default    => 'Tiada Status',
         };
-    }
+    };
 @endphp
 
-<div class="container-fluid application-page">
+<div class="container-fluid member-page">
 
     <div class="card hero-card shadow-sm mb-4">
         <div class="card-body p-4 p-lg-5">
             <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
                 <div>
                     <p class="mb-2 small text-white-50">Panel Pentadbir</p>
-                    <h1 class="fw-bold mb-2">Senarai Permohonan Keahlian</h1>
+                    <h1 class="fw-bold mb-2">Senarai Ahli Khairat</h1>
                     <p class="mb-0 text-white-50">
-                        Semak, tapis dan urus permohonan keahlian pengguna dengan lebih teratur.
+                        Paparan semua ahli yang telah berdaftar dalam sistem eKhairat.
                     </p>
                 </div>
             </div>
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success border-0 shadow-sm rounded-4 alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert alert-danger border-0 shadow-sm rounded-4 alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
     <div class="row g-3 mb-4">
         <div class="col-xl-3 col-md-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Jumlah Permohonan</div>
-                        <div class="summary-value">{{ $profiles->total() }}</div>
+                        <div class="summary-label">Jumlah Ahli</div>
+                        <div class="summary-value">{{ $members->total() }}</div>
                     </div>
                     <div class="stats-icon bg-primary-subtle text-primary">
-                        <i class="bx bx-file"></i>
+                        <i class="bx bx-group"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="summary-label">Diluluskan / Aktif</div>
+                        <div class="summary-value">{{ $approvedCount + $activeCount }}</div>
+                    </div>
+                    <div class="stats-icon bg-success-subtle text-success">
+                        <i class="bx bx-check-shield"></i>
                     </div>
                 </div>
             </div>
@@ -237,20 +242,20 @@
     <div class="card filter-card mb-4">
         <div class="card-body p-4">
             <div class="mb-3">
-                <h5 class="mb-1 fw-bold">Carian Permohonan</h5>
-                <p class="text-muted mb-0">Cari berdasarkan nama, MyKad atau nombor telefon.</p>
+                <h5 class="mb-1 fw-bold">Carian Ahli</h5>
+                <p class="text-muted mb-0">Cari ahli dengan lebih cepat berdasarkan nama, MyKad atau nombor telefon.</p>
             </div>
 
-            <form method="GET" action="{{ route('admin.profile.index') }}" class="search-box">
+            <form action="" method="GET" class="search-box">
                 <div class="row g-3 align-items-end">
-                    <div class="col-lg-7">
+                    <div class="col-lg-6">
                         <label class="form-label fw-semibold">Kata Kunci</label>
                         <input
                             type="text"
                             name="search"
                             class="form-control"
-                            placeholder="Contoh: Ali / 990101011234 / 01xxxxxxxx"
-                            value="{{ request('search') }}"
+                            placeholder="Contoh: Ali / 0101234567 / 990101011234"
+                            value="{{ $currentKeyword }}"
                         >
                     </div>
 
@@ -258,19 +263,19 @@
                         <label class="form-label fw-semibold">Status</label>
                         <select name="status" class="form-select">
                             <option value="">Semua Status</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu</option>
-                            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Diluluskan</option>
-                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
-                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
+                            <option value="pending" {{ $currentStatus == 'pending' ? 'selected' : '' }}>Menunggu</option>
+                            <option value="approved" {{ $currentStatus == 'approved' ? 'selected' : '' }}>Diluluskan</option>
+                            <option value="active" {{ $currentStatus == 'active' ? 'selected' : '' }}>Aktif</option>
+                            <option value="rejected" {{ $currentStatus == 'rejected' ? 'selected' : '' }}>Ditolak</option>
                         </select>
                     </div>
 
-                    <div class="col-lg-2">
+                    <div class="col-lg-3">
                         <div class="d-flex gap-2">
                             <button type="submit" class="btn btn-primary w-100">
                                 <i class="bx bx-search me-1"></i> Cari
                             </button>
-                            <a href="{{ route('admin.profile.index') }}" class="btn btn-outline-secondary w-100">
+                            <a href="{{ url()->current() }}" class="btn btn-outline-secondary w-100">
                                 Reset
                             </a>
                         </div>
@@ -283,9 +288,9 @@
     <div class="card table-card">
         <div class="card-body p-0">
             <div class="px-4 pt-4 pb-2">
-                <h5 class="mb-1 fw-bold">Rekod Permohonan</h5>
+                <h5 class="mb-1 fw-bold">Rekod Ahli</h5>
                 <p class="text-muted mb-0">
-                    Paparan semasa: <span class="fw-semibold">{{ $profiles->count() }}</span> permohonan
+                    Paparan semasa: <span class="fw-semibold">{{ $members->count() }}</span> ahli
                 </p>
             </div>
 
@@ -294,47 +299,46 @@
                     <thead>
                         <tr>
                             <th width="6%">#</th>
-                            <th>Pemohon</th>
-                            <th>Tarikh Permohonan</th>
+                            <th>Maklumat Ahli</th>
+                            <th>No. MyKad</th>
+                            <th>No. Telefon</th>
                             <th>Pelan</th>
                             <th>Status</th>
                             <th class="text-center" width="10%">Tindakan</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($profiles as $index => $profile)
+                        @forelse($members as $index => $member)
                             @php
-                                $statusClass = getStatusClass($profile->status_permohonan);
-                                $statusLabel = getStatusLabel($profile->status_permohonan);
-                                $initial = strtoupper(substr($profile->nama ?? 'A', 0, 1));
+                                $statusClass = $getStatusClass($member->status_permohonan);
+                                $statusLabel = $getStatusLabel($member->status_permohonan);
+                                $initial = strtoupper(substr($member->nama ?? 'A', 0, 1));
                             @endphp
+
                             <tr>
                                 <td class="fw-semibold text-muted">
-                                    {{ $profiles->firstItem() + $index }}
+                                    {{ $members->firstItem() + $index }}
                                 </td>
 
                                 <td>
                                     <div class="d-flex align-items-start gap-3">
-                                        <div class="person-avatar">{{ $initial }}</div>
+                                        <div class="member-avatar">{{ $initial }}</div>
                                         <div>
-                                            <div class="person-name">{{ $profile->nama }}</div>
-                                            <div class="person-meta">No. MyKad: {{ $profile->no_kp }}</div>
-                                            <div class="person-meta">Telefon: {{ $profile->no_tel_bimbit ?? '-' }}</div>
+                                            <div class="member-name">{{ $member->nama }}</div>
+                                            <div class="member-meta">
+                                                Ahli khairat berdaftar
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td>
-                                    <div class="fw-semibold">
-                                        {{ $profile->tarikh_permohonan ? \Carbon\Carbon::parse($profile->tarikh_permohonan)->format('d/m/Y') : '-' }}
-                                    </div>
-                                    <div class="person-meta">Tarikh permohonan</div>
-                                </td>
+                                <td class="fw-semibold">{{ $member->no_kp }}</td>
+                                <td>{{ $member->no_tel_bimbit ?? '-' }}</td>
 
                                 <td>
-                                    @if($profile->payment_plan)
-                                        <span class="badge bg-info-subtle text-info border status-badge">
-                                            {{ ucfirst($profile->payment_plan) }}
+                                    @if($member->payment_plan)
+                                        <span class="badge bg-info-subtle text-info border">
+                                            {{ ucfirst($member->payment_plan) }}
                                         </span>
                                     @else
                                         <span class="text-muted">-</span>
@@ -342,13 +346,17 @@
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-{{ $statusClass }} status-badge">
-                                        {{ $statusLabel }}
-                                    </span>
+                                    @if($member->status_permohonan)
+                                        <span class="badge bg-{{ $statusClass }} status-badge">
+                                            {{ $statusLabel }}
+                                        </span>
+                                    @else
+                                        <span class="badge bg-secondary status-badge">Tiada Status</span>
+                                    @endif
                                 </td>
 
                                 <td class="text-center">
-                                    <a href="{{ route('admin.profile.show', $profile) }}"
+                                    <a href="{{ route('admin.khairat.members.show', $member) }}"
                                        class="btn btn-sm btn-outline-primary action-btn"
                                        title="Lihat">
                                         <i class="bx bx-show"></i>
@@ -357,10 +365,10 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6">
+                                <td colspan="7">
                                     <div class="empty-state">
                                         <i class="bx bx-folder-open fs-1 mb-2 d-block"></i>
-                                        Tiada permohonan keahlian dijumpai.
+                                        Tiada ahli dijumpai.
                                     </div>
                                 </td>
                             </tr>
@@ -370,9 +378,9 @@
             </div>
         </div>
 
-        @if($profiles->hasPages())
+        @if($members->hasPages())
             <div class="card-footer bg-white border-0 pt-0 pb-4 px-4">
-                {{ $profiles->withQueryString()->links() }}
+                {{ $members->withQueryString()->links() }}
             </div>
         @endif
     </div>

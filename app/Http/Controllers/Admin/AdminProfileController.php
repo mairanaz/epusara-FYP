@@ -9,9 +9,27 @@ use Illuminate\Http\Request;
 
 class AdminProfileController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $profiles = UserProfile::latest('tarikh_permohonan')->paginate(10);
+        $query = UserProfile::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+
+            $query->where(function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('no_kp', 'like', "%{$search}%")
+                  ->orWhere('no_tel_bimbit', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status_permohonan', $request->status);
+        } else {
+            $query->where('status_permohonan', 'pending');
+        }
+
+        $profiles = $query->latest()->paginate(10);
 
         return view('admin.profile.index', compact('profiles'));
     }
