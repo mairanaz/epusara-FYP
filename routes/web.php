@@ -118,6 +118,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/user/payments', [PaymentController::class, 'index'])->name('user.payments.index');
     Route::get('/user/payments/create', [PaymentController::class, 'create'])->name('user.payments.create');
     Route::post('/user/payments', [PaymentController::class, 'store'])->name('user.payments.store');
+    Route::get('/user/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('user.payments.receipt');
 
     // Breeze profile setting
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

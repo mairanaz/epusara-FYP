@@ -2,6 +2,8 @@
     <div class="main-sidebar-header d-flex align-items-center justify-content-center">
         @php
             $user = auth()->user();
+            $profile = $user->profile ?? null;
+            $profileStatus = $profile->status_permohonan ?? null;
 
             if ($user->account_type === 'tanggungan') {
                 $homeRoute = route('dependent.dashboard');
@@ -36,7 +38,7 @@
 
                     <li class="slide">
                         <a href="{{ route('user.profile.create.step1') }}"
-                           class="side-menu__item {{ request()->routeIs('user.profile.create.step1') || request()->routeIs('user.profile.post.step1') ? 'active' : '' }}">
+                           class="side-menu__item {{ request()->routeIs('user.profile.create.step1') || request()->routeIs('user.profile.create.step2') || request()->routeIs('user.profile.create.step3') || request()->routeIs('user.profile.create.step4') ? 'active' : '' }}">
                             <i class="bx bx-user side-menu__icon"></i>
                             <span class="side-menu__label">Lengkapkan Profil</span>
                         </a>
@@ -104,13 +106,15 @@
                         </a>
                     </li>
 
-                    <li class="slide">
-                        <a href="{{ route('user.payments.index') }}"
-                           class="side-menu__item {{ request()->routeIs('user.payments.*') ? 'active' : '' }}">
-                            <i class="bx bx-credit-card side-menu__icon"></i>
-                            <span class="side-menu__label">Yuran</span>
-                        </a>
-                    </li>
+                    @if(in_array($profileStatus, ['approved', 'active']))
+                        <li class="slide">
+                            <a href="{{ route('user.payments.index') }}"
+                               class="side-menu__item {{ request()->routeIs('user.payments.*') ? 'active' : '' }}">
+                                <i class="bx bx-credit-card side-menu__icon"></i>
+                                <span class="side-menu__label">Yuran</span>
+                            </a>
+                        </li>
+                    @endif
 
                     <li class="slide">
                         <a href="{{ route('death-report.create') }}"

@@ -3,10 +3,165 @@
 @section('content')
 <div class="container-fluid">
 
+    <style>
+        .stepper-wrapper {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0;
+            position: relative;
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding: 8px 0 4px;
+        }
+
+        .stepper-item {
+            position: relative;
+            flex: 1;
+            min-width: 160px;
+            text-align: center;
+        }
+
+        .stepper-item:not(:last-child)::after {
+            content: "";
+            position: absolute;
+            top: 24px;
+            left: 50%;
+            width: 100%;
+            height: 4px;
+            background: #dfe3e8;
+            z-index: 1;
+        }
+
+        .stepper-item.completed:not(:last-child)::after,
+        .stepper-item.active:not(:last-child)::after {
+            background: #22c55e;
+        }
+
+        .stepper-circle {
+            position: relative;
+            z-index: 2;
+            width: 48px;
+            height: 48px;
+            margin: 0 auto;
+            border-radius: 50%;
+            background: #f1f3f5;
+            border: 3px solid #dfe3e8;
+            color: #6c757d;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .stepper-title {
+            margin-top: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #6c757d;
+            line-height: 1.35;
+        }
+
+        .stepper-subtitle {
+            font-size: 12px;
+            color: #9aa1a9;
+            margin-top: 2px;
+        }
+
+        .stepper-item.active .stepper-circle {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: #fff;
+            box-shadow: 0 0 0 6px rgba(34, 197, 94, 0.12);
+        }
+
+        .stepper-item.active .stepper-title {
+            color: #198754;
+        }
+
+        .stepper-item.completed .stepper-circle {
+            background: #198754;
+            border-color: #198754;
+            color: #fff;
+        }
+
+        .info-soft-card {
+            background: #f8fafc;
+            border: 1px solid #edf1f5;
+            border-radius: 16px;
+        }
+
+        .form-section-card {
+            border-radius: 18px;
+            overflow: hidden;
+        }
+
+        .section-box {
+            border: 1px solid #edf1f5;
+            border-radius: 16px;
+            padding: 24px;
+            background: #ffffff;
+            height: 100%;
+        }
+
+        .section-heading {
+            font-size: 16px;
+            font-weight: 700;
+            color: #198754;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-heading .badge-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(25, 135, 84, 0.12);
+            color: #198754;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .stepper-item {
+                min-width: 120px;
+            }
+
+            .stepper-circle {
+                width: 42px;
+                height: 42px;
+                font-size: 14px;
+            }
+
+            .stepper-item:not(:last-child)::after {
+                top: 21px;
+            }
+
+            .stepper-title {
+                font-size: 12px;
+            }
+
+            .stepper-subtitle {
+                font-size: 11px;
+            }
+
+            .section-box {
+                padding: 18px;
+            }
+        }
+    </style>
+
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
         <div>
             <h1 class="page-title fw-semibold fs-20 mb-1">Permohonan Keahlian</h1>
-            <p class="text-muted mb-0">Lengkapkan maklumat waris.</p>
+            <p class="text-muted mb-0">Lengkapkan maklumat waris untuk urusan khairat dan kecemasan.</p>
         </div>
     </div>
 
@@ -28,92 +183,146 @@
         </div>
     @endif
 
-    <div class="card custom-card border-0 shadow-sm mb-4">
-        <div class="card-body">
-            <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
-                <div class="d-flex align-items-center gap-2">
-                    <span class="badge bg-success rounded-pill px-3 py-2">Step 3</span>
-                    <span class="fw-semibold">Maklumat Waris</span>
+    <div class="card custom-card border-0 shadow-sm mb-4 form-section-card">
+        <div class="card-body py-4 px-4 px-md-5">
+            <div class="stepper-wrapper">
+                <div class="stepper-item completed">
+                    <div class="stepper-circle">
+                        <i class="bx bx-check"></i>
+                    </div>
+                    <div class="stepper-title">Maklumat Asas</div>
+                    <div class="stepper-subtitle">Langkah 1</div>
                 </div>
-                <small class="text-muted">3 / 4</small>
-            </div>
 
-            <div class="progress mt-3" style="height: 8px;">
-                <div class="progress-bar bg-success" style="width: 75%"></div>
+                <div class="stepper-item completed">
+                    <div class="stepper-circle">
+                        <i class="bx bx-check"></i>
+                    </div>
+                    <div class="stepper-title">Maklumat Perhubungan</div>
+                    <div class="stepper-subtitle">Langkah 2</div>
+                </div>
+
+                <div class="stepper-item active">
+                    <div class="stepper-circle">3</div>
+                    <div class="stepper-title">Maklumat Waris</div>
+                    <div class="stepper-subtitle">Langkah 3</div>
+                </div>
+
+                <div class="stepper-item">
+                    <div class="stepper-circle">4</div>
+                    <div class="stepper-title">Bayaran Yuran</div>
+                    <div class="stepper-subtitle">Langkah 4</div>
+                </div>
             </div>
         </div>
     </div>
 
     <div class="row justify-content-center">
-        <div class="col-xl-9">
-            <div class="card custom-card border-0 shadow-sm">
+        <div class="col-xxl-10 col-xl-11">
+            <div class="card custom-card border-0 shadow-sm form-section-card">
                 <div class="card-body p-0">
                     <form action="{{ route('user.profile.post.step3') }}" method="POST">
                         @csrf
 
-                        <div class="p-4">
-                            <div class="mb-4">
-                                <h4 class="fw-semibold mb-1">Maklumat Waris</h4>
-                                <p class="text-muted mb-0">Maklumat waris penting untuk urusan khairat dan kecemasan.</p>
+                        <div class="p-4 p-md-5">
+
+                            <div class="text-center mb-4">
+                                <h4 class="fw-semibold mb-2">Maklumat Waris</h4>
+                                <p class="text-muted mb-0">
+                                    Sila isi maklumat waris yang boleh dihubungi bagi urusan khairat, kecemasan dan semakan pentadbiran.
+                                </p>
                             </div>
 
-                            <div class="row g-3">
+                            <div class="info-soft-card shadow-sm mb-4">
+                                <div class="card-body py-3 px-4">
+                                    <div class="d-flex align-items-start gap-2">
+                                        <i class="bx bx-info-circle fs-5 text-primary mt-1"></i>
+                                        <div>
+                                            <div class="fw-semibold mb-1">Makluman</div>
+                                            <div class="text-muted small mb-0">
+                                                Pastikan nombor telefon dan alamat waris adalah tepat supaya pihak pentadbiran dapat menghubungi waris jika diperlukan.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row g-4">
                                 <div class="col-12">
-                                    <h5 class="fw-semibold mb-3">Maklumat Waris</h5>
-                                </div>
+                                    <div class="section-box shadow-sm">
+                                        <div class="section-heading">
+                                            <span class="badge-circle">A</span>
+                                            <span>Butiran Waris</span>
+                                        </div>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Nama Waris</label>
-                                    <input type="text" name="nama_waris"
-                                           class="form-control @error('nama_waris') is-invalid @enderror"
-                                           value="{{ old('nama_waris', session('user_profile.step3.nama_waris')) }}"
-                                           placeholder="Sila isikan nama waris">
-                                    @error('nama_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
+                                        <div class="row g-4">
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Nama Waris</label>
+                                                <input type="text"
+                                                       name="nama_waris"
+                                                       class="form-control form-control-lg @error('nama_waris') is-invalid @enderror"
+                                                       value="{{ old('nama_waris', session('user_profile.step3.nama_waris')) }}"
+                                                       placeholder="Sila isikan nama penuh waris">
+                                                @error('nama_waris')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Hubungan Waris</label>
-                                    <select name="hubungan_waris" class="form-select @error('hubungan_waris') is-invalid @enderror">
-                                        <option value="">-- Sila Pilih --</option>
-                                        @php
-                                            $hubunganWaris = old('hubungan_waris', session('user_profile.step3.hubungan_waris'));
-                                        @endphp
-                                        <option value="Suami" {{ $hubunganWaris == 'Suami' ? 'selected' : '' }}>Suami</option>
-                                        <option value="Isteri" {{ $hubunganWaris == 'Isteri' ? 'selected' : '' }}>Isteri</option>
-                                        <option value="Anak" {{ $hubunganWaris == 'Anak' ? 'selected' : '' }}>Anak</option>
-                                        <option value="Ibu" {{ $hubunganWaris == 'Ibu' ? 'selected' : '' }}>Ibu</option>
-                                        <option value="Bapa" {{ $hubunganWaris == 'Bapa' ? 'selected' : '' }}>Bapa</option>
-                                        <option value="Ibu Mertua" {{ $hubunganWaris == 'Ibu Mertua' ? 'selected' : '' }}>Ibu Mertua</option>
-                                        <option value="Bapa Mertua" {{ $hubunganWaris == 'Bapa Mertua' ? 'selected' : '' }}>Bapa Mertua</option>
-                                    </select>
-                                    @error('hubungan_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Hubungan Waris</label>
+                                                <select name="hubungan_waris" class="form-select form-select-lg @error('hubungan_waris') is-invalid @enderror">
+                                                    <option value="">-- Sila Pilih --</option>
+                                                    @php
+                                                        $hubunganWaris = old('hubungan_waris', session('user_profile.step3.hubungan_waris'));
+                                                    @endphp
+                                                    <option value="Suami" {{ $hubunganWaris == 'Suami' ? 'selected' : '' }}>Suami</option>
+                                                    <option value="Isteri" {{ $hubunganWaris == 'Isteri' ? 'selected' : '' }}>Isteri</option>
+                                                    <option value="Anak" {{ $hubunganWaris == 'Anak' ? 'selected' : '' }}>Anak</option>
+                                                    <option value="Ibu" {{ $hubunganWaris == 'Ibu' ? 'selected' : '' }}>Ibu</option>
+                                                    <option value="Bapa" {{ $hubunganWaris == 'Bapa' ? 'selected' : '' }}>Bapa</option>
+                                                    <option value="Ibu Mertua" {{ $hubunganWaris == 'Ibu Mertua' ? 'selected' : '' }}>Ibu Mertua</option>
+                                                    <option value="Bapa Mertua" {{ $hubunganWaris == 'Bapa Mertua' ? 'selected' : '' }}>Bapa Mertua</option>
+                                                </select>
+                                                @error('hubungan_waris')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">No. Tel Waris</label>
-                                    <input type="text" name="no_tel_waris"
-                                           class="form-control @error('no_tel_waris') is-invalid @enderror"
-                                           value="{{ old('no_tel_waris', session('user_profile.step3.no_tel_waris')) }}"
-                                           placeholder="Contoh: 0123456789">
-                                    @error('no_tel_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">No. Tel Waris</label>
+                                                <input type="text"
+                                                       name="no_tel_waris"
+                                                       class="form-control form-control-lg @error('no_tel_waris') is-invalid @enderror"
+                                                       value="{{ old('no_tel_waris', session('user_profile.step3.no_tel_waris')) }}"
+                                                       placeholder="Contoh: 0123456789">
+                                                @error('no_tel_waris')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
 
-                                <div class="col-md-6">
-                                    <label class="form-label">Alamat Waris</label>
-                                    <input type="text" name="alamat_waris"
-                                           class="form-control @error('alamat_waris') is-invalid @enderror"
-                                           value="{{ old('alamat_waris', session('user_profile.step3.alamat_waris')) }}"
-                                           placeholder="Sila isikan alamat waris">
-                                    @error('alamat_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                            <div class="col-md-6">
+                                                <label class="form-label fw-semibold">Alamat Waris</label>
+                                                <input type="text"
+                                                       name="alamat_waris"
+                                                       class="form-control form-control-lg @error('alamat_waris') is-invalid @enderror"
+                                                       value="{{ old('alamat_waris', session('user_profile.step3.alamat_waris')) }}"
+                                                       placeholder="Sila isikan alamat waris">
+                                                @error('alamat_waris')
+                                                    <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
                         </div>
 
-                        <div class="px-4 py-3 border-top d-flex justify-content-between">
+                        <div class="px-4 px-md-5 py-3 border-top d-flex justify-content-between align-items-center">
                             <a href="{{ route('user.profile.create.step2') }}" class="btn btn-light">
                                 Kembali
                             </a>
-                            <button type="submit" class="btn btn-success">
+                            <button type="submit" class="btn btn-success px-4">
                                 Seterusnya
                             </button>
                         </div>

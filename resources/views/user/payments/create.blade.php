@@ -58,14 +58,20 @@
                             <span class="text-muted">Yuran Pendaftaran</span>
                             <span class="fw-semibold">RM20.00</span>
                         </div>
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Yuran Bulanan</span>
-                            <span class="fw-semibold">RM10.00</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted">Yuran Tahunan</span>
-                            <span class="fw-semibold">RM100.00</span>
-                        </div>
+
+                        @if($plan === 'monthly')
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Yuran Bulanan</span>
+                                <span class="fw-semibold">RM10.00</span>
+                            </div>
+                        @endif
+
+                        @if($plan === 'yearly')
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Yuran Tahunan</span>
+                                <span class="fw-semibold">RM100.00</span>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="alert alert-light mb-0">
@@ -134,7 +140,7 @@
                                             </label>
                                         </div>
                                         <div class="text-muted small mt-2">
-                                            Bayaran hanya dibenarkan untuk bulan seterusnya yang belum dibayar.
+                                            Bayaran hanya dibenarkan untuk tempoh seterusnya dalam kitaran 12 bulan keahlian anda.
                                         </div>
                                         <div class="mt-2">
                                             <span class="badge bg-info-transparent text-info">
@@ -146,17 +152,11 @@
                             </div>
 
                             <div class="mb-4">
-                                <label for="payment_period" class="form-label fw-semibold">Tempoh Bayaran Bulanan</label>
-                                <input
-                                    type="text"
-                                    name="payment_period"
-                                    id="payment_period"
-                                    class="form-control"
-                                    placeholder="Contoh: {{ $nextMonthlyPeriod }}"
-                                    value="{{ old('payment_period', $nextMonthlyPeriod) }}"
-                                >
+                                <label class="form-label fw-semibold">Tempoh Bayaran Bulanan</label>
+                                <input type="hidden" name="payment_period" value="{{ $nextMonthlyPeriod }}">
+                                <input type="text" class="form-control" value="{{ $nextMonthlyPeriod }}" disabled>
                                 <small class="text-muted">
-                                    Gunakan format YYYY-MM. Sistem hanya menerima bulan semasa untuk bayaran pertama, dan bulan seterusnya untuk bayaran selepas itu.
+                                    Tempoh bayaran ditetapkan secara automatik oleh sistem.
                                 </small>
                             </div>
 
@@ -245,13 +245,7 @@
                                 <div class="mb-4">
                                     <label for="payment_period_year" class="form-label fw-semibold">Tahun Bayaran</label>
                                     <input type="hidden" name="payment_period" value="{{ $currentYear }}">
-                                    <input
-                                        type="text"
-                                        id="payment_period_year"
-                                        class="form-control"
-                                        value="{{ $currentYear }}"
-                                        disabled
-                                    >
+                                    <input type="text" id="payment_period_year" class="form-control" value="{{ $currentYear }}" disabled>
                                     <small class="text-muted">
                                         Bayaran tahunan adalah untuk tahun semasa sahaja.
                                     </small>

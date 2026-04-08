@@ -5,7 +5,110 @@
 
     @php
         $isDependent = auth()->user()->account_type === 'tanggungan';
+        $status = $profile->status_permohonan ?? null;
+
+        $statusClass = match($status) {
+            'pending' => 'warning',
+            'approved' => 'info',
+            'rejected' => 'danger',
+            'active' => 'success',
+            default => 'secondary',
+        };
+
+        $statusLabel = match($status) {
+            'pending' => 'Menunggu Semakan',
+            'approved' => 'Diluluskan',
+            'rejected' => 'Ditolak',
+            'active' => 'Aktif',
+            default => 'Belum Dihantar',
+        };
+
+        $paymentPlanLabel = '-';
+        if ($profile->payment_plan === 'bulanan') {
+            $paymentPlanLabel = 'Bulanan';
+        } elseif ($profile->payment_plan === 'tahunan') {
+            $paymentPlanLabel = 'Tahunan';
+        }
     @endphp
+
+    <style>
+        .formal-card {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            background: #fff;
+        }
+
+        .formal-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 700;
+            color: #212529;
+            padding: 14px 18px;
+        }
+
+        .formal-body {
+            padding: 18px;
+        }
+
+        .info-label {
+            font-size: 13px;
+            color: #6c757d;
+            margin-bottom: 4px;
+        }
+
+        .info-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #212529;
+            word-break: break-word;
+        }
+
+        .info-row {
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f3f5;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .profile-summary {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            background: #ffffff;
+            padding: 20px;
+        }
+
+        .profile-summary h3 {
+            margin-bottom: 4px;
+            font-weight: 700;
+            color: #212529;
+        }
+
+        .section-spacing {
+            margin-bottom: 1.5rem;
+        }
+
+        .status-box {
+            border-radius: 10px;
+            border: 1px solid #dee2e6;
+            padding: 16px 18px;
+            background: #fff;
+        }
+
+        .table-summary td {
+            padding: 10px 12px;
+            vertical-align: top;
+        }
+
+        .table-summary td:first-child {
+            width: 220px;
+            font-weight: 600;
+            color: #495057;
+            background: #f8f9fa;
+        }
+    </style>
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
         <div>
@@ -13,7 +116,7 @@
                 {{ $isDependent ? 'Maklumat Tanggungan' : 'Maklumat Ahli' }}
             </h1>
             <p class="text-muted mb-0">
-                Semakan maklumat profil dan status permohonan keahlian anda.
+                Paparan maklumat profil dan status permohonan keahlian.
             </p>
         </div>
 
@@ -25,240 +128,284 @@
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert">
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show shadow-sm border-0" role="alert">
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
             {{ session('error') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    <div class="card border-0 shadow-sm mb-4">
-        <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-            <div>
-                <h4 class="mb-1 fw-bold">{{ $profile->nama }}</h4>
-                <div class="text-muted mb-2">{{ $profile->no_kp }}</div>
-
-                @if($profile->status_permohonan)
-                    <span class="badge bg-{{ $statusClass }} px-3 py-2">
-                        Status: {{ ucfirst(str_replace('_', ' ', $profile->status_permohonan)) }}
-                    </span>
-                @else
-                    <span class="badge bg-secondary px-3 py-2">
-                        Status: Belum Dihantar
-                    </span>
-                @endif
+    <div class="profile-summary section-spacing">
+        <div class="row align-items-center g-3">
+            <div class="col-md-8">
+                <h3>{{ $profile->nama }}</h3>
+                <div class="text-muted">{{ $profile->no_kp }}</div>
             </div>
-
-            <div class="text-md-end">
-                <small class="text-muted d-block">Tarikh Permohonan</small>
-                <span class="fw-semibold">
-                    {{ $profile->tarikh_permohonan ? \Carbon\Carbon::parse($profile->tarikh_permohonan)->format('d/m/Y') : '-' }}
-                </span>
+            <div class="col-md-4 text-md-end">
+                <div class="mb-2">
+                    <small class="text-muted d-block">Status Permohonan</small>
+                    <span class="badge bg-{{ $statusClass }} px-3 py-2">
+                        {{ $statusLabel }}
+                    </span>
+                </div>
+                <div>
+                    <small class="text-muted d-block">Tarikh Permohonan</small>
+                    <span class="fw-semibold">
+                        {{ $profile->tarikh_permohonan ? \Carbon\Carbon::parse($profile->tarikh_permohonan)->format('d/m/Y') : '-' }}
+                    </span>
+                </div>
             </div>
         </div>
     </div>
 
-    @if($profile->status_permohonan === 'pending')
-        <div class="alert alert-info border-0 shadow-sm">
+    @if($status === 'pending')
+        <div class="status-box section-spacing">
             <div class="fw-semibold mb-1">Permohonan Sedang Disemak</div>
-            <div>
-                Permohonan keahlian anda telah berjaya dihantar dan sedang menunggu semakan pihak pentadbiran.
+            <div class="text-muted">
+                Permohonan keahlian anda telah dihantar dan sedang menunggu semakan pihak pentadbiran.
+                @unless($isDependent)
+                    Bayaran yuran hanya boleh dibuat selepas permohonan diluluskan.
+                @endunless
             </div>
-
-            @unless($isDependent)
-                <div class="mt-2">
-                    Sila tunggu keputusan pentadbiran sebelum membuat bayaran yuran.
-                </div>
-            @endunless
         </div>
-    @elseif($profile->status_permohonan === 'approved')
+    @elseif($status === 'approved')
         @if($isDependent)
-            <div class="alert alert-success border-0 shadow-sm">
+            <div class="status-box section-spacing">
                 <div class="fw-semibold mb-1">Permohonan Diluluskan</div>
-                <div>
+                <div class="text-muted">
                     Maklumat anda telah disahkan oleh pihak pentadbiran.
                 </div>
             </div>
         @else
-            <div class="alert alert-success border-0 shadow-sm d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div class="status-box section-spacing d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                 <div>
                     <div class="fw-semibold mb-1">Permohonan Diluluskan</div>
-                    <div>
-                        Permohonan anda telah <b>diluluskan</b>. Sila buat bayaran yuran untuk meneruskan proses pengaktifan keahlian.
+                    <div class="text-muted">
+                        Permohonan anda telah diluluskan. Sila teruskan dengan bayaran yuran untuk pengaktifan keahlian.
                     </div>
                 </div>
-
                 <a href="{{ route('user.payments.create') }}" class="btn btn-success">
                     Bayar Yuran
                 </a>
             </div>
         @endif
-    @elseif($profile->status_permohonan === 'rejected')
-        <div class="alert alert-danger border-0 shadow-sm">
-            <div class="fw-semibold mb-1">Permohonan Ditolak</div>
-            <div>Permohonan anda telah ditolak oleh pihak pentadbiran.</div>
-
+    @elseif($status === 'rejected')
+        <div class="status-box section-spacing">
+            <div class="fw-semibold mb-1 text-danger">Permohonan Ditolak</div>
+            <div class="text-muted">Permohonan anda telah ditolak oleh pihak pentadbiran.</div>
             @if($profile->catatan_permohonan)
-                <div class="mt-2">
-                    <b>Catatan:</b> {{ $profile->catatan_permohonan }}
-                </div>
+                <div class="mt-2"><b>Catatan:</b> {{ $profile->catatan_permohonan }}</div>
             @endif
         </div>
-    @elseif($profile->status_permohonan === 'active')
-        <div class="alert alert-success border-0 shadow-sm">
-            <div class="fw-semibold mb-1">Keahlian Aktif</div>
-            <div>
-                Tahniah. Akaun keahlian anda telah aktif dan maklumat anda telah disahkan.
+    @elseif($status === 'active')
+        <div class="status-box section-spacing">
+            <div class="fw-semibold mb-1 text-success">Keahlian Aktif</div>
+            <div class="text-muted">
+                Akaun keahlian anda telah aktif dan disahkan.
             </div>
-        </div>
-    @else
-        <div class="alert alert-secondary border-0 shadow-sm">
-            Maklumat profil anda telah disimpan, tetapi status permohonan belum tersedia.
         </div>
     @endif
 
     <div class="row g-4">
 
         <div class="col-xl-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-light fw-semibold">A. Maklumat Peribadi</div>
-                <div class="card-body">
-                    <div class="mb-2"><b>Nama:</b> {{ $profile->nama }}</div>
-                    <div class="mb-2"><b>No. MyKad:</b> {{ $profile->no_kp }}</div>
-                    <div class="mb-2"><b>Tarikh Lahir:</b> {{ optional($profile->tarikh_lahir)->format('d/m/Y') }}</div>
-                    <div class="mb-2"><b>Jantina:</b> {{ ucfirst($profile->jantina ?? '-') }}</div>
-                    <div class="mb-2"><b>Agama:</b> {{ $profile->agama }}</div>
-                    <div><b>Warganegara:</b> {{ $profile->warganegara }}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-light fw-semibold">B. Maklumat Perhubungan</div>
-                <div class="card-body">
-                    <div class="mb-2"><b>Alamat Rumah:</b> {{ $profile->alamat_rumah }}</div>
-                    <div class="mb-2"><b>No. Tel Rumah:</b> {{ $profile->no_tel_rumah ?? '-' }}</div>
-                    <div><b>No. Telefon Bimbit:</b> {{ $profile->no_tel_bimbit }}</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-light fw-semibold">C. Maklumat Kariah</div>
-                <div class="card-body">
-                    <div class="mb-2">
-                        <b>Tinggal Dalam Kariah:</b>
-                        <span class="badge bg-success">{{ $profile->tinggal_dalam_kariah ? 'Ya' : 'Tidak' }}</span>
+            <div class="formal-card h-100">
+                <div class="formal-header">A. Maklumat Peribadi</div>
+                <div class="formal-body">
+                    <div class="info-row">
+                        <div class="info-label">Nama</div>
+                        <div class="info-value">{{ $profile->nama }}</div>
                     </div>
-                    <div><b>Tempoh Menetap:</b> {{ $profile->tempoh_menetap }}</div>
+                    <div class="info-row">
+                        <div class="info-label">No. MyKad</div>
+                        <div class="info-value">{{ $profile->no_kp }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Tarikh Lahir</div>
+                        <div class="info-value">{{ optional($profile->tarikh_lahir)->format('d/m/Y') ?? '-' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Jantina</div>
+                        <div class="info-value">{{ ucfirst($profile->jantina ?? '-') }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Agama</div>
+                        <div class="info-value">{{ $profile->agama ?? '-' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Warganegara</div>
+                        <div class="info-value">{{ $profile->warganegara ?? '-' }}</div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-xl-6">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-header bg-light fw-semibold">D. Maklumat Pekerjaan</div>
-                <div class="card-body">
-                    <div class="mb-2"><b>Pekerjaan:</b> {{ $profile->pekerjaan ?? '-' }}</div>
-                    <div class="mb-2"><b>Nama Majikan:</b> {{ $profile->nama_majikan ?? '-' }}</div>
-                    <div><b>Alamat Kerja:</b> {{ $profile->alamat_kerja ?? '-' }}</div>
+            <div class="formal-card h-100">
+                <div class="formal-header">B. Maklumat Perhubungan</div>
+                <div class="formal-body">
+                    <div class="info-row">
+                        <div class="info-label">Alamat Rumah</div>
+                        <div class="info-value">{{ $profile->alamat_rumah ?? '-' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">No. Tel Rumah</div>
+                        <div class="info-value">{{ $profile->no_tel_rumah ?? '-' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">No. Telefon Bimbit</div>
+                        <div class="info-value">{{ $profile->no_tel_bimbit ?? '-' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6">
+            <div class="formal-card h-100">
+                <div class="formal-header">C. Maklumat Kariah</div>
+                <div class="formal-body">
+                    <div class="info-row">
+                        <div class="info-label">Tinggal Dalam Kariah</div>
+                        <div class="info-value">
+                            <span class="badge bg-{{ $profile->tinggal_dalam_kariah ? 'success' : 'secondary' }}">
+                                {{ $profile->tinggal_dalam_kariah ? 'Ya' : 'Tidak' }}
+                            </span>
+                        </div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Tempoh Menetap</div>
+                        <div class="info-value">{{ $profile->tempoh_menetap ?? '-' }}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6">
+            <div class="formal-card h-100">
+                <div class="formal-header">D. Maklumat Pekerjaan</div>
+                <div class="formal-body">
+                    <div class="info-row">
+                        <div class="info-label">Pekerjaan</div>
+                        <div class="info-value">{{ $profile->pekerjaan ?? '-' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Nama Majikan</div>
+                        <div class="info-value">{{ $profile->nama_majikan ?? '-' }}</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">Alamat Kerja</div>
+                        <div class="info-value">{{ $profile->alamat_kerja ?? '-' }}</div>
+                    </div>
                 </div>
             </div>
         </div>
 
         @unless($isDependent)
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-light fw-semibold">E. Maklumat Waris</div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <b>Nama Waris:</b><br>
-                                {{ $profile->nama_waris }}
-                            </div>
-                            <div class="col-md-3">
-                                <b>Hubungan Waris:</b><br>
-                                {{ $profile->hubungan_waris }}
-                            </div>
-                            <div class="col-md-3">
-                                <b>No. Tel Waris:</b><br>
-                                {{ $profile->no_tel_waris }}
-                            </div>
-                            <div class="col-md-3">
-                                <b>Alamat Waris:</b><br>
-                                {{ $profile->alamat_waris }}
-                            </div>
-                        </div>
+        <div class="col-12">
+            <div class="formal-card">
+                <div class="formal-header">E. Maklumat Waris</div>
+                <div class="formal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-summary mb-0">
+                            <tbody>
+                                <tr>
+                                    <td>Nama Waris</td>
+                                    <td>{{ $profile->nama_waris ?? '-' }}</td>
+                                    <td>Hubungan Waris</td>
+                                    <td>{{ $profile->hubungan_waris ?? '-' }}</td>
+                                </tr>
+                                <tr>
+                                    <td>No. Tel Waris</td>
+                                    <td>{{ $profile->no_tel_waris ?? '-' }}</td>
+                                    <td>Alamat Waris</td>
+                                    <td>{{ $profile->alamat_waris ?? '-' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+        </div>
         @endunless
 
         <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-light fw-semibold">
+            <div class="formal-card">
+                <div class="formal-header">
                     {{ $isDependent ? 'E. Maklumat Permohonan' : 'F. Maklumat Permohonan' }}
                 </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <b>Tarikh Permohonan:</b><br>
-                            {{ $profile->tarikh_permohonan ? \Carbon\Carbon::parse($profile->tarikh_permohonan)->format('d/m/Y') : '-' }}
-                        </div>
-
-                        <div class="col-md-4">
-                            <b>Status Permohonan:</b><br>
-                            @if($profile->status_permohonan)
-                                <span class="badge bg-{{ $statusClass }}">
-                                    {{ ucfirst(str_replace('_', ' ', $profile->status_permohonan)) }}
-                                </span>
-                            @else
-                                <span class="badge bg-secondary">Belum Dihantar</span>
-                            @endif
-                        </div>
-
-                        <div class="col-md-4">
-                            <b>Catatan:</b><br>
-                            {{ $profile->catatan_permohonan ?? '-' }}
-                        </div>
+                <div class="formal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-summary mb-0">
+                            <tbody>
+                                <tr>
+                                    <td>Tarikh Permohonan</td>
+                                    <td>{{ $profile->tarikh_permohonan ? \Carbon\Carbon::parse($profile->tarikh_permohonan)->format('d/m/Y') : '-' }}</td>
+                                    <td>Status Permohonan</td>
+                                    <td>
+                                        <span class="badge bg-{{ $statusClass }}">
+                                            {{ $statusLabel }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Catatan</td>
+                                    <td colspan="3">{{ $profile->catatan_permohonan ?? '-' }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
         @unless($isDependent)
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-light fw-semibold">G. Pelan Pembayaran</div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
-                                <b>Pelan Dipilih:</b><br>
-                                {{ $paymentPlanLabel }}
-                            </div>
-
-                            <div class="col-md-6">
-                                <b>Keterangan:</b><br>
-                                @if($profile->payment_plan === 'tahunan')
-                                    RM20 pendaftaran + RM100 tahunan
-                                @elseif($profile->payment_plan === 'bulanan')
-                                    RM20 pendaftaran + RM10 bulan semasa, kemudian RM10 setiap bulan
-                                @else
-                                    -
-                                @endif
-                            </div>
-                        </div>
+        <div class="col-12">
+            <div class="formal-card">
+                <div class="formal-header">G. Maklumat Bayaran</div>
+                <div class="formal-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-summary mb-0">
+                            <tbody>
+                                <tr>
+                                    <td>Kaedah Bayaran Dipilih</td>
+                                    <td>{{ $paymentPlanLabel }}</td>
+                                    <td>Yuran Pendaftaran</td>
+                                    <td>RM20</td>
+                                </tr>
+                                <tr>
+                                    <td>Jumlah Bayaran Permulaan</td>
+                                    <td>
+                                        @if($profile->payment_plan === 'tahunan')
+                                            RM120
+                                        @elseif($profile->payment_plan === 'bulanan')
+                                            RM30
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>Keterangan</td>
+                                    <td>
+                                        @if($profile->payment_plan === 'tahunan')
+                                            RM20 pendaftaran + RM100 tahunan
+                                        @elseif($profile->payment_plan === 'bulanan')
+                                            RM20 pendaftaran + RM10 bulan pertama, kemudian RM10 setiap bulan
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
+        </div>
         @endunless
 
     </div>

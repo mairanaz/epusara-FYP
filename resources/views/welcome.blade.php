@@ -62,6 +62,7 @@
             display: flex;
             gap: 12px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .btn {
@@ -158,6 +159,17 @@
             color: #0f766e;
         }
 
+        .btn-danger-soft {
+            background: #dc2626;
+            color: white;
+            border: 1px solid #dc2626;
+        }
+
+        .btn-danger-soft:hover {
+            background: #b91c1c;
+            color: white;
+        }
+
         .hero-card {
             background: rgba(255,255,255,0.10);
             border: 1px solid rgba(255,255,255,0.16);
@@ -226,6 +238,7 @@
             padding: 28px;
             box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
             transition: 0.3s ease;
+            height: 100%;
         }
 
         .card:hover {
@@ -260,6 +273,74 @@
             background: #f1f5f9;
         }
 
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+        }
+
+        .info-box {
+            background: #ffffff;
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+        }
+
+        .info-box h3 {
+            font-size: 24px;
+            margin-bottom: 14px;
+            color: #0f172a;
+        }
+
+        .info-box p {
+            color: #64748b;
+            line-height: 1.8;
+            margin-bottom: 14px;
+        }
+
+        .info-box ul {
+            padding-left: 18px;
+            color: #475569;
+            line-height: 1.8;
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .step-card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
+        }
+
+        .step-number {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #0f766e;
+            color: white;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 14px;
+        }
+
+        .step-card h4 {
+            font-size: 18px;
+            margin-bottom: 8px;
+            color: #0f172a;
+        }
+
+        .step-card p {
+            color: #64748b;
+            line-height: 1.7;
+        }
+
         .cta-box {
             background: linear-gradient(135deg, #0f766e, #134e4a);
             color: white;
@@ -288,7 +369,9 @@
 
         @media (max-width: 992px) {
             .hero-grid,
-            .features {
+            .features,
+            .info-grid,
+            .steps {
                 grid-template-columns: 1fr;
             }
 
@@ -302,7 +385,6 @@
             }
 
             .nav-buttons {
-                flex-wrap: wrap;
                 justify-content: center;
             }
         }
@@ -339,23 +421,26 @@
     <section class="hero">
         <div class="container hero-grid">
             <div>
-                <span class="hero-badge">Sistem Pengurusan Khairat Kematian</span>
-                <h1>Urus Keahlian, Bayaran dan Maklumat Ahli Dengan Lebih Mudah</h1>
+                <span class="hero-badge">Sistem Pengurusan Khairat Kematian Digital</span>
+                <h1>E-Pusara: Platform Pengurusan Khairat, Ahli dan Laporan Kematian</h1>
                 <p>
-                    E-Pusara membantu pengurusan khairat kematian menjadi lebih tersusun,
-                    sistematik dan mesra pengguna. Pengguna boleh mendaftar akaun,
-                    log masuk, mengurus maklumat ahli, tanggungan dan rekod bayaran
-                    secara dalam talian.
+                    E-Pusara merupakan sistem yang dibangunkan untuk membantu pengurusan
+                    khairat kematian secara lebih moden, tersusun dan efisien. Sistem ini
+                    memudahkan urusan pendaftaran ahli, pengurusan tanggungan, semakan rekod
+                    bayaran, serta pelaporan kematian melalui satu platform berpusat.
                 </p>
 
                 @guest
                     <div class="hero-actions">
-                        <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-light">WhatsApp Pentadbir</a>
+                        <a href="{{ route('login') }}" class="btn btn-light">Log Masuk</a>
+                        <a href="{{ route('register') }}" class="btn btn-outline-light">Daftar Akaun</a>
+                        <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-outline-light">WhatsApp Pentadbir</a>
                         <a href="tel:0132186469" class="btn btn-outline-light">Call Pentadbir</a>
                     </div>
                 @else
                     <div class="hero-actions">
                         <a href="{{ route('dashboard') }}" class="btn btn-light">Pergi ke Dashboard</a>
+                        <a href="{{ route('death-report.create') }}" class="btn btn-danger-soft">Lapor Kematian</a>
                         <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-outline-light">WhatsApp Pentadbir</a>
                         <a href="tel:0132186469" class="btn btn-outline-light">Call Pentadbir</a>
                     </div>
@@ -369,6 +454,7 @@
                     <li>Log masuk mengikut akaun masing-masing</li>
                     <li>Pengurusan maklumat ahli dan tanggungan</li>
                     <li>Semakan dan rekod bayaran khairat</li>
+                    <li>Pelaporan kematian secara dalam talian</li>
                     <li>Akses dashboard mengikut peranan pengguna</li>
                 </ul>
             </div>
@@ -376,6 +462,48 @@
     </section>
 
     <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Tentang E-Pusara</h2>
+                <p>
+                    E-Pusara dibangunkan bagi memperkenalkan sistem pengurusan khairat kematian
+                    yang lebih teratur dan mudah digunakan oleh komuniti. Sistem ini membantu
+                    mempercepatkan urusan berkaitan ahli, tanggungan, bayaran serta laporan
+                    kematian tanpa bergantung sepenuhnya kepada proses manual.
+                </p>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-box">
+                    <h3>Objektif Sistem</h3>
+                    <p>
+                        Memudahkan pihak pengguna dan pentadbir mengurus data khairat kematian
+                        dengan lebih sistematik dalam satu platform.
+                    </p>
+                    <ul>
+                        <li>Menyimpan maklumat ahli dan tanggungan dengan lebih tersusun</li>
+                        <li>Memudahkan semakan rekod bayaran khairat</li>
+                        <li>Mempercepatkan proses laporan kematian</li>
+                        <li>Meningkatkan kecekapan pengurusan oleh pentadbir</li>
+                    </ul>
+                </div>
+
+                <div class="info-box">
+                    <h3>Siapa Yang Guna Sistem Ini?</h3>
+                    <p>
+                        Sistem ini digunakan oleh dua peranan utama iaitu pengguna dan pentadbir.
+                    </p>
+                    <ul>
+                        <li><strong>Pengguna:</strong> daftar akaun, urus profil, tanggungan dan bayaran</li>
+                        <li><strong>Pentadbir:</strong> semak data ahli, sahkan bayaran dan urus laporan kematian</li>
+                        <li><strong>Waris/Pelapor:</strong> boleh bertindak lebih cepat melalui WhatsApp, panggilan atau laporan dalam sistem</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section bg-soft">
         <div class="container">
             <div class="section-header">
                 <h2>Fungsi Utama Sistem</h2>
@@ -388,20 +516,76 @@
             <div class="features">
                 <div class="card">
                     <div class="icon">1</div>
-                    <h3>Register Akaun</h3>
+                    <h3>Daftar Akaun</h3>
                     <p>Pengguna baharu boleh membuat pendaftaran sebelum menggunakan sistem.</p>
                 </div>
 
                 <div class="card">
                     <div class="icon">2</div>
-                    <h3>Login Sistem</h3>
-                    <p>Pengguna yang berdaftar boleh log masuk untuk mengakses sistem masing-masing.</p>
+                    <h3>Urus Profil & Tanggungan</h3>
+                    <p>Maklumat ahli dan tanggungan boleh disimpan, dikemaskini dan disemak dengan mudah.</p>
                 </div>
 
                 <div class="card">
                     <div class="icon">3</div>
-                    <h3>Dashboard Ikut Role</h3>
-                    <p>User dan admin akan dibawa ke dashboard yang berbeza mengikut peranan.</p>
+                    <h3>Rekod Bayaran Khairat</h3>
+                    <p>Pengguna boleh melihat status dan rekod bayaran khairat dengan lebih teratur.</p>
+                </div>
+
+                <div class="card">
+                    <div class="icon">4</div>
+                    <h3>Laporan Kematian</h3>
+                    <p>Laporan kematian boleh dihantar melalui sistem bagi memudahkan tindakan lanjut oleh pentadbir.</p>
+                </div>
+
+                <div class="card">
+                    <div class="icon">5</div>
+                    <h3>Hubungi Pentadbir</h3>
+                    <p>Pengguna atau waris boleh terus menghubungi pentadbir melalui WhatsApp atau panggilan telefon.</p>
+                </div>
+
+                <div class="card">
+                    <div class="icon">6</div>
+                    <h3>Dashboard Ikut Peranan</h3>
+                    <p>User dan admin akan dibawa ke dashboard berbeza mengikut peranan masing-masing.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="section-header">
+                <h2>Proses Ringkas Laporan Kematian</h2>
+                <p>
+                    Bahagian ini membantu pelawat memahami bagaimana sistem digunakan
+                    apabila berlaku kematian ahli atau tanggungan.
+                </p>
+            </div>
+
+            <div class="steps">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h4>Maklumkan Kematian</h4>
+                    <p>Waris atau pelapor boleh menghubungi pentadbir dengan segera melalui WhatsApp, panggilan atau sistem.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h4>Isi Borang Laporan</h4>
+                    <p>Maklumat kematian boleh diisi melalui borang laporan untuk rekod rasmi dalam sistem.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h4>Semakan Pentadbir</h4>
+                    <p>Pentadbir akan menyemak maklumat yang dihantar sebelum tindakan lanjut dibuat.</p>
+                </div>
+
+                <div class="step-card">
+                    <div class="step-number">4</div>
+                    <h4>Tindakan Susulan</h4>
+                    <p>Maklumat yang telah disahkan akan membantu proses pengurusan seterusnya dengan lebih cepat dan tersusun.</p>
                 </div>
             </div>
         </div>
@@ -425,12 +609,12 @@
 
                 <div class="card">
                     <h3>Data Lebih Tersusun</h3>
-                    <p>Maklumat ahli, tanggungan dan pembayaran disimpan dengan lebih sistematik.</p>
+                    <p>Maklumat ahli, tanggungan, bayaran dan laporan kematian disimpan dengan lebih sistematik.</p>
                 </div>
 
                 <div class="card">
-                    <h3>Akses Lebih Cepat</h3>
-                    <p>Semakan rekod boleh dilakukan dengan lebih pantas berbanding cara manual.</p>
+                    <h3>Tindakan Lebih Cepat</h3>
+                    <p>Pelaporan dan semakan boleh dilakukan lebih pantas berbanding kaedah manual.</p>
                 </div>
             </div>
         </div>
@@ -440,13 +624,18 @@
         <div class="container">
             <div class="cta-box">
                 <h2>Mula Gunakan E-Pusara</h2>
-                <p>Daftar akaun sekarang atau log masuk jika anda sudah mempunyai akaun.</p>
+                <p>
+                    Daftar akaun untuk mengurus maklumat keahlian dan bayaran, atau gunakan
+                    butang laporan kematian sekiranya ingin membuat makluman kepada pentadbir.
+                </p>
 
                 @guest
                     <a href="{{ route('register') }}" class="btn btn-light" style="margin-right:10px;">Daftar</a>
-                    <a href="{{ route('login') }}" class="btn btn-outline-light">Log Masuk</a>
+                    <a href="{{ route('login') }}" class="btn btn-outline-light" style="margin-right:10px;">Log Masuk</a>
+                    <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-outline-light">WhatsApp Pentadbir</a>
                 @else
-                    <a href="{{ route('dashboard') }}" class="btn btn-light">Dashboard</a>
+                    <a href="{{ route('dashboard') }}" class="btn btn-light" style="margin-right:10px;">Dashboard</a>
+                    <a href="{{ route('death-report.create') }}" class="btn btn-outline-light">Lapor Kematian</a>
                 @endguest
             </div>
         </div>
@@ -457,7 +646,6 @@
             © {{ date('Y') }} E-Pusara. Hak cipta terpelihara.
         </div>
     </footer>
-    
 
 </body>
 </html>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Payment;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class PaymentController extends Controller
 {
@@ -17,9 +18,15 @@ class PaymentController extends Controller
         $user = auth()->user();
 
         $profile = $user->profile;
+
+        if (!$profile) {
+            return redirect()->route('user.profile.create')
+                ->with('error', 'Sila lengkapkan maklumat ahli terlebih dahulu.');
+        }
+
         $payments = $user->payments()->latest()->get();
 
-        $plan = $this->normalizePlan($profile?->payment_plan);
+        $plan = $this->normalizePlan($profile->payment_plan);
         $summary = $this->getPaymentSummary($user->id, $plan);
 
         return view('user.payments.index', compact('payments', 'summary', 'profile'));
@@ -66,7 +73,6 @@ class PaymentController extends Controller
         $summary = $this->getPaymentSummary($user->id, $plan);
         $currentYear = now()->year;
 
-        // PLAN BULANAN
         if ($plan === 'monthly') {
             if ($action === 'annual_payment') {
                 return redirect()->route('user.payments.index')
@@ -74,7 +80,7 @@ class PaymentController extends Controller
             }
 
             if ($action === 'first_payment') {
-                if ($summary['registration_paid'] > 0 || $summary['monthly_count_this_year'] > 0) {
+                if ($summary['registration_paid'] > 0 || $summary['monthly_paid_count'] > 0) {
                     return redirect()->route('user.payments.index')
                         ->with('error', 'Bayaran pertama telah pun dibuat.');
                 }
@@ -84,7 +90,7 @@ class PaymentController extends Controller
 
                 if (!$this->isAllowedMonthlyPeriod($user->id, $year, $month)) {
                     return redirect()->route('user.payments.index')
-                        ->with('error', 'Untuk pelan bulanan, bayaran hanya dibenarkan bagi bulan semasa atau bulan seterusnya yang belum dibayar.');
+                        ->with('error', 'Bayaran pertama pelan bulanan hanya dibenarkan untuk bulan semasa.');
                 }
 
                 $this->createPayment([
@@ -93,7 +99,7 @@ class PaymentController extends Controller
                     'payment_type' => 'registration',
                     'amount' => self::REGISTRATION_FEE,
                     'payment_period' => null,
-                    'membership_year' => $currentYear,
+                    'membership_year' => $year,
                     'paid_month' => null,
                     'notes' => 'Bayaran pendaftaran',
                     'suffix' => 'REG',
@@ -121,6 +127,11 @@ class PaymentController extends Controller
                         ->with('error', 'Sila buat bayaran pertama dahulu (pendaftaran + bulan semasa).');
                 }
 
+                if ($summary['monthly_remaining_count'] <= 0) {
+                    return redirect()->route('user.payments.index')
+                        ->with('error', 'Semua 12 bulan bayaran untuk kitaran semasa telah lengkap.');
+                }
+
                 $period = $request->payment_period ?: now()->format('Y-m');
                 [$year, $month] = $this->extractYearMonth($period);
 
@@ -131,7 +142,7 @@ class PaymentController extends Controller
 
                 if (!$this->isAllowedMonthlyPeriod($user->id, $year, $month)) {
                     return redirect()->route('user.payments.index')
-                        ->with('error', 'Untuk pelan bulanan, bayaran hanya dibenarkan bagi bulan semasa atau bulan seterusnya yang belum dibayar.');
+                        ->with('error', 'Bayaran bulanan hanya dibenarkan untuk bulan seterusnya yang belum dibayar.');
                 }
 
                 $this->createPayment([
@@ -154,7 +165,6 @@ class PaymentController extends Controller
                 ->with('error', 'Tindakan bayaran tidak sah untuk pelan bulanan.');
         }
 
-        // PLAN TAHUNAN
         if ($plan === 'yearly') {
             if ($action === 'monthly_payment') {
                 return redirect()->route('user.payments.index')
@@ -230,6 +240,15 @@ class PaymentController extends Controller
             ->with('error', 'Pelan bayaran tidak sah.');
     }
 
+    public function receipt(Payment $payment)
+    {
+        if ($payment->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        return view('user.payments.receipt', compact('payment'));
+    }
+
     private function getPaymentSummary($userId, $plan)
     {
         $currentYear = now()->year;
@@ -240,17 +259,14 @@ class PaymentController extends Controller
             ->where('payment_type', 'registration')
             ->sum('amount');
 
-        $monthlyPaidThisYear = Payment::where('user_id', $userId)
+        $monthlyPayments = Payment::where('user_id', $userId)
             ->where('status', 'paid')
             ->where('payment_type', 'monthly')
-            ->where('membership_year', $currentYear)
-            ->sum('amount');
+            ->orderBy('membership_year')
+            ->orderBy('paid_month')
+            ->get();
 
-        $monthlyCountThisYear = Payment::where('user_id', $userId)
-            ->where('status', 'paid')
-            ->where('payment_type', 'monthly')
-            ->where('membership_year', $currentYear)
-            ->count();
+        $monthlyPaidCount = $monthlyPayments->count();
 
         $annualPaidThisYear = Payment::where('user_id', $userId)
             ->where('status', 'paid')
@@ -261,44 +277,78 @@ class PaymentController extends Controller
         $registrationBalance = max(0, self::REGISTRATION_FEE - $registrationPaid);
         $annualBalance = max(0, self::YEARLY_FEE - $annualPaidThisYear);
 
-        $latestMonthlyPayment = Payment::where('user_id', $userId)
-            ->where('status', 'paid')
-            ->where('payment_type', 'monthly')
-            ->orderByDesc('membership_year')
-            ->orderByDesc('paid_month')
-            ->first();
+        $firstMonthlyPayment = $monthlyPayments->first();
+        $latestMonthlyPayment = $monthlyPayments->last();
 
-        $nextMonthlyPeriod = null;
+        $membershipStartPeriod = $firstMonthlyPayment
+            ? sprintf('%04d-%02d', $firstMonthlyPayment->membership_year, $firstMonthlyPayment->paid_month)
+            : now()->format('Y-m');
+
+        $schedulePeriods = $this->buildRollingMonthlySchedule($membershipStartPeriod, 12);
+
+        $paidPeriods = $monthlyPayments
+            ->map(fn ($payment) => sprintf('%04d-%02d', $payment->membership_year, $payment->paid_month))
+            ->values()
+            ->toArray();
 
         if ($latestMonthlyPayment) {
-            $nextMonth = $latestMonthlyPayment->paid_month + 1;
-            $nextYear = $latestMonthlyPayment->membership_year;
+            $nextDate = Carbon::createFromDate(
+                $latestMonthlyPayment->membership_year,
+                $latestMonthlyPayment->paid_month,
+                1
+            )->addMonth();
 
-            if ($nextMonth > 12) {
-                $nextMonth = 1;
-                $nextYear++;
-            }
-
-            $nextMonthlyPeriod = sprintf('%04d-%02d', $nextYear, $nextMonth);
+            $nextMonthlyPeriod = $nextDate->format('Y-m');
         } else {
             $nextMonthlyPeriod = now()->format('Y-m');
         }
+
+        $monthlyRemainingCount = max(0, 12 - $monthlyPaidCount);
+        $monthlyOutstanding = $monthlyRemainingCount * self::MONTHLY_FEE;
 
         return [
             'plan' => $plan,
             'registration_paid' => $registrationPaid,
             'registration_balance' => $registrationBalance,
-            'monthly_paid_this_year' => $monthlyPaidThisYear,
-            'monthly_count_this_year' => $monthlyCountThisYear,
+
             'annual_paid_this_year' => $annualPaidThisYear,
             'annual_balance' => $annualBalance,
+            'is_fully_paid_yearly' => $annualPaidThisYear >= self::YEARLY_FEE,
+
             'first_monthly_total' => self::REGISTRATION_FEE + self::MONTHLY_FEE,
             'first_yearly_total' => self::REGISTRATION_FEE + self::YEARLY_FEE,
+
             'current_year' => $currentYear,
             'current_month' => $currentMonth,
+
+            'membership_start_period' => $membershipStartPeriod,
+            'schedule_periods' => $schedulePeriods,
+            'paid_periods' => $paidPeriods,
+            'monthly_paid_count' => $monthlyPaidCount,
+            'monthly_remaining_count' => $monthlyRemainingCount,
+            'monthly_outstanding' => $monthlyOutstanding,
             'next_monthly_period' => $nextMonthlyPeriod,
-            'is_fully_paid_yearly' => $annualPaidThisYear >= self::YEARLY_FEE,
         ];
+    }
+
+    private function buildRollingMonthlySchedule(string $startPeriod, int $months = 12): array
+    {
+        $startDate = Carbon::createFromFormat('Y-m', $startPeriod)->startOfMonth();
+        $periods = [];
+
+        for ($i = 0; $i < $months; $i++) {
+            $date = $startDate->copy()->addMonths($i);
+
+            $periods[] = [
+                'period' => $date->format('Y-m'),
+                'year' => (int) $date->format('Y'),
+                'month' => (int) $date->format('m'),
+                'label' => $date->translatedFormat('F Y'),
+                'amount' => self::MONTHLY_FEE,
+            ];
+        }
+
+        return $periods;
     }
 
     private function createPayment(array $data): void
@@ -314,7 +364,7 @@ class PaymentController extends Controller
             'membership_year' => $data['membership_year'],
             'paid_month' => $data['paid_month'],
             'status' => 'paid',
-            'paid_at' => now()->toDateString(),
+            'paid_at' => now(),
             'payment_method' => 'manual',
             'reference_no' => 'MANUAL-' . $timestamp . '-' . $data['suffix'],
             'receipt_no' => 'RCP-' . $timestamp . '-' . $data['suffix'],
@@ -345,15 +395,14 @@ class PaymentController extends Controller
             return $year === now()->year && $month === now()->month;
         }
 
-        $expectedMonth = $latestMonthlyPayment->paid_month + 1;
-        $expectedYear = $latestMonthlyPayment->membership_year;
+        $expectedDate = Carbon::createFromDate(
+            $latestMonthlyPayment->membership_year,
+            $latestMonthlyPayment->paid_month,
+            1
+        )->addMonth();
 
-        if ($expectedMonth > 12) {
-            $expectedMonth = 1;
-            $expectedYear++;
-        }
-
-        return $year === $expectedYear && $month === $expectedMonth;
+        return $year === (int) $expectedDate->format('Y')
+            && $month === (int) $expectedDate->format('m');
     }
 
     private function extractYearMonth(string $period): array

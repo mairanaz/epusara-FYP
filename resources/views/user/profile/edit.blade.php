@@ -5,7 +5,90 @@
 
     @php
         $isDependent = auth()->user()->account_type === 'tanggungan';
+
+        $status = $profile->status_permohonan ?? null;
+
+        $statusClass = match($status) {
+            'pending' => 'warning',
+            'approved' => 'info',
+            'rejected' => 'danger',
+            'active' => 'success',
+            default => 'secondary',
+        };
+
+        $statusLabel = match($status) {
+            'pending' => 'Menunggu Semakan',
+            'approved' => 'Diluluskan',
+            'rejected' => 'Ditolak',
+            'active' => 'Aktif',
+            default => 'Draf',
+        };
     @endphp
+
+    <style>
+        .formal-card {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            background: #fff;
+        }
+
+        .formal-header {
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 700;
+            color: #212529;
+            padding: 14px 18px;
+        }
+
+        .formal-body {
+            padding: 18px;
+        }
+
+        .summary-box {
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            background: #ffffff;
+            padding: 20px;
+            margin-bottom: 1.5rem;
+        }
+
+        .summary-name {
+            font-weight: 700;
+            color: #212529;
+            margin-bottom: 4px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #212529;
+            margin-bottom: 6px;
+        }
+
+        .form-control,
+        .form-select {
+            border-radius: 8px;
+        }
+
+        .section-spacing {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-note {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 14px 16px;
+            font-size: 14px;
+            color: #495057;
+        }
+
+        .bottom-action-wrap {
+            border-top: 1px solid #dee2e6;
+            padding-top: 1rem;
+            margin-top: 1.5rem;
+        }
+    </style>
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
         <div>
@@ -51,35 +134,34 @@
         @csrf
         @method('PUT')
 
+        <div class="summary-box">
+            <div class="row align-items-center g-3">
+                <div class="col-md-8">
+                    <div class="summary-name fs-4">{{ $profile->nama }}</div>
+                    <div class="text-muted">{{ $profile->no_kp }}</div>
+                </div>
+
+                <div class="col-md-4 text-md-end">
+                    <small class="text-muted d-block">Status Semasa</small>
+                    <span class="badge bg-{{ $statusClass }} px-3 py-2">
+                        {{ $statusLabel }}
+                    </span>
+                </div>
+            </div>
+        </div>
+
         <div class="row g-4">
 
             <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                        <div>
-                            <h4 class="mb-1 fw-bold">{{ $profile->nama }}</h4>
-                            <div class="text-muted">{{ $profile->no_kp }}</div>
-                        </div>
-
-                        <div class="text-md-end">
-                            <small class="text-muted d-block">Status Semasa</small>
-                            <span class="badge bg-secondary px-3 py-2">
-                                {{ ucfirst(str_replace('_', ' ', $profile->status_permohonan ?? 'draf')) }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-12">
-                <div class="card border-0 shadow-sm">
-                    <div class="card-header bg-light fw-semibold">A. Maklumat Peribadi</div>
-                    <div class="card-body">
+                <div class="formal-card">
+                    <div class="formal-header">A. Maklumat Peribadi</div>
+                    <div class="formal-body">
                         <div class="row g-3">
 
                             <div class="col-md-6">
                                 <label class="form-label">Nama Penuh</label>
-                                <input type="text" name="nama"
+                                <input type="text"
+                                       name="nama"
                                        class="form-control @error('nama') is-invalid @enderror"
                                        value="{{ old('nama', $profile->nama) }}"
                                        placeholder="Sila isikan nama penuh">
@@ -88,7 +170,10 @@
 
                             <div class="col-md-6">
                                 <label class="form-label">No. MyKad</label>
-                                <input type="text" name="no_kp"
+                                <input type="text"
+                                       id="no_kp"
+                                       name="no_kp"
+                                       maxlength="12"
                                        class="form-control @error('no_kp') is-invalid @enderror"
                                        value="{{ old('no_kp', $profile->no_kp) }}"
                                        placeholder="Contoh: 010203040506">
@@ -98,7 +183,9 @@
 
                             <div class="col-md-4">
                                 <label class="form-label">Tarikh Lahir</label>
-                                <input type="date" name="tarikh_lahir"
+                                <input type="date"
+                                       id="tarikh_lahir"
+                                       name="tarikh_lahir"
                                        class="form-control @error('tarikh_lahir') is-invalid @enderror"
                                        value="{{ old('tarikh_lahir', optional($profile->tarikh_lahir)->format('Y-m-d')) }}">
                                 @error('tarikh_lahir') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -106,7 +193,7 @@
 
                             <div class="col-md-4">
                                 <label class="form-label">Jantina</label>
-                                <select name="jantina" class="form-select @error('jantina') is-invalid @enderror">
+                                <select id="jantina" name="jantina" class="form-select @error('jantina') is-invalid @enderror">
                                     <option value="">-- Sila Pilih --</option>
                                     <option value="lelaki" {{ old('jantina', $profile->jantina) == 'lelaki' ? 'selected' : '' }}>Lelaki</option>
                                     <option value="perempuan" {{ old('jantina', $profile->jantina) == 'perempuan' ? 'selected' : '' }}>Perempuan</option>
@@ -139,14 +226,15 @@
             </div>
 
             <div class="col-xl-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-light fw-semibold">B. Maklumat Perhubungan</div>
-                    <div class="card-body">
+                <div class="formal-card h-100">
+                    <div class="formal-header">B. Maklumat Perhubungan</div>
+                    <div class="formal-body">
                         <div class="row g-3">
 
                             <div class="col-12">
                                 <label class="form-label">Alamat Rumah</label>
-                                <textarea name="alamat_rumah" rows="4"
+                                <textarea name="alamat_rumah"
+                                          rows="4"
                                           class="form-control @error('alamat_rumah') is-invalid @enderror"
                                           placeholder="Sila isikan alamat rumah">{{ old('alamat_rumah', $profile->alamat_rumah) }}</textarea>
                                 @error('alamat_rumah') <div class="invalid-feedback">{{ $message }}</div> @enderror
@@ -154,7 +242,8 @@
 
                             <div class="col-12">
                                 <label class="form-label">No. Tel Rumah</label>
-                                <input type="text" name="no_tel_rumah"
+                                <input type="text"
+                                       name="no_tel_rumah"
                                        class="form-control @error('no_tel_rumah') is-invalid @enderror"
                                        value="{{ old('no_tel_rumah', $profile->no_tel_rumah) }}"
                                        placeholder="Contoh: 03-12345678">
@@ -163,7 +252,8 @@
 
                             <div class="col-12">
                                 <label class="form-label">No. Telefon Bimbit</label>
-                                <input type="text" name="no_tel_bimbit"
+                                <input type="text"
+                                       name="no_tel_bimbit"
                                        class="form-control @error('no_tel_bimbit') is-invalid @enderror"
                                        value="{{ old('no_tel_bimbit', $profile->no_tel_bimbit) }}"
                                        placeholder="Contoh: 0123456789">
@@ -176,9 +266,9 @@
             </div>
 
             <div class="col-xl-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-light fw-semibold">C. Maklumat Kariah</div>
-                    <div class="card-body">
+                <div class="formal-card h-100">
+                    <div class="formal-header">C. Maklumat Kariah</div>
+                    <div class="formal-body">
                         <div class="row g-3">
 
                             <div class="col-12">
@@ -193,7 +283,8 @@
 
                             <div class="col-12">
                                 <label class="form-label">Tempoh Menetap</label>
-                                <input type="text" name="tempoh_menetap"
+                                <input type="text"
+                                       name="tempoh_menetap"
                                        class="form-control @error('tempoh_menetap') is-invalid @enderror"
                                        value="{{ old('tempoh_menetap', $profile->tempoh_menetap) }}"
                                        placeholder="Contoh: 5 tahun">
@@ -206,14 +297,15 @@
             </div>
 
             <div class="col-xl-6">
-                <div class="card border-0 shadow-sm h-100">
-                    <div class="card-header bg-light fw-semibold">D. Maklumat Pekerjaan</div>
-                    <div class="card-body">
+                <div class="formal-card h-100">
+                    <div class="formal-header">D. Maklumat Pekerjaan</div>
+                    <div class="formal-body">
                         <div class="row g-3">
 
                             <div class="col-12">
                                 <label class="form-label">Pekerjaan</label>
-                                <input type="text" name="pekerjaan"
+                                <input type="text"
+                                       name="pekerjaan"
                                        class="form-control @error('pekerjaan') is-invalid @enderror"
                                        value="{{ old('pekerjaan', $profile->pekerjaan) }}"
                                        placeholder="Contoh: Swasta / Kerajaan / Pelajar">
@@ -222,7 +314,8 @@
 
                             <div class="col-12">
                                 <label class="form-label">Nama Majikan</label>
-                                <input type="text" name="nama_majikan"
+                                <input type="text"
+                                       name="nama_majikan"
                                        class="form-control @error('nama_majikan') is-invalid @enderror"
                                        value="{{ old('nama_majikan', $profile->nama_majikan) }}"
                                        placeholder="Sila isikan nama majikan">
@@ -231,7 +324,8 @@
 
                             <div class="col-12">
                                 <label class="form-label">Alamat Kerja</label>
-                                <input type="text" name="alamat_kerja"
+                                <input type="text"
+                                       name="alamat_kerja"
                                        class="form-control @error('alamat_kerja') is-invalid @enderror"
                                        value="{{ old('alamat_kerja', $profile->alamat_kerja) }}"
                                        placeholder="Sila isikan alamat kerja">
@@ -245,14 +339,15 @@
 
             @unless($isDependent)
                 <div class="col-xl-6">
-                    <div class="card border-0 shadow-sm h-100">
-                        <div class="card-header bg-light fw-semibold">E. Maklumat Waris</div>
-                        <div class="card-body">
+                    <div class="formal-card h-100">
+                        <div class="formal-header">E. Maklumat Waris</div>
+                        <div class="formal-body">
                             <div class="row g-3">
 
                                 <div class="col-12">
                                     <label class="form-label">Nama Waris</label>
-                                    <input type="text" name="nama_waris"
+                                    <input type="text"
+                                           name="nama_waris"
                                            class="form-control @error('nama_waris') is-invalid @enderror"
                                            value="{{ old('nama_waris', $profile->nama_waris) }}"
                                            placeholder="Sila isikan nama waris">
@@ -276,7 +371,8 @@
 
                                 <div class="col-12">
                                     <label class="form-label">No. Tel Waris</label>
-                                    <input type="text" name="no_tel_waris"
+                                    <input type="text"
+                                           name="no_tel_waris"
                                            class="form-control @error('no_tel_waris') is-invalid @enderror"
                                            value="{{ old('no_tel_waris', $profile->no_tel_waris) }}"
                                            placeholder="Contoh: 0123456789">
@@ -285,7 +381,8 @@
 
                                 <div class="col-12">
                                     <label class="form-label">Alamat Waris</label>
-                                    <input type="text" name="alamat_waris"
+                                    <input type="text"
+                                           name="alamat_waris"
                                            class="form-control @error('alamat_waris') is-invalid @enderror"
                                            value="{{ old('alamat_waris', $profile->alamat_waris) }}"
                                            placeholder="Sila isikan alamat waris">
@@ -298,13 +395,13 @@
                 </div>
 
                 <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-light fw-semibold">F. Pelan Pembayaran</div>
-                        <div class="card-body">
+                    <div class="formal-card">
+                        <div class="formal-header">F. Maklumat Bayaran</div>
+                        <div class="formal-body">
                             <div class="row g-4 align-items-start">
 
                                 <div class="col-md-6">
-                                    <label class="form-label">Pelan Pembayaran</label>
+                                    <label class="form-label">Kaedah Bayaran</label>
 
                                     @if($hasPaidPayments)
                                         <input type="hidden" name="payment_plan" value="{{ $profile->payment_plan }}">
@@ -321,22 +418,20 @@
 
                                     @if($hasPaidPayments)
                                         <small class="text-danger d-block mt-2">
-                                            Pelan pembayaran tidak boleh diubah kerana anda sudah mempunyai bayaran berstatus paid.
+                                            Kaedah bayaran tidak boleh diubah kerana anda sudah mempunyai bayaran berstatus paid.
                                         </small>
                                     @else
                                         <small class="text-muted d-block mt-2">
-                                            Anda boleh ubah pelan pembayaran selagi belum ada bayaran paid.
+                                            Kaedah bayaran boleh diubah selagi belum ada bayaran berstatus paid.
                                         </small>
                                     @endif
                                 </div>
 
                                 <div class="col-md-6">
-                                    <div class="alert alert-light border mb-0 h-100">
-                                        <div class="fw-semibold mb-2">Maklumat Pelan</div>
-                                        <ul class="mb-0 ps-3">
-                                            <li><b>Bulanan</b>: Bayaran pertama RM30, kemudian RM10 setiap bulan.</li>
-                                            <li><b>Tahunan</b>: Bayaran pertama RM120, kemudian tiada bayaran lain untuk tahun semasa.</li>
-                                        </ul>
+                                    <div class="info-note">
+                                        <div class="fw-semibold mb-2">Maklumat Bayaran</div>
+                                        <div class="mb-2"><b>Bulanan:</b> RM20 yuran pendaftaran + RM10 bulan pertama. Bayaran seterusnya RM10 setiap bulan.</div>
+                                        <div><b>Tahunan:</b> RM20 yuran pendaftaran + RM100 yuran tahunan.</div>
                                     </div>
                                 </div>
 
@@ -348,7 +443,7 @@
 
         </div>
 
-        <div class="mt-4">
+        <div class="bottom-action-wrap">
             <div class="form-check mt-2">
                 <input class="form-check-input @error('akuan') is-invalid @enderror"
                        type="checkbox"
@@ -357,21 +452,96 @@
                        id="akuan"
                        {{ old('akuan', 1) ? 'checked' : '' }}>
                 <label class="form-check-label" for="akuan">
-                    Saya mengesahkan bahawa maklumat yang dikemaskini adalah benar.
+                    Saya mengesahkan bahawa semua maklumat yang dikemaskini adalah benar.
                 </label>
                 @error('akuan') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
             </div>
-        </div>
 
-        <div class="mt-4 d-flex flex-column flex-sm-row justify-content-end gap-2">
-            <a class="btn btn-light" href="{{ route('user.profile.show') }}">
-                Batal
-            </a>
-            <button class="btn btn-primary" type="submit">
-                Simpan Kemaskini
-            </button>
+            <div class="mt-4 d-flex flex-column flex-sm-row justify-content-end gap-2">
+                <a class="btn btn-light" href="{{ route('user.profile.show') }}">
+                    Batal
+                </a>
+                <button class="btn btn-primary" type="submit">
+                    Simpan Kemaskini
+                </button>
+            </div>
         </div>
     </form>
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const icInput = document.getElementById('no_kp');
+    const birthDateInput = document.getElementById('tarikh_lahir');
+    const genderSelect = document.getElementById('jantina');
+
+    function parseBirthDateFromIC(ic) {
+        if (!/^\d{12}$/.test(ic)) {
+            return null;
+        }
+
+        const yy = parseInt(ic.substring(0, 2), 10);
+        const mm = parseInt(ic.substring(2, 4), 10);
+        const dd = parseInt(ic.substring(4, 6), 10);
+
+        if (mm < 1 || mm > 12 || dd < 1 || dd > 31) {
+            return null;
+        }
+
+        const currentYear = new Date().getFullYear();
+        const currentYearShort = currentYear % 100;
+        const fullYear = yy <= currentYearShort ? 2000 + yy : 1900 + yy;
+
+        const formatted = `${fullYear}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+        const testDate = new Date(formatted);
+
+        if (isNaN(testDate.getTime())) {
+            return null;
+        }
+
+        if (
+            testDate.getFullYear() !== fullYear ||
+            (testDate.getMonth() + 1) !== mm ||
+            testDate.getDate() !== dd
+        ) {
+            return null;
+        }
+
+        return formatted;
+    }
+
+    function parseGenderFromIC(ic) {
+        if (!/^\d{12}$/.test(ic)) {
+            return '';
+        }
+
+        const lastDigit = parseInt(ic.charAt(11), 10);
+        return lastDigit % 2 === 0 ? 'perempuan' : 'lelaki';
+    }
+
+    function handleICInput() {
+        let ic = icInput.value.replace(/\D/g, '');
+        icInput.value = ic;
+
+        if (ic.length === 12) {
+            const birthDate = parseBirthDateFromIC(ic);
+            const gender = parseGenderFromIC(ic);
+
+            if (birthDate) {
+                birthDateInput.value = birthDate;
+            }
+
+            if (gender) {
+                genderSelect.value = gender;
+            }
+        }
+    }
+
+    if (icInput) {
+        icInput.addEventListener('input', handleICInput);
+        handleICInput();
+    }
+});
+</script>
 @endsection
