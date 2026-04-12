@@ -299,11 +299,15 @@
                 <h6 class="card-title mb-0">Tindakan</h6>
             </div>
             <div class="card-body">
-                <div class="d-flex flex-wrap gap-2">
+                @if(($summary['amount_due_now'] ?? 0) > 0)
                     <a href="{{ route('user.payments.create') }}" class="btn btn-primary">
                         <i class="bx bx-credit-card me-1"></i> Buat Bayaran
                     </a>
-                </div>
+                @else
+                    <div class="alert alert-success mb-0 py-2">
+                        <i class="bx bx-check-circle me-1"></i> Bayaran telah selesai.
+                    </div>
+                @endif
             </div>
         </div>
 

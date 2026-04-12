@@ -38,8 +38,13 @@
         $planLabel = $plan === 'yearly' ? 'Tahunan' : 'Bulanan';
         $currentYear = $summary['current_year'] ?? now()->year;
         $nextMonthlyPeriod = $summary['next_monthly_period'] ?? now()->format('Y-m');
-        $isFirstPaymentMonthly = $summary['registration_paid'] <= 0 && $summary['monthly_count_this_year'] <= 0;
-        $isFirstPaymentYearly = $summary['registration_paid'] <= 0 && $summary['annual_paid_this_year'] <= 0;
+
+        $registrationPaid = $summary['registration_paid'] ?? 0;
+        $monthlyCountThisYear = $summary['monthly_count_this_year'] ?? 0;
+        $annualPaidThisYear = $summary['annual_paid_this_year'] ?? 0;
+
+        $isFirstPaymentMonthly = ($summary['registration_paid'] ?? 0) <= 0 && ($summary['monthly_paid_count'] ?? 0) <= 0;
+        $isFirstPaymentYearly = $registrationPaid <= 0 && $annualPaidThisYear <= 0;
     @endphp
 
     <div class="row g-4">
@@ -289,13 +294,19 @@
                         @endif
 
                         @if(
-                            ($plan === 'monthly') ||
+                            ($plan === 'monthly' && ($summary['can_pay_monthly_now'] ?? true)) ||
                             ($plan === 'yearly' && ($isFirstPaymentYearly || !$summary['is_fully_paid_yearly']))
                         )
                             <div class="mt-4 d-flex justify-content-end">
                                 <button type="submit" class="btn btn-primary">
                                     <i class="bx bx-save me-1"></i> Simpan Bayaran
                                 </button>
+                            </div>
+                        @endif
+
+                        @if($plan === 'monthly' && !($summary['can_pay_monthly_now'] ?? true))
+                            <div class="alert alert-warning">
+                                Bayaran untuk tempoh seterusnya belum dibuka kerana belum masuk bulan tersebut.
                             </div>
                         @endif
                     </form>

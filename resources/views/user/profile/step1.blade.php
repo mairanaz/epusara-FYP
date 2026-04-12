@@ -212,10 +212,11 @@
                                 <div class="col-md-6">
                                     <label class="form-label fw-semibold">Nama Penuh</label>
                                     <input type="text"
-                                           name="nama"
-                                           class="form-control form-control-lg @error('nama') is-invalid @enderror"
-                                           value="{{ old('nama', session('user_profile.step1.nama')) }}"
-                                           placeholder="Sila isikan nama penuh seperti dalam MyKad">
+                                        name="nama"
+                                        class="form-control form-control-lg @error('nama') is-invalid @enderror"
+                                        value="{{ old('nama', session('user_profile.step1.nama', auth()->user()->name)) }}"
+                                        placeholder="Sila isikan nama penuh seperti dalam MyKad"
+                                        readonly>
                                     @error('nama')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror

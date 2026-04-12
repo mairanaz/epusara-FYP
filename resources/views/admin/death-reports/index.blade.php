@@ -320,6 +320,9 @@
                                             <div class="person-name">{{ $report->nama_si_mati ?? '-' }}</div>
                                             <div class="person-meta">No. KP: {{ $report->no_kp_si_mati ?? '-' }}</div>
                                             <div class="person-meta">
+                                                Jenis: {{ $report->deceased_type === 'member' ? 'Ahli Utama' : 'Tanggungan' }}
+                                            </div>
+                                            <div class="person-meta">
                                                 Tarikh meninggal:
                                                 {{ optional($report->tarikh_meninggal)->format('d/m/Y') ?: '-' }}
                                             </div>

@@ -8,22 +8,21 @@ use App\Models\UserProfile;
 use App\Models\Dependent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Symfony\Component\HttpFoundation\Response;
 
 class AdminDeathReportController extends Controller
 {
     public function index(Request $request)
     {
-        $query = \App\Models\DeathReport::query();
+        $query = DeathReport::query();
 
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = trim($request->search);
 
             $query->where(function ($q) use ($search) {
                 $q->where('nama_si_mati', 'like', '%' . $search . '%')
-                ->orWhere('no_kp_si_mati', 'like', '%' . $search . '%')
-                ->orWhere('nama_pelapor', 'like', '%' . $search . '%')
-                ->orWhere('no_tel_pelapor', 'like', '%' . $search . '%');
+                    ->orWhere('no_kp_si_mati', 'like', '%' . $search . '%')
+                    ->orWhere('nama_pelapor', 'like', '%' . $search . '%')
+                    ->orWhere('no_tel_pelapor', 'like', '%' . $search . '%');
             });
         }
 
@@ -38,10 +37,10 @@ class AdminDeathReportController extends Controller
         $deathReports = $query->latest()->paginate(10)->withQueryString();
 
         $summary = [
-            'total' => \App\Models\DeathReport::count(),
-            'pending' => \App\Models\DeathReport::where('status', 'menunggu_semakan')->count(),
-            'approved' => \App\Models\DeathReport::where('status', 'disahkan')->count(),
-            'need_docs' => \App\Models\DeathReport::where('status', 'perlukan_dokumen_tambahan')->count(),
+            'total' => DeathReport::count(),
+            'pending' => DeathReport::where('status', 'menunggu_semakan')->count(),
+            'approved' => DeathReport::where('status', 'disahkan')->count(),
+            'need_docs' => DeathReport::where('status', 'perlukan_dokumen_tambahan')->count(),
         ];
 
         return view('admin.death-reports.index', compact('deathReports', 'summary'));
@@ -49,6 +48,8 @@ class AdminDeathReportController extends Controller
 
     public function show(DeathReport $deathReport)
     {
+        $deathReport->load('verifier');
+
         $matchedUserProfile = UserProfile::where('no_kp', $deathReport->no_kp_si_mati)->first();
         $matchedDependent = Dependent::where('no_kp', $deathReport->no_kp_si_mati)->first();
 
@@ -85,9 +86,13 @@ class AdminDeathReportController extends Controller
         $deathReport->update([
             'verification_category' => $validated['verification_category'],
             'status' => $validated['status'],
-            'burial_lot_no' => $validated['burial_lot_no'] ?? null,
-            'burial_date' => $validated['burial_date'] ?? null,
-            'admin_notes' => $validated['admin_notes'] ?? null,
+            'burial_lot_no' => $validated['status'] === 'disahkan'
+                ? ($validated['burial_lot_no'] ?? null)
+                : null,
+            'burial_date' => $validated['status'] === 'disahkan'
+                ? ($validated['burial_date'] ?? null)
+                : null,
+            'admin_notes' => $validated['admin_notes'],
             'verified_by' => auth()->id(),
             'verified_at' => now(),
         ]);
@@ -98,7 +103,7 @@ class AdminDeathReportController extends Controller
 
                 if ($profile) {
                     $profile->update([
-                        'status_kehidupan' => 'meninggal_dunia',
+                        'status_kehidupan' => 'meninggal',
                         'tarikh_kematian' => $deathReport->tarikh_meninggal,
                     ]);
                 }
@@ -109,14 +114,15 @@ class AdminDeathReportController extends Controller
 
                 if ($dependent) {
                     $dependent->update([
-                        'status_kehidupan' => 'meninggal_dunia',
+                        'status_kehidupan' => 'meninggal',
                         'tarikh_kematian' => $deathReport->tarikh_meninggal,
                     ]);
                 }
             }
         }
 
-        return redirect()->route('admin.death-reports.show', $deathReport)
+        return redirect()
+            ->route('admin.death-reports.show', $deathReport)
             ->with('success', 'Semakan laporan kematian berjaya dikemaskini.');
     }
 
@@ -134,12 +140,11 @@ class AdminDeathReportController extends Controller
         }
 
         $fullPath = Storage::disk('public')->path($path);
-        $mimeType = Storage::disk('public')->mimeType($path);
+        $mimeType = Storage::disk('public')->mimeType($path) ?? 'application/octet-stream';
 
         return response()->file($fullPath, [
             'Content-Type' => $mimeType,
             'Content-Disposition' => 'inline; filename="' . basename($fullPath) . '"',
         ]);
     }
-
 }

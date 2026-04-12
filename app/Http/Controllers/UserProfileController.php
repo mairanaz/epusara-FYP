@@ -56,6 +56,9 @@ class UserProfileController extends Controller
             $this->messages()
         );
 
+        // Paksa nama ikut nama akaun yang didaftarkan
+        $validated['nama'] = auth()->user()->name;
+
         session(['user_profile.step1' => $validated]);
 
         $matchedDependent = Dependent::where('no_kp', $validated['no_kp'])->first();
@@ -302,12 +305,15 @@ class UserProfileController extends Controller
             ->exists();
 
         $isDependent = auth()->user()->account_type === 'tanggungan' || is_null($profile->payment_plan);
+        
 
         $rules = $isDependent
             ? $this->dependentProfileRules($profile->id)
             : $this->fullProfileRules($profile->id, $hasPaidPayments);
 
         $data = $request->validate($rules, $this->messages());
+
+        $data['nama'] = auth()->user()->name;
 
         if (!$isDependent && $hasPaidPayments) {
             $data['payment_plan'] = $profile->payment_plan;

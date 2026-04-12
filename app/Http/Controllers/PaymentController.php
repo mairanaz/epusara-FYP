@@ -291,16 +291,20 @@ class PaymentController extends Controller
             ->values()
             ->toArray();
 
+        $currentDate = now()->startOfMonth();
+
         if ($latestMonthlyPayment) {
-            $nextDate = Carbon::createFromDate(
+            $expectedDate = Carbon::createFromDate(
                 $latestMonthlyPayment->membership_year,
                 $latestMonthlyPayment->paid_month,
                 1
-            )->addMonth();
+            )->addMonth()->startOfMonth();
 
-            $nextMonthlyPeriod = $nextDate->format('Y-m');
+            $nextMonthlyPeriod = $expectedDate->format('Y-m');
+            $canPayMonthlyNow = $expectedDate->lessThanOrEqualTo($currentDate);
         } else {
-            $nextMonthlyPeriod = now()->format('Y-m');
+            $nextMonthlyPeriod = $currentDate->format('Y-m');
+            $canPayMonthlyNow = true;
         }
 
         $monthlyRemainingCount = max(0, 12 - $monthlyPaidCount);
@@ -328,6 +332,7 @@ class PaymentController extends Controller
             'monthly_remaining_count' => $monthlyRemainingCount,
             'monthly_outstanding' => $monthlyOutstanding,
             'next_monthly_period' => $nextMonthlyPeriod,
+            'can_pay_monthly_now' => $canPayMonthlyNow,
         ];
     }
 
@@ -384,6 +389,15 @@ class PaymentController extends Controller
 
     private function isAllowedMonthlyPeriod($userId, $year, $month): bool
     {
+        $currentDate = now()->startOfMonth();
+
+        $requestedDate = Carbon::createFromDate($year, $month, 1)->startOfMonth();
+
+        // Tak boleh bayar bulan masa depan
+        if ($requestedDate->gt($currentDate)) {
+            return false;
+        }
+
         $latestMonthlyPayment = Payment::where('user_id', $userId)
             ->where('status', 'paid')
             ->where('payment_type', 'monthly')
@@ -391,18 +405,20 @@ class PaymentController extends Controller
             ->orderByDesc('paid_month')
             ->first();
 
+        // Kalau belum pernah bayar bulanan, hanya bulan semasa dibenarkan
         if (!$latestMonthlyPayment) {
-            return $year === now()->year && $month === now()->month;
+            return $requestedDate->equalTo($currentDate);
         }
 
         $expectedDate = Carbon::createFromDate(
             $latestMonthlyPayment->membership_year,
             $latestMonthlyPayment->paid_month,
             1
-        )->addMonth();
+        )->addMonth()->startOfMonth();
 
-        return $year === (int) $expectedDate->format('Y')
-            && $month === (int) $expectedDate->format('m');
+        // Hanya boleh bayar bulan seterusnya DAN bulan itu mesti dah tiba
+        return $requestedDate->equalTo($expectedDate)
+            && $requestedDate->lessThanOrEqualTo($currentDate);
     }
 
     private function extractYearMonth(string $period): array

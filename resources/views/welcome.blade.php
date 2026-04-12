@@ -432,15 +432,13 @@
 
                 @guest
                     <div class="hero-actions">
-                        <a href="{{ route('login') }}" class="btn btn-light">Log Masuk</a>
-                        <a href="{{ route('register') }}" class="btn btn-outline-light">Daftar Akaun</a>
                         <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-outline-light">WhatsApp Pentadbir</a>
                         <a href="tel:0132186469" class="btn btn-outline-light">Call Pentadbir</a>
                     </div>
                 @else
                     <div class="hero-actions">
                         <a href="{{ route('dashboard') }}" class="btn btn-light">Pergi ke Dashboard</a>
-                        <a href="{{ route('death-report.create') }}" class="btn btn-danger-soft">Lapor Kematian</a>
+                       {{--   <a href="{{ route('death-report.create') }}" class="btn btn-danger-soft">Lapor Kematian</a> --}}
                         <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-outline-light">WhatsApp Pentadbir</a>
                         <a href="tel:0132186469" class="btn btn-outline-light">Call Pentadbir</a>
                     </div>
@@ -635,7 +633,7 @@
                     <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-outline-light">WhatsApp Pentadbir</a>
                 @else
                     <a href="{{ route('dashboard') }}" class="btn btn-light" style="margin-right:10px;">Dashboard</a>
-                    <a href="{{ route('death-report.create') }}" class="btn btn-outline-light">Lapor Kematian</a>
+                 {{--   <a href="{{ route('death-report.create') }}" class="btn btn-outline-light">Lapor Kematian</a> --}}  
                 @endguest
             </div>
         </div>

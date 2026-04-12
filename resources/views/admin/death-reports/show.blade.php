@@ -214,7 +214,7 @@
                         </div>
 
                         <div class="col-md-6">
-                            <label class="text-muted fs-12 d-block mb-1">Jenis Laporan</label>
+                            <label class="text-muted fs-12 d-block mb-1">Jenis Si Mati</label>
                             <div class="fw-semibold">
                                 {{ $deathReport->deceased_type === 'member' ? 'Ahli Utama' : ($deathReport->deceased_type === 'dependent' ? 'Tanggungan' : '-') }}
                             </div>
@@ -244,9 +244,9 @@
                             <div class="border rounded p-3 h-100">
                                 <div class="fw-semibold mb-2">Sijil Mati</div>
                                 @if($deathReport->sijil_mati_path)
-                                    <a href="{{ route('admin.death-reports.preview', [$deathReport, 'type' => 'sijil_mati']) }}"
-                                       target="_blank"
-                                       class="btn btn-outline-primary btn-sm">
+                                    <a href="{{ route('admin.death-reports.preview', [$deathReport, 'sijil_mati']) }}"
+                                    target="_blank"
+                                    class="btn btn-outline-primary btn-sm">
                                         Preview Dokumen
                                     </a>
                                     <div class="text-muted fs-12 mt-2">Klik untuk buka dokumen</div>
@@ -260,9 +260,9 @@
                             <div class="border rounded p-3 h-100">
                                 <div class="fw-semibold mb-2">Permit Kebumi</div>
                                 @if($deathReport->permit_kebumi_path)
-                                    <a href="{{ route('admin.death-reports.preview', [$deathReport, 'type' => 'permit_kebumi']) }}"
-                                       target="_blank"
-                                       class="btn btn-outline-primary btn-sm">
+                                    <a href="{{ route('admin.death-reports.preview', [$deathReport, 'permit_kebumi']) }}"
+                                    target="_blank"
+                                    class="btn btn-outline-primary btn-sm">
                                         Preview Dokumen
                                     </a>
                                     <div class="text-muted fs-12 mt-2">Klik untuk buka dokumen</div>
@@ -276,9 +276,9 @@
                             <div class="border rounded p-3 h-100">
                                 <div class="fw-semibold mb-2">Dokumen Sokongan</div>
                                 @if($deathReport->dokumen_sokongan_path)
-                                    <a href="{{ route('admin.death-reports.preview', [$deathReport, 'type' => 'dokumen_sokongan']) }}"
-                                       target="_blank"
-                                       class="btn btn-outline-primary btn-sm">
+                                    <a href="{{ route('admin.death-reports.preview', [$deathReport, 'dokumen_sokongan']) }}"
+                                    target="_blank"
+                                    class="btn btn-outline-primary btn-sm">
                                         Preview Dokumen
                                     </a>
                                     <div class="text-muted fs-12 mt-2">Klik untuk buka dokumen</div>
