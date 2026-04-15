@@ -163,8 +163,9 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::get('/death-reports', [AdminDeathReportController::class, 'index'])->name('death-reports.index');
     Route::get('/death-reports/{deathReport}', [AdminDeathReportController::class, 'show'])->name('death-reports.show');
     Route::post('/death-reports/{deathReport}/verify', [AdminDeathReportController::class, 'verify'])->name('death-reports.verify');
-    Route::get('/death-reports/{deathReport}/preview/{type}', [AdminDeathReportController::class, 'preview'])
-        ->name('death-reports.preview');
+    Route::get('/death-reports/{deathReport}/preview/{type}', [AdminDeathReportController::class, 'preview'])->name('death-reports.preview');
+    Route::get('/death-reports/{deathReport}/select-plot', [AdminDeathReportController::class, 'selectPlot'])->name('death-reports.select-plot');
+    Route::post('/death-reports/{deathReport}/store-plot', [AdminDeathReportController::class, 'storePlot'])->name('death-reports.store-plot');
 });
 
 require __DIR__ . '/auth.php';

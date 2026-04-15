@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DeathReport;
 use App\Models\UserProfile;
 use App\Models\Dependent;
+use App\Models\BurialPlot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -146,5 +147,95 @@ class AdminDeathReportController extends Controller
             'Content-Type' => $mimeType,
             'Content-Disposition' => 'inline; filename="' . basename($fullPath) . '"',
         ]);
+    }
+
+    private function determineZone($deathReport)
+    {
+        $jantina = strtolower(trim($deathReport->jantina ?? ''));
+        $umur = is_numeric($deathReport->umur) ? (int) $deathReport->umur : null;
+
+        if (!is_null($umur) && $umur < 12) {
+            return 'K';
+        }
+
+        if (in_array($jantina, ['perempuan', 'female'])) {
+            return 'P';
+        }
+
+        if (in_array($jantina, ['lelaki', 'male'])) {
+            return 'L';
+        }
+
+        return 'L';
+    }
+
+    public function selectPlot(DeathReport $deathReport)
+    {
+        if ($deathReport->burial_plot_id) {
+            return redirect()
+                ->route('admin.death-reports.show', $deathReport)
+                ->with('success', 'Lot kubur telah dipilih untuk laporan ini.');
+        }
+
+        $zone = $this->determineZone($deathReport);
+
+        $plots = BurialPlot::where('zone', $zone)
+            ->orderBy('row_number')
+            ->orderByDesc('lot_number')
+            ->get()
+            ->groupBy('row_number');
+
+        return view('admin.death-reports.select-plot', compact('deathReport', 'zone', 'plots'));
+    }
+
+    public function storePlot(Request $request, DeathReport $deathReport)
+    {
+        $validated = $request->validate([
+            'burial_plot_id' => ['required', 'exists:burial_plots,id'],
+            'burial_date' => ['required', 'date'],
+        ], [
+            'burial_plot_id.required' => 'Sila pilih lot kubur.',
+            'burial_plot_id.exists' => 'Lot kubur yang dipilih tidak sah.',
+            'burial_date.required' => 'Sila pilih tarikh kebumi.',
+            'burial_date.date' => 'Tarikh kebumi tidak sah.',
+        ]);
+
+        if ($deathReport->burial_plot_id) {
+            return redirect()
+                ->route('admin.death-reports.show', $deathReport)
+                ->with('error', 'Laporan ini sudah mempunyai lot kubur. Setiap laporan hanya dibenarkan satu lot kubur sahaja.');
+        }
+
+        $plot = BurialPlot::where('id', $validated['burial_plot_id'])
+            ->where('status', 'available')
+            ->first();
+
+        if (!$plot) {
+            return back()->with('error', 'Lot kubur telah dipilih atau tidak tersedia.');
+        }
+
+        $zone = $this->determineZone($deathReport);
+
+        if ($plot->zone !== $zone) {
+            return back()->with('error', 'Lot kubur tidak sepadan dengan zon si mati.');
+        }
+
+        $plot->status = 'occupied';
+        $plot->death_report_id = $deathReport->id;
+        $plot->buried_at = $validated['burial_date'];
+        $plot->save();
+
+        $deathReport->burial_plot_id = $plot->id;
+        $deathReport->burial_lot_no = $plot->plot_code;
+        $deathReport->burial_date = $validated['burial_date'];
+        $deathReport->status = 'disahkan';
+        $deathReport->verified_by = auth()->id();
+        $deathReport->verified_at = now();
+        $deathReport->save();
+     
+
+        return redirect()
+            ->route('admin.death-reports.show', $deathReport)
+            ->with('success', 'Lot kubur berjaya dipilih dan disimpan.');
     }
 }

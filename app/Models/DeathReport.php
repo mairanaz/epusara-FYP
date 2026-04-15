@@ -29,7 +29,7 @@ class DeathReport extends Model
         'dokumen_sokongan_path',
         'status',
         'catatan_admin',
-
+        'burial_plot_id',
         'verification_category',
         'verified_by',
         'verified_at',
@@ -58,4 +58,10 @@ class DeathReport extends Model
     {
         return $this->belongsTo(User::class, 'verified_by');
     }
+
+    public function burialPlot()
+    {
+        return $this->belongsTo(BurialPlot::class, 'burial_plot_id');
+    }
+
 }

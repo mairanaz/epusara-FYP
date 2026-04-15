@@ -45,13 +45,26 @@ class DeathReportController extends Controller
             }
         }
 
-        $dependents = Dependent::where('user_id', $familyUserId)->get();
+        $activeReportStatuses = ['menunggu_semakan', 'disahkan', 'perlukan_dokumen_tambahan'];
+
+        $reportedNoKps = DeathReport::whereIn('status', $activeReportStatuses)
+            ->pluck('no_kp_si_mati')
+            ->filter()
+            ->toArray();
+
+        $dependents = Dependent::where('user_id', $familyUserId)
+            ->whereNotIn('no_kp', $reportedNoKps)
+            ->get();
 
         $memberOptions = collect();
         $dependentOptions = collect();
 
-        // Tanggungan login boleh lapor ahli utama
-        if (!$isMainMember) {
+        // Tanggungan login boleh lapor ahli utama jika belum pernah dilaporkan
+        if (
+            !$isMainMember &&
+            $mainProfile &&
+            !in_array($mainProfile->no_kp, $reportedNoKps)
+        ) {
             $memberOptions->push([
                 'id' => $mainProfile->id,
                 'name' => $mainProfile->nama,
@@ -60,8 +73,8 @@ class DeathReportController extends Controller
             ]);
         }
 
-        // Ahli utama login -> semua tanggungan keluar
-        // Tanggungan login -> semua tanggungan lain keluar kecuali dirinya sendiri
+        // Ahli utama login -> semua tanggungan yang belum dilaporkan
+        // Tanggungan login -> semua tanggungan lain kecuali dirinya sendiri
         $dependentOptions = $dependents
             ->filter(function ($dependent) use ($isMainMember, $loggedDependent) {
                 if ($isMainMember) {
@@ -231,7 +244,7 @@ class DeathReportController extends Controller
         }
 
         $existingReport = DeathReport::where('no_kp_si_mati', $data['no_kp_si_mati'])
-            ->whereIn('status', ['menunggu_semakan', 'disemak', 'approved'])
+            ->whereIn('status', ['menunggu_semakan', 'disahkan', 'perlukan_dokumen_tambahan'])
             ->first();
 
         if ($existingReport) {

@@ -294,6 +294,8 @@
                             <th>Pelapor</th>
                             <th>Status</th>
                             <th>Tarikh Laporan</th>
+                            <th>No Lot Kubur</th>
+                            <th>Tarikh Kebumi</th>
                             <th class="text-center" width="10%">Tindakan</th>
                         </tr>
                     </thead>
@@ -350,6 +352,9 @@
                                         {{ optional($report->created_at)->format('h:i A') ?: '-' }}
                                     </div>
                                 </td>
+
+                                <td>{{ $report->burial_lot_no ?: '-' }}</td>
+                                <td>{{ $report->burial_date ? \Carbon\Carbon::parse($report->burial_date)->format('d/m/Y') : '-' }}</td>
 
                                 <td class="text-center">
                                     <a href="{{ route('admin.death-reports.show', $report) }}"

@@ -497,21 +497,35 @@
 
                         <div id="burialFields">
                             <div class="mb-3">
-                                <label class="form-label">No Lot Kubur</label>
-                                <input type="text"
-                                       name="burial_lot_no"
-                                       id="burial_lot_no"
-                                       class="form-control"
-                                       value="{{ old('burial_lot_no', $deathReport->burial_lot_no) }}">
+                                <label class="form-label fw-semibold">No Lot Kubur</label>
+                                <div class="input-group">
+                                    <input type="text"
+                                        name="burial_lot_no"
+                                        id="burial_lot_no"
+                                        class="form-control"
+                                        value="{{ old('burial_lot_no', $deathReport->burial_lot_no) }}"
+                                        readonly>
+
+                                    @if(!$deathReport->burial_lot_no)
+                                        <a href="{{ route('admin.death-reports.select-plot', $deathReport->id) }}"
+                                        class="btn btn-outline-primary">
+                                            Pilih Lot
+                                        </a>
+                                    @else
+                                        <button type="button" class="btn btn-success" disabled>
+                                            Lot Telah Dipilih
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Tarikh Kebumi</label>
-                                <input type="date"
-                                       name="burial_date"
-                                       id="burial_date"
-                                       class="form-control"
-                                       value="{{ old('burial_date', optional($deathReport->burial_date)->format('Y-m-d')) }}">
+                            <div class="col-md-4">
+                                <div class="border rounded p-3 h-100">
+                                    <div class="text-muted fs-12 mb-1">Tarikh Kebumi</div>
+                                    <div class="fw-semibold">
+                                        {{ optional($deathReport->burial_date)->format('d/m/Y') ?? '-' }}
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -544,16 +558,22 @@
         const burialDate = document.getElementById('burial_date');
 
         function toggleBurialFields() {
+            if (!statusField || !burialFields) return;
+
             if (statusField.value === 'disahkan') {
                 burialFields.style.display = 'block';
-                burialLot.disabled = false;
-                burialDate.disabled = false;
+                if (burialLot) burialLot.disabled = false;
+                if (burialDate) burialDate.disabled = false;
             } else {
                 burialFields.style.display = 'none';
-                burialLot.disabled = true;
-                burialDate.disabled = true;
-                burialLot.value = '';
-                burialDate.value = '';
+                if (burialLot) {
+                    burialLot.disabled = true;
+                    burialLot.value = '';
+                }
+                if (burialDate) {
+                    burialDate.disabled = true;
+                    burialDate.value = '';
+                }
             }
         }
 

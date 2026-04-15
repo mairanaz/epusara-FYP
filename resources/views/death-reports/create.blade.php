@@ -21,7 +21,7 @@
                 timer: 2500,
                 timerProgressBar: true
             }).then(() => {
-                window.location.href = "{{ route('home') }}";
+                window.location.href = "{{ route('user.dashboard') }}";
             });
         </script>
     @endif
