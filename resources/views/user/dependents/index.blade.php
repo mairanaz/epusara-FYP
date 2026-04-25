@@ -9,7 +9,7 @@
             <p class="text-muted mb-0">Urus maklumat tanggungan ahli khairat dengan lebih teratur</p>
         </div>
         <div>
-            <a href="{{ route('user.dependents.create') }}" class="btn btn-primary">
+            <a href="{{ route('user.dependents.create') }}" class="btn btn-info">
                 <i class="ri-user-add-line me-1"></i> Tambah Tanggungan
             </a>
         </div>
@@ -164,7 +164,7 @@
                                         </div>
                                         <h6 class="mb-1">Tiada tanggungan direkodkan</h6>
                                         <p class="text-muted mb-3">Sila tambah tanggungan baharu untuk dipaparkan di sini.</p>
-                                        <a href="{{ route('user.dependents.create') }}" class="btn btn-primary btn-sm">
+                                        <a href="{{ route('user.dependents.create') }}" class="btn btn-info btn-sm">
                                             <i class="ri-user-add-line me-1"></i> Tambah Tanggungan
                                         </a>
                                     </div>

@@ -67,15 +67,15 @@
                         <a href="{{ route('dependent.main-member') }}"
                            class="side-menu__item {{ request()->routeIs('dependent.main-member') ? 'active' : '' }}">
                             <i class="bx bx-id-card side-menu__icon"></i>
-                            <span class="side-menu__label">Ahli Utama</span>
+                            <span class="side-menu__label">Maklumat keluarga</span>
                         </a>
                     </li>
 
                     <li class="slide">
-                        <a href="{{ route('death-report.create') }}"
-                           class="side-menu__item {{ request()->routeIs('death-report.create') ? 'active' : '' }}">
+                        <a href="{{ route('death-reports.index') }}"
+                        class="side-menu__item {{ request()->routeIs('death-reports.index') || request()->routeIs('death-reports.show') ? 'active' : '' }}">
                             <i class="bx bx-file side-menu__icon"></i>
-                            <span class="side-menu__label">Lapor Kematian</span>
+                            <span class="side-menu__label">Laporan Kematian</span>
                         </a>
                     </li>
 
@@ -117,10 +117,10 @@
                     @endif
 
                     <li class="slide">
-                        <a href="{{ route('death-report.create') }}"
-                           class="side-menu__item {{ request()->routeIs('death-report.create') ? 'active' : '' }}">
+                        <a href="{{ route('death-reports.index') }}"
+                        class="side-menu__item {{ request()->routeIs('death-reports.index') || request()->routeIs('death-reports.show') ? 'active' : '' }}">
                             <i class="bx bx-file side-menu__icon"></i>
-                            <span class="side-menu__label">Lapor Kematian</span>
+                            <span class="side-menu__label">Laporan Kematian</span>
                         </a>
                     </li>
                 @endif

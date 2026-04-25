@@ -21,12 +21,6 @@ Route::get('/', function () {
 Route::get('/whatsapp/lapor-kematian', [WhatsAppController::class, 'laporKematian'])
     ->name('whatsapp.lapor-kematian');
 
-Route::get('/lapor-kematian', [DeathReportController::class, 'create'])
-    ->name('death-report.create');
-
-Route::post('/lapor-kematian', [DeathReportController::class, 'store'])
-    ->name('death-report.store');
-
 Route::get('/dashboard', function () {
     $user = auth()->user();
 
@@ -120,6 +114,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/user/payments', [PaymentController::class, 'store'])->name('user.payments.store');
     Route::get('/user/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('user.payments.receipt');
 
+    //USER DEATH-REPORTS
+    Route::get('/lapor-kematian', [DeathReportController::class, 'create'])->name('death-reports.create');
+    Route::post('/lapor-kematian', [DeathReportController::class, 'store'])->name('death-reports.store');
+    Route::get('/status-laporan-kematian', [DeathReportController::class, 'index'])->name('death-reports.index');
+    Route::get('/status-laporan-kematian/{deathReport}', [DeathReportController::class, 'show'])->name('death-reports.show');
+
     // Breeze profile setting
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -143,6 +143,7 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
         Route::get('/members/{member}', [AdminKhairatMemberController::class, 'show'])->name('members.show');
         Route::get('/dependents', [AdminKhairatDependentController::class, 'index'])->name('dependents.index');
         Route::get('/fees', [AdminKhairatFeeController::class, 'index'])->name('fees.index');
+        Route::get('/fees/{payment}', [AdminKhairatFeeController::class, 'show'])->name('fees.show');
     });
 
     /*

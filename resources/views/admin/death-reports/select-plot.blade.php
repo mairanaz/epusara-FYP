@@ -97,7 +97,7 @@
                                 Pilih satu lot yang masih kosong untuk jenazah ini. Lot yang telah digunakan tidak boleh dipilih.
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100 rounded-pill py-2 mt-3 save-btn">
+                            <button type="submit" class="btn btn-info w-100 rounded-pill py-2 mt-3 save-btn">
                                 <i class="bx bx-save me-1"></i> Simpan Lot Kubur
                             </button>
                         </div>
@@ -142,7 +142,7 @@
             </div>
 
             <div class="col-xl-9">
-                <div class="card border-0 shadow-sm cemetery-card map-shell">
+                <div class="card border-0 shadow-sm cemetery-card map-shell" id="mapFullContainer">
 
                     <div class="card-header map-toolbar border-0 bg-white">
                         <div class="toolbar-left">
@@ -167,6 +167,11 @@
                                 <button type="button" class="tool-btn reset-btn" id="resetZoomBtn" title="Reset">
                                     <i class="bx bx-reset"></i>
                                     <span>Reset</span>
+                                </button>
+
+                                <button type="button" class="tool-btn fullview-btn" id="fullViewBtn" title="Full View">
+                                    <i class="bx bx-fullscreen"></i>
+                                    <span>Full View</span>
                                 </button>
                             </div>
                         </div>
@@ -1070,6 +1075,74 @@
             flex-direction: column;
         }
     }
+
+    .fullview-btn {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.map-shell.fullscreen-mode {
+    position: fixed !important;
+    inset: 0;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 9999;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff;
+}
+
+.map-shell.fullscreen-mode .card-header {
+    padding: 16px 20px;
+}
+
+.map-shell.fullscreen-mode .card-body {
+    height: calc(100vh - 88px);
+    display: flex;
+    flex-direction: column;
+    padding: 16px 20px 20px;
+}
+
+.map-shell.fullscreen-mode .map-frame {
+    flex: 1;
+    height: 100%;
+    padding: 10px;
+    border-radius: 18px;
+}
+
+.map-shell.fullscreen-mode .map-scroll-area {
+    height: 100% !important;
+    min-height: 100% !important;
+}
+
+body.map-fullscreen-active {
+    overflow: hidden;
+}
+
+body.map-fullscreen-active .page-header-breadcrumb,
+body.map-fullscreen-active .col-xl-3 {
+    display: none !important;
+}
+
+body.map-fullscreen-active .col-xl-9 {
+    width: 100% !important;
+}
+
+body.map-fullscreen-active .container-fluid.cemetery-page {
+    max-width: 100% !important;
+    padding: 0 !important;
+}
+
+@media (max-width: 767px) {
+    .map-shell.fullscreen-mode .toolbar-right {
+        justify-content: flex-start;
+    }
+
+    .map-shell.fullscreen-mode .toolbar-controls {
+        flex-wrap: wrap;
+        border-radius: 18px;
+    }
+}
 </style>
 
 <script>
@@ -1097,14 +1170,79 @@
         const zoomOutBtn = document.getElementById('zoomOutBtn');
         const resetZoomBtn = document.getElementById('resetZoomBtn');
         const zoomLevel = document.getElementById('zoomLevel');
+        const fullViewBtn = document.getElementById('fullViewBtn');
+        const mapFullContainer = document.getElementById('mapFullContainer');
 
         let scale = 1;
         const minScale = 0.65;
         const maxScale = 2.2;
         const step = 0.15;
 
+        function setFullViewButtonLabel() {
+            if (!fullViewBtn || !mapFullContainer) return;
+
+            const isFullscreen =
+                document.fullscreenElement === mapFullContainer ||
+                mapFullContainer.classList.contains('fullscreen-mode');
+
+            fullViewBtn.innerHTML = isFullscreen
+                ? '<i class="bx bx-exit-fullscreen"></i><span>Tutup</span>'
+                : '<i class="bx bx-fullscreen"></i><span>Full View</span>';
+        }
+
+        async function enterFullView() {
+            if (!mapFullContainer) return;
+
+            mapFullContainer.classList.add('fullscreen-mode');
+            document.body.classList.add('map-fullscreen-active');
+
+            try {
+                if (mapFullContainer.requestFullscreen) {
+                    await mapFullContainer.requestFullscreen();
+                }
+            } catch (error) {
+                console.log('Fullscreen API tidak disokong, guna CSS fullscreen sahaja.');
+            }
+
+            setFullViewButtonLabel();
+        }
+
+        async function exitFullView() {
+            if (!mapFullContainer) return;
+
+            try {
+                if (document.fullscreenElement) {
+                    await document.exitFullscreen();
+                }
+            } catch (error) {
+                console.log('Keluar fullscreen biasa.');
+            }
+
+            mapFullContainer.classList.remove('fullscreen-mode');
+            document.body.classList.remove('map-fullscreen-active');
+
+            setFullViewButtonLabel();
+        }
+
+        async function toggleFullView() {
+            if (!mapFullContainer) return;
+
+            const isFullscreen =
+                document.fullscreenElement === mapFullContainer ||
+                mapFullContainer.classList.contains('fullscreen-mode');
+
+            if (isFullscreen) {
+                await exitFullView();
+            } else {
+                await enterFullView();
+            }
+        }
+
         function applyZoom() {
+            if (!cemeteryMap) return;
+
             cemeteryMap.style.transform = `scale(${scale})`;
+
             if (zoomLevel) {
                 zoomLevel.textContent = `${Math.round(scale * 100)}%`;
             }
@@ -1123,16 +1261,44 @@
         function resetZoom() {
             scale = 1;
             applyZoom();
-            mapViewer.scrollTo({
-                top: 0,
-                left: 0,
-                behavior: 'smooth'
-            });
+
+            if (mapViewer) {
+                mapViewer.scrollTo({
+                    top: 0,
+                    left: 0,
+                    behavior: 'smooth'
+                });
+            }
         }
 
         if (zoomInBtn) zoomInBtn.addEventListener('click', zoomIn);
         if (zoomOutBtn) zoomOutBtn.addEventListener('click', zoomOut);
         if (resetZoomBtn) resetZoomBtn.addEventListener('click', resetZoom);
+        if (fullViewBtn) fullViewBtn.addEventListener('click', toggleFullView);
+
+        document.addEventListener('fullscreenchange', function () {
+            if (!mapFullContainer) return;
+
+            const active = document.fullscreenElement === mapFullContainer;
+
+            if (active) {
+                mapFullContainer.classList.add('fullscreen-mode');
+                document.body.classList.add('map-fullscreen-active');
+            } else {
+                mapFullContainer.classList.remove('fullscreen-mode');
+                document.body.classList.remove('map-fullscreen-active');
+            }
+
+            setFullViewButtonLabel();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && mapFullContainer) {
+                mapFullContainer.classList.remove('fullscreen-mode');
+                document.body.classList.remove('map-fullscreen-active');
+                setFullViewButtonLabel();
+            }
+        });
 
         let isDown = false;
         let startX = 0;
@@ -1140,49 +1306,52 @@
         let scrollLeft = 0;
         let scrollTop = 0;
 
-        mapViewer.addEventListener('mousedown', function (e) {
-            isDown = true;
-            mapViewer.classList.add('dragging');
-            startX = e.pageX - mapViewer.offsetLeft;
-            startY = e.pageY - mapViewer.offsetTop;
-            scrollLeft = mapViewer.scrollLeft;
-            scrollTop = mapViewer.scrollTop;
-        });
+        if (mapViewer) {
+            mapViewer.addEventListener('mousedown', function (e) {
+                isDown = true;
+                mapViewer.classList.add('dragging');
+                startX = e.pageX - mapViewer.offsetLeft;
+                startY = e.pageY - mapViewer.offsetTop;
+                scrollLeft = mapViewer.scrollLeft;
+                scrollTop = mapViewer.scrollTop;
+            });
 
-        mapViewer.addEventListener('mouseleave', function () {
-            isDown = false;
-            mapViewer.classList.remove('dragging');
-        });
+            mapViewer.addEventListener('mouseleave', function () {
+                isDown = false;
+                mapViewer.classList.remove('dragging');
+            });
 
-        mapViewer.addEventListener('mouseup', function () {
-            isDown = false;
-            mapViewer.classList.remove('dragging');
-        });
+            mapViewer.addEventListener('mouseup', function () {
+                isDown = false;
+                mapViewer.classList.remove('dragging');
+            });
 
-        mapViewer.addEventListener('mousemove', function (e) {
-            if (!isDown) return;
-            e.preventDefault();
+            mapViewer.addEventListener('mousemove', function (e) {
+                if (!isDown) return;
+                e.preventDefault();
 
-            const x = e.pageX - mapViewer.offsetLeft;
-            const y = e.pageY - mapViewer.offsetTop;
-            const walkX = (x - startX) * 1.2;
-            const walkY = (y - startY) * 1.2;
+                const x = e.pageX - mapViewer.offsetLeft;
+                const y = e.pageY - mapViewer.offsetTop;
+                const walkX = (x - startX) * 1.2;
+                const walkY = (y - startY) * 1.2;
 
-            mapViewer.scrollLeft = scrollLeft - walkX;
-            mapViewer.scrollTop = scrollTop - walkY;
-        });
+                mapViewer.scrollLeft = scrollLeft - walkX;
+                mapViewer.scrollTop = scrollTop - walkY;
+            });
 
-        mapViewer.addEventListener('wheel', function (e) {
-            if (!e.ctrlKey) return;
-            e.preventDefault();
+            mapViewer.addEventListener('wheel', function (e) {
+                if (!e.ctrlKey) return;
+                e.preventDefault();
 
-            if (e.deltaY < 0) {
-                zoomIn();
-            } else {
-                zoomOut();
-            }
-        }, { passive: false });
+                if (e.deltaY < 0) {
+                    zoomIn();
+                } else {
+                    zoomOut();
+                }
+            }, { passive: false });
+        }
 
+        setFullViewButtonLabel();
         applyZoom();
     });
 </script>

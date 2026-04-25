@@ -5,8 +5,8 @@
     .application-page .hero-card {
         border: 0;
         border-radius: 20px;
-        background: linear-gradient(135deg, #f59e0b, #f97316);
-        color: #fff;
+        background: linear-gradient(135deg, #ffd7b8, #ffe7d1);
+        color: #1f2937;
         overflow: hidden;
         position: relative;
     }
@@ -18,7 +18,7 @@
         right: -35px;
         width: 170px;
         height: 170px;
-        background: rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.22);
         border-radius: 50%;
     }
 
@@ -85,8 +85,8 @@
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        color: #fff;
-        background: linear-gradient(135deg, #f59e0b, #fb923c);
+        color: #9a5b2e;
+        background: linear-gradient(135deg, #ffe6d2, #ffd5b5);
         flex-shrink: 0;
     }
 
@@ -133,6 +133,10 @@
         text-align: center;
         color: #6b7280;
     }
+
+    .application-page .hero-subtitle {
+        color: #7a6b5f;
+    }
 </style>
 
 @php
@@ -166,9 +170,9 @@
         <div class="card-body p-4 p-lg-5">
             <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
                 <div>
-                    <p class="mb-2 small text-white-50">Panel Pentadbir</p>
+                    <p class="mb-2 small hero-subtitle">Panel Pentadbir</p>
                     <h1 class="fw-bold mb-2">Senarai Permohonan Keahlian</h1>
-                    <p class="mb-0 text-white-50">
+                    <p class="mb-0 hero-subtitle">
                         Semak, tapis dan urus permohonan keahlian pengguna dengan lebih teratur.
                     </p>
                 </div>
@@ -267,10 +271,10 @@
 
                     <div class="col-lg-2">
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary w-100">
+                            <button type="submit" class="btn btn-info btn-wave w-100">
                                 <i class="bx bx-search me-1"></i> Cari
                             </button>
-                            <a href="{{ route('admin.profile.index') }}" class="btn btn-outline-secondary w-100">
+                            <a href="{{ route('admin.profile.index') }}" class="btn btn-outline-info w-100">
                                 Reset
                             </a>
                         </div>
@@ -349,7 +353,7 @@
 
                                 <td class="text-center">
                                     <a href="{{ route('admin.profile.show', $profile) }}"
-                                       class="btn btn-sm btn-outline-primary action-btn"
+                                       class="btn btn-sm btn-outline-info action-btn"
                                        title="Lihat">
                                         <i class="bx bx-show"></i>
                                     </a>

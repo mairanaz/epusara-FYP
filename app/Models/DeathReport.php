@@ -19,7 +19,15 @@ class DeathReport extends Model
         'alamat_terakhir',
         'tarikh_meninggal',
         'umur',
+        'sebab_kematian',
         'no_permit_kebumi',
+        'lokasi_mandi_jenazah',
+        'pengurusan_jenazah_oleh',
+        'lokasi_pengkebumian',
+        'nama_tanah_perkuburan',
+        'alamat_tanah_perkuburan',
+        'negeri_tanah_perkuburan',
+        'catatan_pengurusan',
         'nama_pelapor',
         'no_kp_pelapor',
         'no_tel_pelapor',
@@ -63,5 +71,4 @@ class DeathReport extends Model
     {
         return $this->belongsTo(BurialPlot::class, 'burial_plot_id');
     }
-
 }

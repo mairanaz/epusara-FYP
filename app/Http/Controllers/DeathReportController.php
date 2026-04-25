@@ -124,7 +124,22 @@ class DeathReportController extends Controller
 
             'alamat_terakhir' => ['required', 'string'],
             'tarikh_meninggal' => ['required', 'date', 'before_or_equal:today'],
+            'sebab_kematian' => ['required', 'string', 'max:255'],
+            'sebab_kematian_lain' => ['nullable', 'required_if:sebab_kematian,Lain-lain', 'string', 'max:255'],
             'no_permit_kebumi' => ['nullable', 'string', 'max:255'],
+
+            'lokasi_mandi_jenazah' => ['required', 'string', 'max:255'],
+            'pengurusan_jenazah_oleh' => ['required', 'string', 'max:255'],
+            'lokasi_pengkebumian' => ['required', 'in:rtb,luar_rtb'],
+            'nama_tanah_perkuburan' => ['nullable', 'string', 'max:255', 'required_if:lokasi_pengkebumian,luar_rtb'],
+            'alamat_tanah_perkuburan' => ['nullable', 'string', 'required_if:lokasi_pengkebumian,luar_rtb'],
+            'negeri_tanah_perkuburan' => [
+                'nullable',
+                'string',
+                'required_if:lokasi_pengkebumian,luar_rtb',
+                'in:Johor,Kedah,Kelantan,Melaka,Negeri Sembilan,Pahang,Perak,Perlis,Pulau Pinang,Sabah,Sarawak,Selangor,Terengganu,W.P. Kuala Lumpur,W.P. Labuan,W.P. Putrajaya'
+            ],
+            'catatan_pengurusan' => ['nullable', 'string'],
 
             'nama_pelapor' => ['required', 'string', 'max:255'],
             'no_kp_pelapor' => ['required', 'string', 'max:255'],
@@ -134,8 +149,28 @@ class DeathReportController extends Controller
             'sijil_mati' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
             'permit_kebumi' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
             'dokumen_sokongan' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+        ], [
+            'alamat_terakhir.required' => 'Sila nyatakan tempat kematian.',
+            'tarikh_meninggal.required' => 'Sila pilih tarikh meninggal.',
+            'tarikh_meninggal.before_or_equal' => 'Tarikh meninggal tidak boleh melebihi hari ini.',
+            'sebab_kematian.required' => 'Sila pilih sebab kematian.',
+            'sebab_kematian_lain.required_if' => 'Sila nyatakan sebab kematian jika memilih lain-lain.',
+            'lokasi_mandi_jenazah.required' => 'Sila pilih lokasi mandikan jenazah.',
+            'pengurusan_jenazah_oleh.required' => 'Sila pilih siapa yang menguruskan jenazah.',
+            'lokasi_pengkebumian.required' => 'Sila pilih lokasi pengkebumian.',
+            'lokasi_pengkebumian.in' => 'Lokasi pengkebumian yang dipilih tidak sah.',
+            'nama_tanah_perkuburan.required_if' => 'Sila nyatakan nama tanah perkuburan jika pengkebumian di luar kawasan.',
+            'alamat_tanah_perkuburan.required_if' => 'Sila nyatakan alamat penuh tempat pengkebumian jika pengkebumian di luar kawasan.',
+            'negeri_tanah_perkuburan.required_if' => 'Sila pilih negeri tempat pengkebumian jika pengkebumian di luar kawasan.',
+            'negeri_tanah_perkuburan.in' => 'Negeri tempat pengkebumian yang dipilih tidak sah.',
         ]);
 
+         if (($validated['lokasi_pengkebumian'] ?? null) === 'rtb') {
+                $validated['nama_tanah_perkuburan'] = null;
+                $validated['alamat_tanah_perkuburan'] = null;
+                $validated['negeri_tanah_perkuburan'] = null;
+            }
+            
         $authUser = auth()->user();
 
         $isMainMember = !empty($authUser->linked_profile_id);
@@ -172,6 +207,12 @@ class DeathReportController extends Controller
             }
         }
 
+        $sebabKematian = $validated['sebab_kematian'];
+
+        if ($validated['sebab_kematian'] === 'Lain-lain') {
+                 $sebabKematian = $validated['sebab_kematian_lain'];
+            }
+
         $data = [
             'deceased_type' => $validated['deceased_type'],
             'user_id' => null,
@@ -179,10 +220,19 @@ class DeathReportController extends Controller
             'nama_si_mati' => null,
             'no_kp_si_mati' => null,
             'jantina' => null,
-            'alamat_terakhir' => $validated['alamat_terakhir'],
+            'alamat_terakhir' => $validated['alamat_terakhir'], // guna sebagai Tempat Kematian
             'tarikh_meninggal' => $validated['tarikh_meninggal'],
             'umur' => null,
+            'sebab_kematian' => $sebabKematian,
             'no_permit_kebumi' => $validated['no_permit_kebumi'] ?? null,
+
+            'lokasi_mandi_jenazah' => $validated['lokasi_mandi_jenazah'],
+            'pengurusan_jenazah_oleh' => $validated['pengurusan_jenazah_oleh'],
+            'lokasi_pengkebumian' => $validated['lokasi_pengkebumian'],
+            'nama_tanah_perkuburan' => $validated['nama_tanah_perkuburan'] ?? null,
+            'alamat_tanah_perkuburan' => $validated['alamat_tanah_perkuburan'] ?? null,
+            'negeri_tanah_perkuburan' => $validated['negeri_tanah_perkuburan'] ?? null,
+            'catatan_pengurusan' => $validated['catatan_pengurusan'] ?? null,
 
             'nama_pelapor' => $validated['nama_pelapor'],
             'no_kp_pelapor' => $validated['no_kp_pelapor'],
@@ -193,7 +243,6 @@ class DeathReportController extends Controller
         ];
 
         if ($validated['deceased_type'] === 'member') {
-            // Ahli utama tak boleh lapor dirinya sendiri
             if ($isMainMember) {
                 return back()->withErrors([
                     'deceased_type' => 'Ahli utama tidak boleh membuat laporan kematian untuk dirinya sendiri.'
@@ -216,7 +265,6 @@ class DeathReportController extends Controller
             $dependentQuery = Dependent::where('user_id', $familyUserId)
                 ->where('id', $validated['deceased_id']);
 
-            // Tanggungan login tak boleh lapor dirinya sendiri
             if (!$isMainMember && $loggedDependent) {
                 $dependentQuery->where('id', '!=', $loggedDependent->id);
             }
@@ -267,7 +315,7 @@ class DeathReportController extends Controller
 
         DeathReport::create($data);
 
-        return redirect()->route('death-report.create')
+        return redirect()->route('death-reports.index')
             ->with('success', 'Laporan kematian berjaya dihantar dan sedang menunggu semakan pentadbir.');
     }
 
@@ -311,4 +359,73 @@ class DeathReportController extends Controller
             return null;
         }
     }
+
+    public function index()
+    {
+        $authUser = auth()->user();
+
+        $isMainMember = !empty($authUser->linked_profile_id);
+        $familyUserId = null;
+
+        if ($isMainMember) {
+            $mainProfile = UserProfile::find($authUser->linked_profile_id);
+
+            if (!$mainProfile) {
+                return redirect()->route('home')
+                    ->with('error', 'Profil ahli utama tidak dijumpai.');
+            }
+
+            $familyUserId = $mainProfile->user_id;
+        } else {
+            $loggedDependent = Dependent::find($authUser->linked_dependent_id);
+
+            if (!$loggedDependent) {
+                return redirect()->route('home')
+                    ->with('error', 'Rekod tanggungan tidak dijumpai.');
+            }
+
+            $familyUserId = $loggedDependent->user_id;
+        }
+
+        $reports = DeathReport::where('user_id', $familyUserId)
+            ->latest()
+            ->get();
+
+        return view('death-reports.index', compact('reports'));
+    }
+
+    public function show(DeathReport $deathReport)
+    {
+        $authUser = auth()->user();
+
+        $isMainMember = !empty($authUser->linked_profile_id);
+        $familyUserId = null;
+
+        if ($isMainMember) {
+            $mainProfile = UserProfile::find($authUser->linked_profile_id);
+
+            if (!$mainProfile) {
+                return redirect()->route('home')
+                    ->with('error', 'Profil ahli utama tidak dijumpai.');
+            }
+
+            $familyUserId = $mainProfile->user_id;
+        } else {
+            $loggedDependent = Dependent::find($authUser->linked_dependent_id);
+
+            if (!$loggedDependent) {
+                return redirect()->route('home')
+                    ->with('error', 'Rekod tanggungan tidak dijumpai.');
+            }
+
+            $familyUserId = $loggedDependent->user_id;
+        }
+
+        if ($deathReport->user_id !== $familyUserId) {
+            abort(403);
+        }
+
+        return view('death-reports.show', compact('deathReport'));
+    }
+
 }

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Payment;
 use App\Models\UserProfile;
 use App\Models\Dependent;
+use App\Models\DeathReport;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
@@ -572,7 +573,88 @@ class UserProfileController extends Controller
 
         $principalProfile = UserProfile::where('user_id', $dependent->user_id)->first();
 
-        return view('dependent.main-member', compact('dependent', 'principalProfile'));
+        $otherDependents = Dependent::where('user_id', $dependent->user_id)
+            ->orderBy('name')
+            ->get();
+
+        $familyMembers = collect();
+
+        if ($principalProfile) {
+            $familyMembers->push([
+                'nama' => $principalProfile->nama,
+                'no_kp' => $principalProfile->no_kp,
+                'peranan' => 'ahli_utama',
+                'pertalian' => 'Ahli Utama',
+                'status_kehidupan' => $principalProfile->status_kehidupan ?? 'aktif',
+                'tarikh_kematian' => $principalProfile->tarikh_kematian ?? null,
+            ]);
+        }
+
+        foreach ($otherDependents as $item) {
+            $familyMembers->push([
+                'nama' => $item->name,
+                'no_kp' => $item->no_kp,
+                'peranan' => 'tanggungan',
+                'pertalian' => ucwords($item->pertalian ?? '-'),
+                'status_kehidupan' => $item->status_kehidupan ?? 'aktif',
+                'tarikh_kematian' => $item->tarikh_kematian ?? null,
+            ]);
+        }
+
+        $dependentIds = $otherDependents->pluck('id')->toArray();
+
+        $familyDeathReports = DeathReport::query()
+            ->with('burialPlot')
+            ->where(function ($query) use ($dependent, $dependentIds) {
+                $query->where('user_id', $dependent->user_id);
+
+                if (!empty($dependentIds)) {
+                    $query->orWhereIn('dependent_id', $dependentIds);
+                }
+            })
+            ->latest()
+            ->get()
+            ->map(function ($report) use ($principalProfile, $otherDependents) {
+                $hubunganKeluarga = '-';
+
+                if ($report->dependent_id) {
+                    $matchedDependent = $otherDependents->firstWhere('id', $report->dependent_id);
+                    if ($matchedDependent) {
+                        $hubunganKeluarga = ucwords($matchedDependent->pertalian ?? '-');
+                    }
+                } elseif ($principalProfile && $report->user_id == $principalProfile->user_id) {
+                    $hubunganKeluarga = 'Ahli Utama';
+                }
+
+                $report->hubungan_keluarga = $hubunganKeluarga;
+
+                if (empty($report->burial_lot_no) && !empty($report->burialPlot)) {
+                    $lot = [];
+
+                    if (!empty($report->burialPlot->zone)) {
+                        $lot[] = 'Zon ' . $report->burialPlot->zone;
+                    }
+
+                    if (!empty($report->burialPlot->row_number)) {
+                        $lot[] = 'Baris ' . $report->burialPlot->row_number;
+                    }
+
+                    if (!empty($report->burialPlot->lot_number)) {
+                        $lot[] = 'Lot ' . $report->burialPlot->lot_number;
+                    }
+
+                    $report->burial_lot_no = !empty($lot) ? implode(', ', $lot) : '-';
+                }
+
+                return $report;
+            });
+
+        return view('dependent.main-member', compact(
+            'dependent',
+            'principalProfile',
+            'familyMembers',
+            'familyDeathReports'
+        ));
     }
 
     protected function isDependentFlow(): bool

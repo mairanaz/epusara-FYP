@@ -5,8 +5,8 @@
     .dependent-page .hero-card {
         border: 0;
         border-radius: 20px;
-        background: linear-gradient(135deg, #198754, #36b37e);
-        color: #fff;
+        background: linear-gradient(135deg, #a8e1d7, #c9efe8);
+        color: #1f2937;
         overflow: hidden;
         position: relative;
     }
@@ -18,7 +18,7 @@
         right: -35px;
         width: 170px;
         height: 170px;
-        background: rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.20);
         border-radius: 50%;
     }
 
@@ -95,8 +95,8 @@
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        color: #fff;
-        background: linear-gradient(135deg, #198754, #53c68c);
+        color: #2f6f63;
+        background: linear-gradient(135deg, #d8f4ee, #bfe9e0);
         flex-shrink: 0;
     }
 
@@ -124,12 +124,53 @@
         text-align: center;
         color: #6b7280;
     }
+
+    .dependent-page .pagination {
+    margin-bottom: 0;
+}
+
+.dependent-page .pagination svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.dependent-page .pagination .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    padding: 0 12px;
+}
+
+.dependent-page .pagination .page-item.active .page-link {
+    color: #fff;
+}
+
+.dependent-page nav svg,
+.dependent-page .pagination svg {
+    width: 14px !important;
+    height: 14px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+}
+
+.dependent-page .card-footer {
+    padding-top: 12px !important;
+}
+
+.dependent-page .pagination {
+    margin-bottom: 0;
+}
+
+.dependent-page .hero-subtitle {
+    color: #5f6f82;
+}
+
 </style>
 
 @php
-    $anakCount = $dependents->getCollection()->where('pertalian', 'anak')->count();
-    $pasanganCount = $dependents->getCollection()->where('pertalian', 'pasangan')->count();
-    $lainCount = $dependents->getCollection()->whereNotIn('pertalian', ['anak', 'pasangan'])->count();
 
     $currentKeyword = request('search');
     $currentRelation = request('pertalian');
@@ -137,7 +178,7 @@
     function relationBadgeClass($pertalian) {
         return match(strtolower($pertalian ?? '')) {
             'anak' => 'bg-primary-subtle text-primary border',
-            'pasangan' => 'bg-success-subtle text-success border',
+            'isteri', 'suami' => 'bg-success-subtle text-success border',
             default => 'bg-secondary-subtle text-secondary border',
         };
     }
@@ -158,9 +199,9 @@
         <div class="card-body p-4 p-lg-5">
             <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
                 <div>
-                    <p class="mb-2 small text-white-50">Panel Pentadbir</p>
+                    <p class="mb-2 small hero-subtitle">Panel Pentadbir</p>
                     <h1 class="fw-bold mb-2">Senarai Tanggungan</h1>
-                    <p class="mb-0 text-white-50">
+                    <p class="mb-0 hero-subtitle">
                         Paparan semua tanggungan yang didaftarkan oleh ahli khairat dalam sistem.
                     </p>
                 </div>
@@ -175,7 +216,7 @@
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
                         <div class="summary-label">Jumlah Tanggungan</div>
-                        <div class="summary-value">{{ $dependents->total() }}</div>
+                        <div class="summary-value">{{ $totalCount }}</div>
                     </div>
                     <div class="stats-icon bg-success-subtle text-success">
                         <i class="bx bx-group"></i>
@@ -262,10 +303,10 @@
 
                     <div class="col-lg-3">
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-success w-100">
+                            <button type="submit" class="btn btn-info btn-wave w-100">
                                 <i class="bx bx-search me-1"></i> Cari
                             </button>
-                            <a href="{{ url()->current() }}" class="btn btn-outline-secondary w-100">
+                            <a href="{{ url()->current() }}" class="btn btn-outline-info w-100">
                                 Reset
                             </a>
                         </div>

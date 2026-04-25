@@ -7,24 +7,25 @@
     .application-show-page .action-card {
         border: 0;
         border-radius: 18px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
     }
 
     .application-show-page .hero-card {
-        background: linear-gradient(135deg, #f59e0b, #f97316);
-        color: #fff;
+        background: linear-gradient(135deg, #eaf3ff, #dbeafe);
+        color: #1e3a5f;
         overflow: hidden;
         position: relative;
+        border: 1px solid #d6e6fb;
     }
 
     .application-show-page .hero-card::after {
         content: "";
         position: absolute;
-        top: -35px;
-        right: -35px;
-        width: 170px;
-        height: 170px;
-        background: rgba(255,255,255,0.10);
+        top: -45px;
+        right: -45px;
+        width: 140px;
+        height: 140px;
+        background: rgba(255, 255, 255, 0.18);
         border-radius: 50%;
     }
 
@@ -37,8 +38,9 @@
         justify-content: center;
         font-size: 24px;
         font-weight: 800;
-        color: #fff;
-        background: rgba(255,255,255,0.18);
+        color: #2563eb;
+        background: rgba(255,255,255,0.75);
+        border: 1px solid rgba(37, 99, 235, 0.12);
     }
 
     .application-show-page .status-badge {
@@ -51,7 +53,7 @@
     .application-show-page .section-title {
         font-size: 15px;
         font-weight: 700;
-        color: #111827;
+        color: #0f172a;
         margin-bottom: 16px;
     }
 
@@ -61,13 +63,13 @@
 
     .application-show-page .info-label {
         font-size: 12px;
-        color: #6b7280;
+        color: #64748b;
         margin-bottom: 4px;
     }
 
     .application-show-page .info-value {
         font-weight: 600;
-        color: #111827;
+        color: #0f172a;
         word-break: break-word;
     }
 
@@ -78,25 +80,28 @@
     .application-show-page textarea.form-control,
     .application-show-page .form-control {
         border-radius: 12px;
+        border: 1px solid #dbe5f0;
     }
 
     .application-show-page .mini-stat {
-        background: #fff7ed;
+        background: rgba(255, 255, 255, 0.78);
+        border: 1px solid #d9e8fb;
         border-radius: 14px;
         padding: 14px 16px;
         height: 100%;
+        backdrop-filter: blur(2px);
     }
 
     .application-show-page .mini-stat .label {
         font-size: 12px;
-        color: #6b7280;
+        color: #64748b;
         margin-bottom: 4px;
     }
 
     .application-show-page .mini-stat .value {
         font-size: 15px;
         font-weight: 700;
-        color: #111827;
+        color: #0f172a;
     }
 </style>
 
@@ -115,17 +120,33 @@
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success border-0 shadow-sm rounded-4 alert-dismissible fade show" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berjaya',
+                text: @json(session('success')),
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#7c3aed',
+                width: '500px'
+            });
+        });
+    </script>
     @endif
 
     @if(session('error'))
-        <div class="alert alert-danger border-0 shadow-sm rounded-4 alert-dismissible fade show" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            Swal.fire({
+                icon: 'error',
+                title: 'Ralat',
+                text: @json(session('error')),
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#dc2626',
+                width: '500px'
+            });
+        });
+    </script>
     @endif
 
     @if ($errors->any())
@@ -147,16 +168,21 @@
                         {{ strtoupper(substr($profile->nama ?? 'A', 0, 1)) }}
                     </div>
                     <div>
-                        <div class="small text-white-50 mb-1">Permohonan Keahlian</div>
+                        <div class="small text-muted mb-1">Permohonan Keahlian</div>
                         <h2 class="fw-bold mb-1">{{ $profile->nama }}</h2>
-                        <div class="text-white-50 mb-3">{{ $profile->no_kp }}</div>
+                        <div class="text-muted mb-3">{{ $profile->no_kp }}</div>
 
                         @if($profile->status_permohonan)
-                            <span class="badge bg-{{ $statusClass }} status-badge">
+                            <span class="badge status-badge
+                                @if($profile->status_permohonan === 'pending') bg-warning-subtle text-warning
+                                @elseif($profile->status_permohonan === 'approved') bg-success-subtle text-success
+                                @elseif($profile->status_permohonan === 'rejected') bg-danger-subtle text-danger
+                                @else bg-secondary-subtle text-secondary
+                                @endif">
                                 Status: {{ ucfirst(str_replace('_', ' ', $profile->status_permohonan)) }}
                             </span>
                         @else
-                            <span class="badge bg-secondary status-badge">
+                            <span class="badge bg-secondary-subtle text-secondary status-badge">
                                 Status: Belum Dihantar
                             </span>
                         @endif
@@ -403,9 +429,9 @@
                 <div class="section-title mb-3">Tindakan Pentadbir</div>
 
                 <div class="d-flex flex-wrap gap-2 mb-4">
-                    <form action="{{ route('admin.profile.approve', $profile) }}" method="POST" onsubmit="return confirm('Adakah anda pasti mahu meluluskan permohonan ini?');">
+                    <form id="approveForm" action="{{ route('admin.profile.approve', $profile) }}" method="POST">
                         @csrf
-                        <button type="submit" class="btn btn-success">
+                        <button type="button" id="approveBtn" class="btn btn-success">
                             <i class="bx bx-check-circle me-1"></i> Luluskan Permohonan
                         </button>
                     </form>
@@ -413,20 +439,21 @@
 
                 <hr>
 
-                <form action="{{ route('admin.profile.reject', $profile) }}" method="POST" onsubmit="return confirm('Adakah anda pasti mahu menolak permohonan ini?');">
+                <form id="rejectForm" action="{{ route('admin.profile.reject', $profile) }}" method="POST">
                     @csrf
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Sebab / Catatan Penolakan</label>
                         <textarea name="catatan_permohonan"
-                                  rows="4"
-                                  class="form-control @error('catatan_permohonan') is-invalid @enderror"
-                                  placeholder="Sila nyatakan sebab permohonan ditolak">{{ old('catatan_permohonan') }}</textarea>
+                                id="catatan_permohonan"
+                                rows="4"
+                                class="form-control @error('catatan_permohonan') is-invalid @enderror"
+                                placeholder="Sila nyatakan sebab permohonan ditolak">{{ old('catatan_permohonan') }}</textarea>
                         @error('catatan_permohonan')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <button type="submit" class="btn btn-danger">
+                    <button type="button" id="rejectBtn" class="btn btn-danger">
                         <i class="bx bx-x-circle me-1"></i> Tolak Permohonan
                     </button>
                 </form>
@@ -435,4 +462,69 @@
     @endif
 
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    const approveBtn = document.getElementById('approveBtn');
+    const approveForm = document.getElementById('approveForm');
+
+    if (approveBtn && approveForm) {
+        approveBtn.addEventListener('click', function () {
+            Swal.fire({
+                title: 'Adakah anda pasti?',
+                text: 'Permohonan ini akan diluluskan.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, luluskan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                confirmButtonColor: '#16a34a',
+                cancelButtonColor: '#6b7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    approveForm.submit();
+                }
+            });
+        });
+    }
+
+    const rejectBtn = document.getElementById('rejectBtn');
+    const rejectForm = document.getElementById('rejectForm');
+    const rejectNote = document.getElementById('catatan_permohonan');
+
+    if (rejectBtn && rejectForm) {
+        rejectBtn.addEventListener('click', function () {
+            if (!rejectNote || !rejectNote.value.trim()) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Catatan diperlukan',
+                    text: 'Sila isi sebab atau catatan penolakan terlebih dahulu.',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#7c3aed'
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: 'Adakah anda pasti?',
+                text: 'Permohonan ini akan ditolak.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, tolak',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#6b7280'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    rejectForm.submit();
+                }
+            });
+        });
+    }
+
+});
+</script>
+
 @endsection

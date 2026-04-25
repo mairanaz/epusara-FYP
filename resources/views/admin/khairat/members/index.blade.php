@@ -5,8 +5,8 @@
     .member-page .hero-card {
         border: 0;
         border-radius: 20px;
-        background: linear-gradient(135deg, #0d6efd, #3c8ce7);
-        color: #fff;
+        background: linear-gradient(135deg, #8ec5ff, #b8dcff);
+        color: #1f2937;
         overflow: hidden;
         position: relative;
     }
@@ -18,7 +18,7 @@
         right: -30px;
         width: 160px;
         height: 160px;
-        background: rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.22);
         border-radius: 50%;
     }
 
@@ -93,15 +93,15 @@
     }
 
     .member-page .member-avatar {
-        width: 42px;
+         width: 42px;
         height: 42px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        color: #fff;
-        background: linear-gradient(135deg, #0d6efd, #5aa9ff);
+        color: #2b4c7e;
+        background: linear-gradient(135deg, #d9ecff, #bfe0ff);
         flex-shrink: 0;
     }
 
@@ -132,6 +132,10 @@
         align-items: center;
         justify-content: center;
         border-radius: 10px;
+    }
+
+    .member-page .hero-subtitle {
+        color: #5b6b7f;
     }
 </style>
 
@@ -171,9 +175,9 @@
         <div class="card-body p-4 p-lg-5">
             <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
                 <div>
-                    <p class="mb-2 small text-white-50">Panel Pentadbir</p>
+                    <p class="mb-2 small hero-subtitle">Panel Pentadbir</p>
                     <h1 class="fw-bold mb-2">Senarai Ahli Khairat</h1>
-                    <p class="mb-0 text-white-50">
+                    <p class="mb-0 hero-subtitle">
                         Paparan semua ahli yang telah berdaftar dalam sistem eKhairat.
                     </p>
                 </div>
@@ -272,10 +276,10 @@
 
                     <div class="col-lg-3">
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary w-100">
+                            <button type="submit" class="btn btn-info btn-wave w-100">
                                 <i class="bx bx-search me-1"></i> Cari
                             </button>
-                            <a href="{{ url()->current() }}" class="btn btn-outline-secondary w-100">
+                            <a href="{{ url()->current() }}" class="btn btn-outline-info w-100">
                                 Reset
                             </a>
                         </div>
@@ -321,14 +325,9 @@
                                 </td>
 
                                 <td>
-                                    <div class="d-flex align-items-start gap-3">
+                                    <div class="d-flex align-items-center gap-3">
                                         <div class="member-avatar">{{ $initial }}</div>
-                                        <div>
-                                            <div class="member-name">{{ $member->nama }}</div>
-                                            <div class="member-meta">
-                                                Ahli khairat berdaftar
-                                            </div>
-                                        </div>
+                                        <div class="member-name">{{ $member->nama }}</div>    
                                     </div>
                                 </td>
 
@@ -357,7 +356,7 @@
 
                                 <td class="text-center">
                                     <a href="{{ route('admin.khairat.members.show', $member) }}"
-                                       class="btn btn-sm btn-outline-primary action-btn"
+                                       class="btn btn-sm btn-outline-info action-btn"
                                        title="Lihat">
                                         <i class="bx bx-show"></i>
                                     </a>

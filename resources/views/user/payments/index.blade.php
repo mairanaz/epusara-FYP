@@ -41,6 +41,11 @@
     $monthlyFee = 10.00;
     $yearlyFee = 100.00;
 
+    $firstPaymentTotal = $plan === 'monthly'
+        ? ($registrationFee + $monthlyFee)
+        : ($registrationFee + $yearlyFee);
+
+
     $currentYear = $summary['current_year'] ?? now()->year;
     $registrationPaid = (float) ($summary['registration_paid'] ?? 0);
 
@@ -151,19 +156,26 @@
 
     $monthlySchedule = [];
     if ($plan === 'monthly') {
-        foreach ($schedulePeriods as $item) {
+        foreach ($schedulePeriods as $index => $item) {
             $status = 'unpaid';
+            $amount = (float) $item['amount'];
 
             if (in_array($item['period'], $paidPeriods)) {
                 $status = 'paid';
             } elseif ($item['period'] === $nextMonthlyPeriod && $monthlyRemainingCount > 0) {
                 $status = 'current';
+
+                // Jika bayaran pertama masih belum dibuat,
+                // bulan semasa perlu campur yuran pendaftaran
+                if ($registrationPaid <= 0 && $monthlyPaidCount <= 0) {
+                    $amount += $registrationFee;
+                }
             }
 
             $monthlySchedule[] = [
                 'period' => $item['period'],
                 'label' => $item['label'],
-                'amount' => $item['amount'],
+                'amount' => $amount,
                 'status' => $status,
             ];
         }
@@ -229,6 +241,7 @@
             <div class="card-header">
                 <h6 class="card-title mb-0">Maklumat Pelan Yuran</h6>
             </div>
+            
             <div class="card-body">
                 <div class="table-responsive">
                     <table class="table table-bordered align-middle mb-3">
@@ -248,6 +261,10 @@
                                     <td>RM{{ number_format($monthlyFee, 2) }}</td>
                                 </tr>
                                 <tr>
+                                    <th class="bg-light">Jumlah Bayaran Pertama</th>
+                                    <td class="fw-bold text-primary">RM{{ number_format($firstPaymentTotal, 2) }}</td>
+                                </tr>
+                                <tr>
                                     <th class="bg-light">Bayaran Seterusnya</th>
                                     <td>{{ $nextPaymentLabel }}</td>
                                 </tr>
@@ -257,6 +274,10 @@
                                 <tr>
                                     <th class="bg-light">Yuran Tahunan</th>
                                     <td>RM{{ number_format($yearlyFee, 2) }}</td>
+                                </tr>
+                                <tr>
+                                    <th class="bg-light">Jumlah Bayaran Pertama</th>
+                                    <td class="fw-bold text-primary">RM{{ number_format($firstPaymentTotal, 2) }}</td>
                                 </tr>
                                 <tr>
                                     <th class="bg-light">Tahun Semasa</th>
@@ -275,20 +296,19 @@
                         </tbody>
                     </table>
                 </div>
-
-                <div class="alert alert-light border mb-0 py-2">
-                    <div class="fw-semibold mb-2">Penerangan</div>
-                    <ul class="mb-0 ps-3">
-                        <li>Yuran pendaftaran dikenakan sekali sahaja.</li>
-                        @if($plan === 'monthly')
-                            <li>Pelan bulanan dibayar RM10.00 setiap bulan.</li>
-                            <li>Bayaran pertama termasuk yuran pendaftaran dan yuran bulan semasa.</li>
-                        @else
-                            <li>Pelan tahunan dibayar RM100.00 untuk tahun semasa.</li>
-                            <li>Bayaran pertama termasuk yuran pendaftaran dan yuran tahunan.</li>
-                        @endif
-                    </ul>
-                </div>
+                    <div class="alert alert-light border mb-0 py-2">
+                        <div class="fw-semibold mb-2">Penerangan</div>
+                        <ul class="mb-0 ps-3">
+                            <li>Yuran pendaftaran dikenakan sekali sahaja.</li>
+                            @if($plan === 'monthly')
+                                <li>Pelan bulanan dibayar RM{{ number_format($monthlyFee, 2) }} setiap bulan.</li>
+                                <li>Bayaran pertama ialah <strong>RM{{ number_format($firstPaymentTotal, 2) }}</strong> iaitu yuran pendaftaran dan yuran bulan semasa.</li>
+                            @else
+                                <li>Pelan tahunan dibayar RM{{ number_format($yearlyFee, 2) }} untuk tahun semasa.</li>
+                                <li>Bayaran pertama ialah <strong>RM{{ number_format($firstPaymentTotal, 2) }}</strong> iaitu yuran pendaftaran dan yuran tahunan.</li>
+                            @endif
+                        </ul>
+                    </div>
             </div>
         </div>
     </div>
@@ -299,10 +319,30 @@
                 <h6 class="card-title mb-0">Tindakan</h6>
             </div>
             <div class="card-body">
-                @if(($summary['amount_due_now'] ?? 0) > 0)
+                @if($paymentStatus === 'Belum Mula Bayar')
+                    <div class="alert alert-warning mb-3 py-2">
+                        <i class="bx bx-error-circle me-1"></i>
+                        Anda belum membuat bayaran pertama.
+                        Jumlah perlu dibayar sekarang ialah
+                        <strong>RM{{ number_format($currentPaymentAmount, 2) }}</strong>.
+                    </div>
+
                     <a href="{{ route('user.payments.create') }}" class="btn btn-primary">
                         <i class="bx bx-credit-card me-1"></i> Buat Bayaran
                     </a>
+
+                @elseif($totalOutstanding > 0)
+                    <div class="alert alert-info mb-3 py-2">
+                        <i class="bx bx-time-five me-1"></i>
+                        Bayaran anda masih belum lengkap.
+                        Baki semasa ialah
+                        <strong>RM{{ number_format($totalOutstanding, 2) }}</strong>.
+                    </div>
+
+                    <a href="{{ route('user.payments.create') }}" class="btn btn-primary">
+                        <i class="bx bx-credit-card me-1"></i> Teruskan Bayaran
+                    </a>
+
                 @else
                     <div class="alert alert-success mb-0 py-2">
                         <i class="bx bx-check-circle me-1"></i> Bayaran telah selesai.
@@ -339,7 +379,7 @@
         <div class="card custom-card border-0 shadow-sm mb-3">
             <div class="card-header">
             <h6 class="card-title mb-0">
-                Jadual Bayaran Bulanan
+                Jadual Kitaran Bayaran Semasa
                 <span class="text-muted fw-normal">
                     (Kitaran {{ \Carbon\Carbon::createFromFormat('Y-m', $membershipStartPeriod)->translatedFormat('F Y') }} - 
                     {{ \Carbon\Carbon::createFromFormat('Y-m', $membershipStartPeriod)->addMonths(11)->translatedFormat('F Y') }})
@@ -375,11 +415,11 @@
                         </tr>
                     @endforeach
                 </tbody>
-                <tfoot>
+               <tfoot>
                     <tr>
-                        <th colspan="2" class="text-end">Baki Bayaran Kitaran Semasa</th>
-                        <th colspan="2" class="text-start text-primary">
-                            RM{{ number_format($monthlyOutstanding, 2) }}
+                        <th colspan="2" class="text-end">Jumlah Baki Keseluruhan</th>
+                        <th colspan="2" class="text-start text-danger fw-bold">
+                            RM{{ number_format($totalOutstanding, 2) }}
                         </th>
                     </tr>
                 </tfoot>

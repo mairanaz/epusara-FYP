@@ -7,10 +7,6 @@
         </a>
     </div>
 
-    @php
-        $khairatOpen = request()->routeIs('admin.khairat.*') || request()->routeIs('admin.profile.*');
-    @endphp
-
     <div class="main-sidebar" id="sidebar-scroll">
         <nav class="main-menu-container nav nav-pills flex-column">
             <ul class="main-menu">
@@ -29,14 +25,14 @@
 
                 <li class="slide">
                     <a href="javascript:void(0);"
-                       class="side-menu__item khairat-toggle {{ $khairatOpen ? 'active' : '' }}"
+                       class="side-menu__item khairat-toggle"
                        id="khairatToggle">
                         <i class="bx bx-folder side-menu__icon"></i>
                         <span class="side-menu__label">Pengurusan Khairat</span>
-                        <i class="bx bx-chevron-right side-menu__angle ms-auto {{ $khairatOpen ? 'rotate' : '' }}" id="khairatArrow"></i>
+                        <i class="bx bx-chevron-right side-menu__angle ms-auto" id="khairatArrow"></i>
                     </a>
 
-                    <ul class="khairat-submenu {{ $khairatOpen ? 'show' : '' }}" id="khairatSubmenu">
+                    <ul class="khairat-submenu" id="khairatSubmenu">
                         <li>
                             <a href="{{ route('admin.khairat.members.index') }}"
                                class="submenu-link {{ request()->routeIs('admin.khairat.members.*') ? 'active' : '' }}">
@@ -79,14 +75,24 @@
 
 <style>
     .khairat-submenu {
-        display: none;
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transform: translateY(-6px);
         padding-left: 0;
         margin: 8px 0 0 0;
         list-style: none;
+        will-change: max-height, opacity, transform;
+        transition:
+            max-height 0.26s cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 0.20s ease,
+            transform 0.20s ease;
     }
 
     .khairat-submenu.show {
-        display: block;
+        max-height: 500px;
+        opacity: 1;
+        transform: translateY(0);
     }
 
     .khairat-submenu li {
@@ -94,6 +100,7 @@
     }
 
     .submenu-link {
+        position: relative;
         display: block;
         text-decoration: none;
         color: #cfd8ff;
@@ -101,12 +108,32 @@
         font-size: 14px;
         border-radius: 8px;
         margin: 4px 10px;
-        transition: all 0.2s ease;
+        transition:
+            background-color 0.18s ease,
+            color 0.18s ease,
+            transform 0.16s ease;
+    }
+
+    .submenu-link::before {
+        content: "";
+        position: absolute;
+        left: 34px;
+        top: 50%;
+        width: 5px;
+        height: 5px;
+        border: 1px solid rgba(255,255,255,0.6);
+        border-radius: 50%;
+        transform: translateY(-50%);
+    }
+
+    .submenu-link.active::before {
+        border-color: #ffffff;
     }
 
     .submenu-link:hover {
         background-color: rgba(255,255,255,0.08);
         color: #ffffff;
+        transform: translateX(2px);
     }
 
     .submenu-link.active {
@@ -116,26 +143,61 @@
     }
 
     .side-menu__angle {
-        transition: transform 0.25s ease;
+        transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+        will-change: transform;
     }
 
     .side-menu__angle.rotate {
         transform: rotate(90deg);
     }
+
+    html[data-khairat-open="true"] #khairatSubmenu {
+        max-height: 500px;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    html[data-khairat-open="true"] #khairatArrow {
+        transform: rotate(90deg);
+    }
+
+    .khairat-toggle {
+        transition: background-color 0.18s ease, color 0.18s ease;
+    }
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const toggle = document.getElementById('khairatToggle');
-        const submenu = document.getElementById('khairatSubmenu');
-        const arrow = document.getElementById('khairatArrow');
+(function () {
+    const savedState = localStorage.getItem('khairatSubmenuOpen');
+    document.documentElement.setAttribute(
+        'data-khairat-open',
+        savedState === 'true' ? 'true' : 'false'
+    );
+})();
+</script>
 
-        if (toggle && submenu && arrow) {
-            toggle.addEventListener('click', function (e) {
-                e.preventDefault();
-                submenu.classList.toggle('show');
-                arrow.classList.toggle('rotate');
-            });
-        }
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toggle = document.getElementById('khairatToggle');
+    const submenu = document.getElementById('khairatSubmenu');
+    const arrow = document.getElementById('khairatArrow');
+
+    if (!toggle || !submenu || !arrow) return;
+
+    const applyState = (isOpen) => {
+        submenu.classList.toggle('show', isOpen);
+        arrow.classList.toggle('rotate', isOpen);
+        document.documentElement.setAttribute('data-khairat-open', isOpen ? 'true' : 'false');
+        localStorage.setItem('khairatSubmenuOpen', isOpen ? 'true' : 'false');
+    };
+
+    const savedState = localStorage.getItem('khairatSubmenuOpen') === 'true';
+    applyState(savedState);
+
+    toggle.addEventListener('click', function (e) {
+        e.preventDefault();
+        const isOpen = !submenu.classList.contains('show');
+        applyState(isOpen);
     });
+});
 </script>

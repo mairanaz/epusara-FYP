@@ -4,9 +4,9 @@
 <style>
     .fee-page .hero-card {
         border: 0;
-        border-radius: 20px;
-        background: linear-gradient(135deg, #7c3aed, #a855f7);
-        color: #fff;
+        border-radius: 22px;
+        background: linear-gradient(135deg, #d9ddff, #ecebff);
+        color: #1f2937;
         overflow: hidden;
         position: relative;
     }
@@ -18,7 +18,7 @@
         right: -35px;
         width: 170px;
         height: 170px;
-        background: rgba(255,255,255,0.10);
+        background: rgba(255,255,255,0.22);
         border-radius: 50%;
     }
 
@@ -64,7 +64,7 @@
     .fee-page .search-box .form-control,
     .fee-page .search-box .form-select {
         border-radius: 12px;
-        min-height: 46px;
+        min-height: 48px;
     }
 
     .fee-page .btn {
@@ -77,10 +77,7 @@
         font-weight: 700;
         color: #344054;
         white-space: nowrap;
-    }
-
-    .fee-page .table tbody tr {
-        transition: 0.2s ease;
+        vertical-align: middle;
     }
 
     .fee-page .table tbody tr:hover {
@@ -93,29 +90,17 @@
         margin-bottom: 2px;
     }
 
-    .fee-page .user-meta {
-        font-size: 13px;
-        color: #6b7280;
-    }
-
     .fee-page .user-avatar {
-        width: 42px;
-        height: 42px;
+        width: 44px;
+        height: 44px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        color: #fff;
-        background: linear-gradient(135deg, #7c3aed, #a855f7);
+        color: #5b63a8;
+        background: linear-gradient(135deg, #eef0ff, #d9ddff);
         flex-shrink: 0;
-    }
-
-    .fee-page .status-badge {
-        padding: 8px 12px;
-        border-radius: 999px;
-        font-size: 12px;
-        font-weight: 600;
     }
 
     .fee-page .empty-state {
@@ -123,50 +108,111 @@
         text-align: center;
         color: #6b7280;
     }
+
+    .fee-page .hero-subtitle {
+        color: #6b7280;
+    }
+
+    .fee-page .plan-pill {
+        padding: 8px 14px;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #5b63a8;
+        font-weight: 700;
+        font-size: 12px;
+        display: inline-block;
+    }
+
+    .fee-page .amount-text {
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .fee-page .status-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        font-size: 17px;
+        font-weight: 800;
+    }
+
+    .fee-page .status-paid {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .fee-page .status-pending {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .fee-page .status-failed {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+
+    .fee-page .fee-label {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 6px;
+        font-weight: 600;
+    }
+
+    .fee-page .section-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #111827;
+    }
+
+    .fee-page .show-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 8px 14px;
+        min-width: unset;
+        min-height: unset;
+        font-size: 13px;
+        font-weight: 600;
+        border-radius: 10px;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+
+    .fee-page .table td,
+    .fee-page .table th {
+        padding-top: 16px;
+        padding-bottom: 16px;
+        vertical-align: middle;
+    }
 </style>
 
 @php
-    $paidCount = $fees->getCollection()->filter(function ($fee) {
-        return in_array(strtolower($fee->status ?? ''), ['paid', 'success', 'approved']);
-    })->count();
-
-    $pendingCount = $fees->getCollection()->filter(function ($fee) {
-        return strtolower($fee->status ?? 'pending') === 'pending';
-    })->count();
-
-    $failedCount = $fees->getCollection()->filter(function ($fee) {
-        return in_array(strtolower($fee->status ?? ''), ['rejected', 'failed']);
-    })->count();
-
-    $totalAmount = $fees->getCollection()->sum(function ($fee) {
-        return (float) ($fee->amount ?? 0);
-    });
-
     $currentKeyword = request('search');
     $currentStatus = request('status');
 
-    $getStatusClass = function ($status) {
-        $status = strtolower($status ?? 'pending');
+    $getPlanLabel = function ($plan) {
+        return $plan === 'yearly' ? 'Tahunan' : 'Bulanan';
+    };
 
-        return match($status) {
-            'paid', 'success', 'approved' => 'success',
-            'pending' => 'warning text-dark',
-            'rejected', 'failed' => 'danger',
-            default => 'secondary',
+    $getStatusIconClass = function ($status) {
+        return match(strtolower($status ?? 'pending')) {
+            'paid' => 'status-paid',
+            'pending' => 'status-pending',
+            'failed' => 'status-failed',
+            default => 'status-pending',
         };
     };
 
-    $getStatusLabel = function ($status) {
-        $status = strtolower($status ?? 'pending');
-
-        return match($status) {
-            'paid' => 'Paid',
-            'success' => 'Success',
-            'approved' => 'Approved',
-            'pending' => 'Pending',
-            'rejected' => 'Rejected',
-            'failed' => 'Failed',
-            default => ucfirst($status),
+    $getStatusIcon = function ($status) {
+        return match(strtolower($status ?? 'pending')) {
+            'paid' => '✓',
+            'pending' => '•',
+            'failed' => '✕',
+            default => '•',
         };
     };
 @endphp
@@ -175,14 +221,12 @@
 
     <div class="card hero-card shadow-sm mb-4">
         <div class="card-body p-4 p-lg-5">
-            <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
-                <div>
-                    <p class="mb-2 small text-white-50">Panel Pentadbir</p>
-                    <h1 class="fw-bold mb-2">Senarai Yuran</h1>
-                    <p class="mb-0 text-white-50">
-                        Paparan semua rekod bayaran yuran ahli dalam sistem eKhairat.
-                    </p>
-                </div>
+            <div>
+                <p class="mb-2 small hero-subtitle">Panel Pentadbir</p>
+                <h1 class="fw-bold mb-2">Senarai Yuran</h1>
+                <p class="mb-0 hero-subtitle">
+                    Paparan ringkas pembayaran ahli yang lebih mudah disemak oleh pentadbir.
+                </p>
             </div>
         </div>
     </div>
@@ -192,11 +236,11 @@
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Jumlah Rekod</div>
-                        <div class="summary-value">{{ $fees->total() }}</div>
+                        <div class="summary-label">Jumlah Ahli</div>
+                        <div class="summary-value">{{ $totalCount }}</div>
                     </div>
                     <div class="stats-icon bg-primary-subtle text-primary">
-                        <i class="bx bx-receipt"></i>
+                        <i class="bx bx-group"></i>
                     </div>
                 </div>
             </div>
@@ -206,7 +250,7 @@
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Bayaran Berjaya</div>
+                        <div class="summary-label">Lengkap</div>
                         <div class="summary-value">{{ $paidCount }}</div>
                     </div>
                     <div class="stats-icon bg-success-subtle text-success">
@@ -220,7 +264,7 @@
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Pending</div>
+                        <div class="summary-label">Belum Lengkap</div>
                         <div class="summary-value">{{ $pendingCount }}</div>
                     </div>
                     <div class="stats-icon bg-warning-subtle text-warning">
@@ -235,7 +279,7 @@
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
                         <div class="summary-label">Jumlah Bayaran</div>
-                        <div class="summary-value">RM {{ number_format($totalAmount, 0) }}</div>
+                        <div class="summary-value">RM {{ number_format($totalAmount, 2) }}</div>
                     </div>
                     <div class="stats-icon bg-info-subtle text-info">
                         <i class="bx bx-wallet"></i>
@@ -248,8 +292,8 @@
     <div class="card filter-card mb-4">
         <div class="card-body p-4">
             <div class="mb-3">
-                <h5 class="mb-1 fw-bold">Carian Rekod Yuran</h5>
-                <p class="text-muted mb-0">Cari berdasarkan nama pengguna, pelan atau jenis bayaran.</p>
+                <h5 class="mb-1 fw-bold">Carian Ahli</h5>
+                <p class="text-muted mb-0">Cari berdasarkan nama ahli, pelan atau status pembayaran.</p>
             </div>
 
             <form action="" method="GET" class="search-box">
@@ -260,7 +304,7 @@
                             type="text"
                             name="search"
                             class="form-control"
-                            placeholder="Contoh: Ali / bulanan / pendaftaran"
+                            placeholder="Contoh: Ali / bulanan / tahunan"
                             value="{{ $currentKeyword }}"
                         >
                     </div>
@@ -269,19 +313,18 @@
                         <label class="form-label fw-semibold">Status</label>
                         <select name="status" class="form-select">
                             <option value="">Semua Status</option>
-                            <option value="paid" {{ $currentStatus == 'paid' ? 'selected' : '' }}>Paid</option>
-                            <option value="pending" {{ $currentStatus == 'pending' ? 'selected' : '' }}>Pending</option>
-                            <option value="rejected" {{ $currentStatus == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                            <option value="failed" {{ $currentStatus == 'failed' ? 'selected' : '' }}>Failed</option>
+                            <option value="paid" {{ $currentStatus == 'paid' ? 'selected' : '' }}>Lengkap</option>
+                            <option value="pending" {{ $currentStatus == 'pending' ? 'selected' : '' }}>Belum Lengkap</option>
+                            <option value="failed" {{ $currentStatus == 'failed' ? 'selected' : '' }}>Gagal</option>
                         </select>
                     </div>
 
                     <div class="col-lg-2">
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary w-100">
+                            <button type="submit" class="btn btn-info w-100">
                                 <i class="bx bx-search me-1"></i> Cari
                             </button>
-                            <a href="{{ url()->current() }}" class="btn btn-outline-secondary w-100">
+                            <a href="{{ route('admin.khairat.fees.index') }}" class="btn btn-outline-info w-100">
                                 Reset
                             </a>
                         </div>
@@ -296,7 +339,7 @@
             <div class="px-4 pt-4 pb-2">
                 <h5 class="mb-1 fw-bold">Rekod Bayaran Yuran</h5>
                 <p class="text-muted mb-0">
-                    Paparan semasa: <span class="fw-semibold">{{ $fees->count() }}</span> rekod
+                    Paparan semasa: <span class="fw-semibold">{{ $groupedFees->count() }}</span> ahli
                 </p>
             </div>
 
@@ -305,68 +348,65 @@
                     <thead>
                         <tr>
                             <th width="6%">#</th>
-                            <th>Nama User</th>
+                            <th>Nama Ahli</th>
                             <th>Pelan</th>
-                            <th>Jenis Bayaran</th>
-                            <th>Jumlah</th>
-                            <th>Status</th>
-                            <th>Tarikh Bayaran</th>
+                            <th>Pendaftaran</th>
+                            <th>Yuran</th>
+                            <th>Jumlah Dibayar</th>
+                            <th>Tarikh Pembayaran</th>
+                            <th width="12%">Tindakan</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($fees as $index => $fee)
+                        @forelse($groupedFees as $index => $fee)
                             @php
-                                $statusClass = $getStatusClass($fee->status);
-                                $statusLabel = $getStatusLabel($fee->status);
-                                $initial = strtoupper(substr($fee->user->name ?? 'U', 0, 1));
+                                $initial = strtoupper(substr($fee->user_name ?? 'U', 0, 1));
                             @endphp
 
                             <tr>
-                                <td class="fw-semibold text-muted">
-                                    {{ $fees->firstItem() + $index }}
-                                </td>
+                                <td class="fw-semibold text-muted">{{ $index + 1 }}</td>
 
                                 <td>
-                                    <div class="d-flex align-items-start gap-3">
+                                    <div class="d-flex align-items-center gap-3">
                                         <div class="user-avatar">{{ $initial }}</div>
-                                        <div>
-                                            <div class="user-name">{{ $fee->user->name ?? '-' }}</div>
-                                            <div class="user-meta">Rekod bayaran ahli</div>
-                                        </div>
+                                        <div class="user-name">{{ $fee->user_name }}</div>
                                     </div>
                                 </td>
 
                                 <td>
-                                    @if($fee->payment_plan)
-                                        <span class="badge bg-primary-subtle text-primary border status-badge">
-                                            {{ ucfirst($fee->payment_plan) }}
-                                        </span>
-                                    @else
-                                        <span class="text-muted">-</span>
-                                    @endif
+                                    <span class="plan-pill">{{ $getPlanLabel($fee->plan) }}</span>
                                 </td>
 
-                                <td class="fw-semibold">
-                                    {{ ucfirst(str_replace('_', ' ', $fee->payment_type ?? '-')) }}
-                                </td>
-
-                                <td class="fw-semibold">
-                                    RM {{ number_format($fee->amount ?? 0, 2) }}
-                                </td>
-
-                                <td>
-                                    <span class="badge bg-{{ $statusClass }} status-badge">
-                                        {{ $statusLabel }}
+                                <td class="text-center">
+                                    <span class="status-icon {{ $getStatusIconClass($fee->registration_status) }}">
+                                        {{ $getStatusIcon($fee->registration_status) }}
                                     </span>
                                 </td>
 
                                 <td>
-                                    {{ $fee->paid_at ? \Carbon\Carbon::parse($fee->paid_at)->format('d/m/Y') : '-' }}
+                                    <div class="fee-label">{{ $fee->fee_label }}</div>
+                                    <span class="status-icon {{ $getStatusIconClass($fee->fee_status) }}">
+                                        {{ $getStatusIcon($fee->fee_status) }}
+                                    </span>
+                                </td>
+
+                                <td class="amount-text">
+                                    RM {{ number_format($fee->total_paid_amount ?? 0, 2) }}
+                                </td>
+
+                                <td>
+                                    {{ $fee->latest_paid_at ? \Carbon\Carbon::parse($fee->latest_paid_at)->format('d/m/Y') : '-' }}
+                                </td>
+
+                                <td>
+                                    <a href="{{ route('admin.khairat.fees.show', $fee->user_id) }}" class="btn btn-info btn-sm show-btn">
+                                        <i class="bx bx-show me-1"></i> Show
+                                    </a>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7">
+                                <td colspan="8">
                                     <div class="empty-state">
                                         <i class="bx bx-folder-open fs-1 mb-2 d-block"></i>
                                         Tiada rekod yuran dijumpai.
@@ -378,12 +418,6 @@
                 </table>
             </div>
         </div>
-
-        @if($fees->hasPages())
-            <div class="card-footer bg-white border-0 pt-0 pb-4 px-4">
-                {{ $fees->withQueryString()->links() }}
-            </div>
-        @endif
     </div>
 
 </div>

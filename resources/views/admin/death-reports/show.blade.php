@@ -7,7 +7,6 @@
         $statusMap = [
             'menunggu_semakan' => ['label' => 'Menunggu Semakan', 'class' => 'warning'],
             'disahkan' => ['label' => 'Disahkan', 'class' => 'success'],
-            'perlukan_dokumen_tambahan' => ['label' => 'Perlukan Dokumen Tambahan', 'class' => 'info'],
             'ditolak' => ['label' => 'Ditolak', 'class' => 'danger'],
         ];
 
@@ -50,7 +49,7 @@
         } elseif ($matchedDependent) {
             $recordType = [
                 'label' => 'Tanggungan Berdaftar',
-                'class' => 'primary',
+                'class' => 'info',
                 'summary' => 'Padanan rekod tanggungan dijumpai dalam sistem.',
             ];
         }
@@ -225,9 +224,81 @@
                             <div class="fw-semibold">{{ optional($deathReport->tarikh_meninggal)->format('d/m/Y') ?: '-' }}</div>
                         </div>
 
+                        <div class="col-md-6">
+                            <label class="text-muted fs-12 d-block mb-1">Sebab Kematian</label>
+                            <div class="fw-semibold">{{ $deathReport->sebab_kematian ?: '-' }}</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="text-muted fs-12 d-block mb-1">No Permit Kebumi</label>
+                            <div class="fw-semibold">{{ $deathReport->no_permit_kebumi ?: '-' }}</div>
+                        </div>
+
                         <div class="col-12">
-                            <label class="text-muted fs-12 d-block mb-1">Alamat Terakhir</label>
+                            <label class="text-muted fs-12 d-block mb-1">Tempat Kematian</label>
                             <div class="fw-semibold">{{ $deathReport->alamat_terakhir ?: '-' }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {{-- pengurusan jenazah --}}
+            <div class="card custom-card mb-4 border-0 shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">Pengurusan Jenazah</h5>
+                </div>
+                <div class="card-body">
+
+                    @if(in_array($deathReport->sebab_kematian, ['Penyakit Berjangkit', 'Kes Polis / Forensik']))
+                        <div class="alert alert-warning mb-3">
+                            Kes ini diuruskan oleh pihak hospital atau pihak berkuasa.
+                        </div>
+                    @endif
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="text-muted fs-12 d-block mb-1">Lokasi Mandikan Jenazah</label>
+                            <div class="fw-semibold">{{ $deathReport->lokasi_mandi_jenazah ?: '-' }}</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="text-muted fs-12 d-block mb-1">Siapa Uruskan Jenazah</label>
+                            <div class="fw-semibold">{{ $deathReport->pengurusan_jenazah_oleh ?: '-' }}</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="text-muted fs-12 d-block mb-1">Lokasi Pengkebumian</label>
+                            <div class="fw-semibold">
+                                @if($deathReport->lokasi_pengkebumian === 'rtb')
+                                    Tanah Perkuburan RTB
+                                @elseif($deathReport->lokasi_pengkebumian === 'luar_rtb')
+                                    Luar Kawasan / Bukan RTB
+                                @else
+                                    -
+                                @endif
+                            </div>
+                        </div>
+
+                        @if($deathReport->lokasi_pengkebumian === 'luar_rtb')
+                            <div class="col-md-6">
+                                <label class="text-muted fs-12 d-block mb-1">Nama Tanah Perkuburan</label>
+                                <div class="fw-semibold">{{ $deathReport->nama_tanah_perkuburan ?: '-' }}</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="text-muted fs-12 d-block mb-1">Negeri Pengkebumian</label>
+                                <div class="fw-semibold">{{ $deathReport->negeri_tanah_perkuburan ?: '-' }}</div>
+                            </div>
+
+                            <div class="col-12">
+                                <label class="text-muted fs-12 d-block mb-1">Alamat Penuh Tempat Pengkebumian</label>
+                                <div class="fw-semibold">{{ $deathReport->alamat_tanah_perkuburan ?: '-' }}</div>
+                            </div>
+                        @endif
+
+                        <div class="col-12">
+                            <label class="text-muted fs-12 d-block mb-1">Catatan Tambahan</label>
+                            <div class="fw-semibold">{{ $deathReport->catatan_pengurusan ?: '-' }}</div>
                         </div>
                     </div>
                 </div>
@@ -246,7 +317,7 @@
                                 @if($deathReport->sijil_mati_path)
                                     <a href="{{ route('admin.death-reports.preview', [$deathReport, 'sijil_mati']) }}"
                                     target="_blank"
-                                    class="btn btn-outline-primary btn-sm">
+                                    class="btn btn-outline-info btn-sm">
                                         Preview Dokumen
                                     </a>
                                     <div class="text-muted fs-12 mt-2">Klik untuk buka dokumen</div>
@@ -262,7 +333,7 @@
                                 @if($deathReport->permit_kebumi_path)
                                     <a href="{{ route('admin.death-reports.preview', [$deathReport, 'permit_kebumi']) }}"
                                     target="_blank"
-                                    class="btn btn-outline-primary btn-sm">
+                                    class="btn btn-outline-info btn-sm">
                                         Preview Dokumen
                                     </a>
                                     <div class="text-muted fs-12 mt-2">Klik untuk buka dokumen</div>
@@ -278,7 +349,7 @@
                                 @if($deathReport->dokumen_sokongan_path)
                                     <a href="{{ route('admin.death-reports.preview', [$deathReport, 'dokumen_sokongan']) }}"
                                     target="_blank"
-                                    class="btn btn-outline-primary btn-sm">
+                                    class="btn btn-outline-info btn-sm">
                                         Preview Dokumen
                                     </a>
                                     <div class="text-muted fs-12 mt-2">Klik untuk buka dokumen</div>
@@ -367,7 +438,7 @@
                             </div>
                         </div>
                     @elseif($matchedDependent)
-                        <div class="alert alert-primary mb-3">
+                        <div class="alert alert-info mb-3">
                             <strong>Status Padanan:</strong> Rekod tanggungan dijumpai dalam sistem.
                         </div>
 
@@ -483,9 +554,7 @@
                                 <option value="disahkan" {{ old('status', $deathReport->status) == 'disahkan' ? 'selected' : '' }}>
                                     Disahkan
                                 </option>
-                                <option value="perlukan_dokumen_tambahan" {{ old('status', $deathReport->status) == 'perlukan_dokumen_tambahan' ? 'selected' : '' }}>
-                                    Perlukan Dokumen Tambahan
-                                </option>
+                                
                                 <option value="ditolak" {{ old('status', $deathReport->status) == 'ditolak' ? 'selected' : '' }}>
                                     Ditolak
                                 </option>
@@ -508,7 +577,7 @@
 
                                     @if(!$deathReport->burial_lot_no)
                                         <a href="{{ route('admin.death-reports.select-plot', $deathReport->id) }}"
-                                        class="btn btn-outline-primary">
+                                        class="btn btn-outline-info">
                                             Pilih Lot
                                         </a>
                                     @else
@@ -519,26 +588,27 @@
                                 </div>
                             </div>
 
-                            <div class="col-md-4">
-                                <div class="border rounded p-3 h-100">
-                                    <div class="text-muted fs-12 mb-1">Tarikh Kebumi</div>
-                                    <div class="fw-semibold">
-                                        {{ optional($deathReport->burial_date)->format('d/m/Y') ?? '-' }}
-                                    </div>
-                                </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-semibold">Tarikh Kebumi</label>
+                                <input type="date"
+                                    name="burial_date"
+                                    id="burial_date"
+                                    class="form-control"
+                                    value="{{ old('burial_date', optional($deathReport->burial_date)->format('Y-m-d')) }}"
+                                    readonly>
                             </div>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Catatan Pentadbir <span class="text-danger">*</span></label>
+                            <label class="form-label">Catatan Pentadbir</label>
                             <textarea name="admin_notes"
-                                      class="form-control"
-                                      rows="4"
-                                      placeholder="Masukkan catatan semakan pentadbir...">{{ old('admin_notes', $deathReport->admin_notes) }}</textarea>
+                                    class="form-control"
+                                    rows="4"
+                                    placeholder="Catatan tambahan (jika perlu)">{{ old('admin_notes', $deathReport->admin_notes) }}</textarea>
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-info">
                                 Simpan Semakan
                             </button>
                         </div>
@@ -566,14 +636,8 @@
                 if (burialDate) burialDate.disabled = false;
             } else {
                 burialFields.style.display = 'none';
-                if (burialLot) {
-                    burialLot.disabled = true;
-                    burialLot.value = '';
-                }
-                if (burialDate) {
-                    burialDate.disabled = true;
-                    burialDate.value = '';
-                }
+                if (burialLot) burialLot.disabled = true;
+                if (burialDate) burialDate.disabled = true;
             }
         }
 

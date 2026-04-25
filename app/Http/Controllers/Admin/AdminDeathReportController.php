@@ -47,12 +47,19 @@ class AdminDeathReportController extends Controller
         return view('admin.death-reports.index', compact('deathReports', 'summary'));
     }
 
-    public function show(DeathReport $deathReport)
+   public function show(DeathReport $deathReport)
     {
         $deathReport->load('verifier');
 
-        $matchedUserProfile = UserProfile::where('no_kp', $deathReport->no_kp_si_mati)->first();
-        $matchedDependent = Dependent::where('no_kp', $deathReport->no_kp_si_mati)->first();
+        $noKp = preg_replace('/\D/', '', $deathReport->no_kp_si_mati);
+
+        $matchedUserProfile = UserProfile::get()->first(function ($item) use ($noKp) {
+            return preg_replace('/\D/', '', $item->no_kp) === $noKp;
+        });
+
+        $matchedDependent = Dependent::get()->first(function ($item) use ($noKp) {
+            return preg_replace('/\D/', '', $item->no_kp) === $noKp;
+        });
 
         $principalMember = null;
 
@@ -75,13 +82,12 @@ class AdminDeathReportController extends Controller
             'status' => ['required', 'in:disahkan,perlukan_dokumen_tambahan,ditolak'],
             'burial_lot_no' => ['nullable', 'string', 'max:100', 'required_if:status,disahkan'],
             'burial_date' => ['nullable', 'date', 'required_if:status,disahkan'],
-            'admin_notes' => ['required', 'string', 'max:1000'],
+            'admin_notes' => ['nullable', 'string', 'max:1000'],
         ], [
             'verification_category.required' => 'Sila pilih kategori si mati.',
             'status.required' => 'Sila pilih status semakan.',
             'burial_lot_no.required_if' => 'No lot kubur wajib diisi apabila status disahkan.',
             'burial_date.required_if' => 'Tarikh kebumi wajib diisi apabila status disahkan.',
-            'admin_notes.required' => 'Sila isi catatan pentadbir.',
         ]);
 
         $deathReport->update([
@@ -93,33 +99,13 @@ class AdminDeathReportController extends Controller
             'burial_date' => $validated['status'] === 'disahkan'
                 ? ($validated['burial_date'] ?? null)
                 : null,
-            'admin_notes' => $validated['admin_notes'],
+            'admin_notes' => $validated['admin_notes'] ?? null,
             'verified_by' => auth()->id(),
             'verified_at' => now(),
         ]);
 
         if ($validated['status'] === 'disahkan') {
-            if ($validated['verification_category'] === 'ahli_khairat') {
-                $profile = UserProfile::where('no_kp', $deathReport->no_kp_si_mati)->first();
-
-                if ($profile) {
-                    $profile->update([
-                        'status_kehidupan' => 'meninggal',
-                        'tarikh_kematian' => $deathReport->tarikh_meninggal,
-                    ]);
-                }
-            }
-
-            if ($validated['verification_category'] === 'tanggungan') {
-                $dependent = Dependent::where('no_kp', $deathReport->no_kp_si_mati)->first();
-
-                if ($dependent) {
-                    $dependent->update([
-                        'status_kehidupan' => 'meninggal',
-                        'tarikh_kematian' => $deathReport->tarikh_meninggal,
-                    ]);
-                }
-            }
+            $this->syncDeathStatus($deathReport->fresh());
         }
 
         return redirect()
@@ -154,7 +140,7 @@ class AdminDeathReportController extends Controller
         $jantina = strtolower(trim($deathReport->jantina ?? ''));
         $umur = is_numeric($deathReport->umur) ? (int) $deathReport->umur : null;
 
-        if (!is_null($umur) && $umur < 12) {
+        if (!is_null($umur) && $umur <= 12) {
             return 'K';
         }
 
@@ -166,7 +152,7 @@ class AdminDeathReportController extends Controller
             return 'L';
         }
 
-        return 'L';
+        return null;
     }
 
     public function selectPlot(DeathReport $deathReport)
@@ -179,9 +165,15 @@ class AdminDeathReportController extends Controller
 
         $zone = $this->determineZone($deathReport);
 
+        if (!$zone) {
+            return redirect()
+                ->route('admin.death-reports.show', $deathReport)
+                ->with('error', 'Zon kubur tidak dapat ditentukan. Sila semak jantina atau umur si mati.');
+        }
+
         $plots = BurialPlot::where('zone', $zone)
             ->orderBy('row_number')
-            ->orderByDesc('lot_number')
+            ->orderBy('lot_number')
             ->get()
             ->groupBy('row_number');
 
@@ -211,13 +203,23 @@ class AdminDeathReportController extends Controller
             ->first();
 
         if (!$plot) {
-            return back()->with('error', 'Lot kubur telah dipilih atau tidak tersedia.');
+            return back()
+                ->withInput()
+                ->with('error', 'Lot kubur telah dipilih atau tidak tersedia.');
         }
 
         $zone = $this->determineZone($deathReport);
 
+        if (!$zone) {
+            return back()
+                ->withInput()
+                ->with('error', 'Zon kubur tidak dapat ditentukan. Sila semak jantina atau umur si mati.');
+        }
+
         if ($plot->zone !== $zone) {
-            return back()->with('error', 'Lot kubur tidak sepadan dengan zon si mati.');
+            return back()
+                ->withInput()
+                ->with('error', 'Lot kubur tidak sepadan dengan zon si mati.');
         }
 
         $plot->status = 'occupied';
@@ -228,14 +230,47 @@ class AdminDeathReportController extends Controller
         $deathReport->burial_plot_id = $plot->id;
         $deathReport->burial_lot_no = $plot->plot_code;
         $deathReport->burial_date = $validated['burial_date'];
+
         $deathReport->status = 'disahkan';
         $deathReport->verified_by = auth()->id();
         $deathReport->verified_at = now();
+
         $deathReport->save();
-     
+
+        $this->syncDeathStatus($deathReport->fresh());
 
         return redirect()
             ->route('admin.death-reports.show', $deathReport)
             ->with('success', 'Lot kubur berjaya dipilih dan disimpan.');
     }
+
+    private function syncDeathStatus(DeathReport $deathReport): void
+    {
+        if ($deathReport->status !== 'disahkan') {
+            return;
+        }
+
+        if ($deathReport->dependent_id) {
+            $dependent = Dependent::find($deathReport->dependent_id);
+
+            if ($dependent) {
+                $dependent->update([
+                    'status_kehidupan' => 'meninggal_dunia',
+                    'tarikh_kematian' => $deathReport->tarikh_meninggal,
+                ]);
+            }
+        }
+
+        if ($deathReport->user_id && $deathReport->deceased_type === 'member') {
+            $profile = UserProfile::where('user_id', $deathReport->user_id)->first();
+
+            if ($profile) {
+                $profile->update([
+                    'status_kehidupan' => 'meninggal_dunia',
+                    'tarikh_kematian' => $deathReport->tarikh_meninggal,
+                ]);
+            }
+        }
+    }
+
 }

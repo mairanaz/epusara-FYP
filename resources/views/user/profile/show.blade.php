@@ -121,7 +121,7 @@
         </div>
 
         <div class="btn-list mt-3 mt-md-0">
-            <a class="btn btn-primary" href="{{ route('user.profile.edit') }}">
+            <a class="btn btn-info" href="{{ route('user.profile.edit') }}">
                 Edit Maklumat
             </a>
         </div>

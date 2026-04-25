@@ -45,11 +45,17 @@
 
         $isFirstPaymentMonthly = ($summary['registration_paid'] ?? 0) <= 0 && ($summary['monthly_paid_count'] ?? 0) <= 0;
         $isFirstPaymentYearly = $registrationPaid <= 0 && $annualPaidThisYear <= 0;
+        
+        $totalOutstanding = (float) ($summary['total_outstanding'] ?? 0);
+        $currentPaymentAmount = $plan === 'monthly'
+            ? ($isFirstPaymentMonthly ? (float) ($summary['first_monthly_total'] ?? 30) : 10.00)
+            : ($isFirstPaymentYearly ? (float) ($summary['first_yearly_total'] ?? 120) : (float) ($summary['annual_balance'] ?? 0));
+
     @endphp
 
     <div class="row g-4">
         <div class="col-xl-4">
-            <div class="card custom-card h-100">
+            <div class="card custom-card">
                 <div class="card-header">
                     <h6 class="card-title mb-0">Ringkasan Pelan</h6>
                 </div>
@@ -77,6 +83,17 @@
                                 <span class="fw-semibold">RM100.00</span>
                             </div>
                         @endif
+                    </div>
+
+                    <div class="border rounded p-3 bg-light mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span class="text-muted">Perlu Dibayar Sekarang</span>
+                            <span class="fw-bold text-primary">RM{{ number_format($currentPaymentAmount, 2) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span class="text-muted">Jumlah Baki Keseluruhan</span>
+                            <span class="fw-bold text-danger">RM{{ number_format($totalOutstanding, 2) }}</span>
+                        </div>
                     </div>
 
                     <div class="alert alert-light mb-0">
@@ -299,7 +316,7 @@
                         )
                             <div class="mt-4 d-flex justify-content-end">
                                 <button type="submit" class="btn btn-primary">
-                                    <i class="bx bx-save me-1"></i> Simpan Bayaran
+                                    <i class="bx bx-save me-1"></i> Buat Bayaran
                                 </button>
                             </div>
                         @endif

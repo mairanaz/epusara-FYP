@@ -88,6 +88,118 @@
             padding-top: 1rem;
             margin-top: 1.5rem;
         }
+
+        .page-top-actions {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+    .page-back-btn {
+        background: #ffffff;
+        border: 1px solid #dbe3f0;
+        color: #334155;
+        border-radius: 12px;
+        padding: 10px 18px;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        transition: all 0.2s ease;
+    }
+
+    .page-back-btn:hover {
+        background: #f8fbff;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+
+    .bottom-action-wrap {
+        border-top: 1px solid #dee2e6;
+        padding-top: 1rem;
+        margin-top: 1.5rem;
+        padding-bottom: 2.5rem;
+    }
+
+    .form-action-buttons {
+        margin-top: 1.25rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .form-action-buttons .btn {
+        min-width: 150px;
+        height: 46px;
+        border-radius: 12px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .form-action-buttons .btn-light {
+        background: #ffffff;
+        border: 1px solid #dbe3f0;
+        color: #334155;
+    }
+
+    .form-action-buttons .btn-light:hover {
+        background: #f8fbff;
+        border-color: #cbd5e1;
+        color: #0f172a;
+    }
+
+    .form-action-buttons .btn-info {
+        background: #4db3eb;
+        border-color: #4db3eb;
+        color: #fff;
+        box-shadow: 0 8px 18px rgba(77, 179, 235, 0.22);
+    }
+
+    .form-action-buttons .btn-info:hover {
+        background: #38a7e3;
+        border-color: #38a7e3;
+        color: #fff;
+    }
+
+    @media (max-width: 576px) {
+        .page-top-actions {
+            justify-content: flex-start;
+        }
+
+        .page-back-btn {
+            width: 100%;
+            justify-content: center;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .form-action-buttons {
+            flex-direction: column;
+        }
+
+        .form-action-buttons .btn {
+            width: 100%;
+            min-width: unset;
+        }
+
+        .form-check-input {
+            border-color: #b6dff5;
+            box-shadow: none;
+        }
+
+        .form-check-input:checked {
+            background-color: #0dcaf0 !important;
+            border-color: #0dcaf0 !important;
+        }
+
+        .form-check-input:focus {
+            border-color: #0dcaf0 !important;
+            box-shadow: 0 0 0 0.15rem rgba(13, 202, 240, 0.2) !important;
+        }
+
+    }
+
     </style>
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
@@ -99,8 +211,8 @@
         </div>
 
         <div class="btn-list mt-3 mt-md-0">
-            <a href="{{ route('user.profile.show') }}" class="btn btn-light">
-                Kembali
+            <a href="{{ route('user.profile.show') }}" class="btn page-back-btn">
+                <i class="bx bx-arrow-back me-1"></i> Kembali
             </a>
         </div>
     </div>
@@ -457,11 +569,11 @@
                 @error('akuan') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
             </div>
 
-            <div class="mt-4 d-flex flex-column flex-sm-row justify-content-end gap-2">
+            <div class="form-action-buttons">
                 <a class="btn btn-light" href="{{ route('user.profile.show') }}">
                     Batal
                 </a>
-                <button class="btn btn-primary" type="submit">
+                <button class="btn btn-info" type="submit">
                     Simpan Kemaskini
                 </button>
             </div>

@@ -275,7 +275,7 @@
                             </div>
 
                             <div class="d-grid mt-3">
-                                <button class="btn btn-lg btn-primary" type="submit">Daftar Akaun</button>
+                                <button class="btn btn-lg btn-success" type="submit">Daftar Akaun</button>
                             </div>
                         </form>
 

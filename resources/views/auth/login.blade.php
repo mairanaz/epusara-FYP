@@ -255,7 +255,7 @@
                             </div>
 
                             <div class="d-grid mt-2">
-                                <button type="submit" class="btn btn-lg btn-primary">
+                                <button type="submit" class="btn btn-lg btn-success">
                                     Log Masuk
                                 </button>
                             </div>

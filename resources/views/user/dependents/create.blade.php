@@ -73,7 +73,7 @@
                     <a href="{{ route('user.dependents.index') }}" class="btn btn-light border">
                         Kembali
                     </a>
-                    <button type="submit" class="btn btn-primary">
+                    <button type="submit" class="btn btn-info">
                         Simpan Tanggungan
                     </button>
                 </div>
