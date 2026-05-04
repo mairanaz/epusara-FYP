@@ -1,6 +1,29 @@
 @extends('layouts.app')
 
 @section('content')
+
+@php
+    $zoneMapConfig = [
+        'K' => [
+            'class' => 'zone-kanak',
+            'label' => 'Zon Kanak-kanak',
+            'col' => 82,
+        ],
+        'P' => [
+            'class' => 'zone-perempuan',
+            'label' => 'Zon Perempuan',
+            'col' => 72,
+        ],
+        'L' => [
+            'class' => 'zone-lelaki',
+            'label' => 'Zon Lelaki',
+            'col' => 70,
+        ],
+    ];
+
+    $mapConfig = $zoneMapConfig[$zone] ?? $zoneMapConfig['L'];
+@endphp
+
 <div class="container-fluid cemetery-page">
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
@@ -62,7 +85,7 @@
                             <div class="info-group">
                                 <div class="info-label">Zon Dipaparkan</div>
                                 <div class="info-value">
-                                    <span class="zone-chip">Zon {{ $zone }}</span>
+                                    <span class="zone-chip">{{ $mapConfig['label'] }}</span>
                                 </div>
                             </div>
 
@@ -196,8 +219,8 @@
 
                         <div class="map-frame">
                             <div class="map-scroll-area" id="mapViewer">
-                                <div class="map-stage">
-                                    <div class="cemetery-map" id="cemeteryMap">
+                                <div class="map-stage map-stage-{{ $zone }}">
+                                    <div class="cemetery-map {{ $mapConfig['class'] }}" id="cemeteryMap">
 
                                         <div class="qiblat-panel">
                                             <div class="qiblat-label">KIBLAT</div>
@@ -258,28 +281,84 @@
                                             <div class="grave-zone-subtitle">Klik pada lot kosong untuk membuat pilihan</div>
                                         </div>
 
-                                        <div class="grave-zone">
+                                        <div class="grave-zone {{ $zone === 'L' ? 'grave-zone-lelaki' : '' }}">
                                             @foreach($plots as $row => $rowPlots)
-                                                <div class="grave-row">
-                                                    @foreach($rowPlots as $plot)
-                                                        <label class="grave-label">
-                                                            <input
-                                                                type="radio"
-                                                                name="burial_plot_id"
-                                                                value="{{ $plot->id }}"
-                                                                class="grave-radio"
-                                                                data-code="{{ $plot->plot_code }}"
-                                                                {{ $plot->status === 'occupied' ? 'disabled' : '' }}
-                                                                {{ old('burial_plot_id') == $plot->id ? 'checked' : '' }}
-                                                            >
 
-                                                            <div class="grave-item {{ $plot->status === 'occupied' ? 'occupied' : 'available' }}">
-                                                                <div class="grave-shape"></div>
-                                                                <div class="grave-code">{{ $plot->plot_code }}</div>
-                                                            </div>
-                                                        </label>
-                                                    @endforeach
-                                                </div>
+                                                @if($zone === 'L')
+                                                    @php
+                                                        $leftPlots = $rowPlots->where('lot_number', '<=', 28);
+                                                        $rightPlots = $rowPlots->where('lot_number', '>', 28);
+                                                    @endphp
+
+                                                    <div class="grave-row-lelaki">
+                                                        <div class="grave-row-side" style="grid-template-columns: repeat({{ $leftPlots->count() }}, {{ $mapConfig['col'] }}px);">
+                                                            @foreach($leftPlots as $plot)
+                                                                <label class="grave-label">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="burial_plot_id"
+                                                                        value="{{ $plot->id }}"
+                                                                        class="grave-radio"
+                                                                        data-code="{{ $plot->plot_code }}"
+                                                                        {{ $plot->status === 'occupied' ? 'disabled' : '' }}
+                                                                        {{ old('burial_plot_id') == $plot->id ? 'checked' : '' }}
+                                                                    >
+
+                                                                    <div class="grave-item {{ $plot->status === 'occupied' ? 'occupied' : 'available' }}">
+                                                                        <div class="grave-shape"></div>
+                                                                        <div class="grave-code">{{ $plot->plot_code }}</div>
+                                                                    </div>
+                                                                </label>
+                                                            @endforeach
+                                                        </div>
+
+                                                        <div class="grave-row-side" style="grid-template-columns: repeat({{ $rightPlots->count() }}, {{ $mapConfig['col'] }}px);">
+                                                            @foreach($rightPlots as $plot)
+                                                                <label class="grave-label">
+                                                                    <input
+                                                                        type="radio"
+                                                                        name="burial_plot_id"
+                                                                        value="{{ $plot->id }}"
+                                                                        class="grave-radio"
+                                                                        data-code="{{ $plot->plot_code }}"
+                                                                        {{ $plot->status === 'occupied' ? 'disabled' : '' }}
+                                                                        {{ old('burial_plot_id') == $plot->id ? 'checked' : '' }}
+                                                                    >
+
+                                                                    <div class="grave-item {{ $plot->status === 'occupied' ? 'occupied' : 'available' }}">
+                                                                        <div class="grave-shape"></div>
+                                                                        <div class="grave-code">{{ $plot->plot_code }}</div>
+                                                                    </div>
+                                                                </label>
+                                                            @endforeach
+                                                        </div>
+                                                    </div>
+
+                                                @else
+
+                                                    <div class="grave-row" style="grid-template-columns: repeat({{ $rowPlots->count() }}, {{ $mapConfig['col'] }}px);">
+                                                        @foreach($rowPlots as $plot)
+                                                            <label class="grave-label">
+                                                                <input
+                                                                    type="radio"
+                                                                    name="burial_plot_id"
+                                                                    value="{{ $plot->id }}"
+                                                                    class="grave-radio"
+                                                                    data-code="{{ $plot->plot_code }}"
+                                                                    {{ $plot->status === 'occupied' ? 'disabled' : '' }}
+                                                                    {{ old('burial_plot_id') == $plot->id ? 'checked' : '' }}
+                                                                >
+
+                                                                <div class="grave-item {{ $plot->status === 'occupied' ? 'occupied' : 'available' }}">
+                                                                    <div class="grave-shape"></div>
+                                                                    <div class="grave-code">{{ $plot->plot_code }}</div>
+                                                                </div>
+                                                            </label>
+                                                        @endforeach
+                                                    </div>
+
+                                                @endif
+
                                             @endforeach
                                         </div>
 
@@ -573,6 +652,139 @@
         margin-bottom: 16px;
     }
 
+    .map-stage-K {
+        min-width: 2100px;
+        min-height: 2000px;
+    }
+
+    .map-stage-P {
+        min-width: 2350px;
+        min-height: 2800px;
+    }
+
+    .map-stage-L {
+        min-width: 5300px;
+        min-height: 2250px;
+    }
+
+    .cemetery-map.zone-kanak {
+        width: 2000px;
+        min-height: 2000px;
+    }
+
+    .cemetery-map.zone-kanak .grave-zone {
+        left: 120px;
+    }
+
+    .cemetery-map.zone-kanak .road-right {
+        right: 120px;
+    }
+
+    .cemetery-map.zone-kanak .road-top {
+        right: 240px;
+    }
+
+    .cemetery-map.zone-kanak .road-bottom {
+        left: 0;
+        right: 240px;
+        bottom: 25px;
+        height: 44px;
+    }
+
+    .cemetery-map.zone-kanak .gazebo-card {
+        right: 210px;
+    }
+
+    .cemetery-map.zone-kanak .compass-box {
+        right: 120px;
+        top: 35px;
+    }
+
+    .cemetery-map.zone-kanak .cluster-bottom-right {
+        display: none;
+    }
+
+    .cemetery-map.zone-kanak .cluster-top-right {
+        right: 35px;
+        top: 130px;
+    }
+
+    .cemetery-map.zone-perempuan {
+        width: 2550px;
+        min-height: 2700px;
+    }
+
+    .cemetery-map.zone-lelaki {
+        width: 5200px;
+        min-height: 2150px;
+    }
+
+    .cemetery-map.zone-lelaki .gazebo-card {
+        display: none;
+    }
+
+    .cemetery-map.zone-lelaki .cluster-top-right,
+    .cemetery-map.zone-lelaki .cluster-bottom-right {
+        display: none;
+    }
+
+    .cemetery-map.zone-lelaki .road-right {
+         display: none;
+    }
+
+    .cemetery-map.zone-lelaki .road-top {
+        right: 240px;
+    }
+
+    .cemetery-map.zone-lelaki .road-bottom {
+         display: none;
+    }
+
+    .cemetery-map.zone-lelaki .compass-box {
+        right: 180px;
+        top: 35px;
+    }
+
+    .cemetery-map.zone-perempuan .grave-zone {
+        left: 120px;
+        top: 330px;
+    }
+
+    .cemetery-map.zone-perempuan .road-right {
+        right: 120px;
+    }
+
+    .cemetery-map.zone-perempuan .road-top {
+        right: 240px;
+    }
+
+    .cemetery-map.zone-perempuan .road-bottom {
+        right: 240px;
+    }
+
+    .cemetery-map.zone-perempuan .gazebo-card {
+        right: 220px;
+    }
+
+    .cemetery-map.zone-perempuan .compass-box {
+        right: 140px;
+        top: 40px;
+    }
+
+    .cemetery-map.zone-perempuan .cluster-top-right,
+    .cemetery-map.zone-perempuan .cluster-bottom-right {
+        right: 80px;
+    }
+
+    .cemetery-map.zone-perempuan .cluster-bottom-right {
+        right: 45px;
+        bottom: 170px;
+    }
+
+    .cemetery-map.zone-perempuan .cluster-top-right {
+        right: 45px;
+    }
+
     .help-pill {
         display: inline-flex;
         align-items: center;
@@ -628,15 +840,15 @@
 
     .map-stage {
         width: max-content;
-        min-width: 1680px;
-        min-height: 2250px;
+        min-width: 1800px;
+        min-height: 1600px;
         padding: 24px;
     }
 
     .cemetery-map {
         position: relative;
         width: 1600px;
-        min-height: 2180px;
+        min-height: 1500px;
         border-radius: 30px;
         overflow: hidden;
         transform-origin: top left;
@@ -758,7 +970,7 @@
     .road-top {
         top: 74px;
         left: 220px;
-        width: 58%;
+        right: 260px;
         height: 56px;
         border-radius: 16px;
     }
@@ -773,7 +985,7 @@
     .road-bottom {
         bottom: 85px;
         left: 0;
-        width: 70%;
+        right: 260px;
         height: 44px;
         border-radius: 0 18px 18px 0;
     }
@@ -792,7 +1004,7 @@
 
     .label-road-top {
         top: 140px;
-        left: 430px;
+        left: 520px;
     }
 
     .gazebo-card {
@@ -921,17 +1133,81 @@
         position: absolute;
         top: 330px;
         left: 170px;
-        width: 1180px;
+        width: max-content;
         z-index: 4;
         display: flex;
         flex-direction: column;
-        gap: 34px;
+        gap: 30px;
     }
 
     .grave-row {
         display: grid;
-        grid-template-columns: repeat(10, minmax(58px, 1fr));
         gap: 18px 16px;
+        width: max-content;
+    }
+
+    .grave-row-lelaki {
+        display: grid;
+        grid-template-columns: max-content max-content;
+        column-gap: 190px;
+        align-items: start;
+        width: max-content;
+    }
+
+    .grave-row-side {
+        display: grid;
+        gap: 18px 16px;
+        width: max-content;
+    }
+
+    .cemetery-map.zone-lelaki .grave-row-lelaki {
+        display: grid;
+        grid-template-columns: max-content max-content;
+        column-gap: 190px;
+        align-items: start;
+        width: max-content;
+        position: relative;
+        z-index: 2;
+    }
+
+    .cemetery-map.zone-lelaki .grave-zone-lelaki {
+        position: absolute;
+    }
+
+    .cemetery-map.zone-lelaki .grave-zone-lelaki::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 2450px;
+        width: 88px;
+        height: 100%;
+        border-radius: 18px;
+        background: linear-gradient(180deg, #a9662e 0%, #925420 100%);
+        box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), 0 4px 10px rgba(0,0,0,.08);
+        z-index: 1;
+    }
+
+    .cemetery-map.zone-lelaki .grave-zone-lelaki::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 2450px;
+        width: 88px;
+        height: 100%;
+        border-radius: 18px;
+        background: repeating-linear-gradient(
+            180deg,
+            transparent 0px,
+            transparent 30px,
+            rgba(255,255,255,.15) 30px,
+            rgba(255,255,255,.15) 36px
+        );
+        opacity: .35;
+        z-index: 1;
+    }
+
+    .cemetery-map.zone-lelaki .road-bottom {
+        display: none;
     }
 
     .grave-label {
@@ -995,8 +1271,8 @@
 
     .grave-code {
         display: inline-block;
-        min-width: 56px;
-        padding: 4px 9px;
+        min-width: 70px;
+        padding: 4px 8px;
         border-radius: 999px;
         font-size: 12px;
         font-weight: 800;
@@ -1062,87 +1338,87 @@
     }
 
     @media (max-width: 767px) {
-        .map-toolbar {
-            flex-direction: column;
-            align-items: stretch;
+            .map-toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .toolbar-right {
+                justify-content: space-between;
+            }
+
+            .map-help-bar {
+                flex-direction: column;
+            }
         }
 
-        .toolbar-right {
-            justify-content: space-between;
-        }
-
-        .map-help-bar {
-            flex-direction: column;
-        }
+        .fullview-btn {
+        font-size: 13px;
+        font-weight: 700;
     }
 
-    .fullview-btn {
-    font-size: 13px;
-    font-weight: 700;
-}
-
-.map-shell.fullscreen-mode {
-    position: fixed !important;
-    inset: 0;
-    width: 100vw !important;
-    height: 100vh !important;
-    z-index: 9999;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    background: #ffffff;
-}
-
-.map-shell.fullscreen-mode .card-header {
-    padding: 16px 20px;
-}
-
-.map-shell.fullscreen-mode .card-body {
-    height: calc(100vh - 88px);
-    display: flex;
-    flex-direction: column;
-    padding: 16px 20px 20px;
-}
-
-.map-shell.fullscreen-mode .map-frame {
-    flex: 1;
-    height: 100%;
-    padding: 10px;
-    border-radius: 18px;
-}
-
-.map-shell.fullscreen-mode .map-scroll-area {
-    height: 100% !important;
-    min-height: 100% !important;
-}
-
-body.map-fullscreen-active {
-    overflow: hidden;
-}
-
-body.map-fullscreen-active .page-header-breadcrumb,
-body.map-fullscreen-active .col-xl-3 {
-    display: none !important;
-}
-
-body.map-fullscreen-active .col-xl-9 {
-    width: 100% !important;
-}
-
-body.map-fullscreen-active .container-fluid.cemetery-page {
-    max-width: 100% !important;
-    padding: 0 !important;
-}
-
-@media (max-width: 767px) {
-    .map-shell.fullscreen-mode .toolbar-right {
-        justify-content: flex-start;
+    .map-shell.fullscreen-mode {
+        position: fixed !important;
+        inset: 0;
+        width: 100vw !important;
+        height: 100vh !important;
+        z-index: 9999;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        background: #ffffff;
     }
 
-    .map-shell.fullscreen-mode .toolbar-controls {
-        flex-wrap: wrap;
+    .map-shell.fullscreen-mode .card-header {
+        padding: 16px 20px;
+    }
+
+    .map-shell.fullscreen-mode .card-body {
+        height: calc(100vh - 88px);
+        display: flex;
+        flex-direction: column;
+        padding: 16px 20px 20px;
+    }
+
+    .map-shell.fullscreen-mode .map-frame {
+        flex: 1;
+        height: 100%;
+        padding: 10px;
         border-radius: 18px;
     }
-}
+
+    .map-shell.fullscreen-mode .map-scroll-area {
+        height: 100% !important;
+        min-height: 100% !important;
+    }
+
+    body.map-fullscreen-active {
+        overflow: hidden;
+    }
+
+    body.map-fullscreen-active .page-header-breadcrumb,
+    body.map-fullscreen-active .col-xl-3 {
+        display: none !important;
+    }
+
+    body.map-fullscreen-active .col-xl-9 {
+        width: 100% !important;
+    }
+
+    body.map-fullscreen-active .container-fluid.cemetery-page {
+        max-width: 100% !important;
+        padding: 0 !important;
+    }
+
+    @media (max-width: 767px) {
+        .map-shell.fullscreen-mode .toolbar-right {
+            justify-content: flex-start;
+        }
+
+        .map-shell.fullscreen-mode .toolbar-controls {
+            flex-wrap: wrap;
+            border-radius: 18px;
+        }
+    }
 </style>
 
 <script>

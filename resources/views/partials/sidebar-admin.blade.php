@@ -68,6 +68,14 @@
                     </a>
                 </li>
 
+                <li class="slide">
+                    <a href="{{ route('admin.burial-map.index') }}"
+                    class="side-menu__item {{ request()->routeIs('admin.burial-map.*') ? 'active' : '' }}">
+                        <i class="bx bx-map side-menu__icon"></i>
+                        <span class="side-menu__label">Peta Plot Kubur</span>
+                    </a>
+                </li>
+
             </ul>
         </nav>
     </div>

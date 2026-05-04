@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-
+use App\Models\PaymentItem;
 
 class Payment extends Model
 {
@@ -25,15 +24,29 @@ class Payment extends Model
         'reference_no',
         'receipt_no',
         'notes',
+        'billplz_bill_id',
+        'billplz_url',
+        'billplz_paid',
+        'billplz_state',
+        'billplz_data',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
-        'paid_at' => 'date',
+        'paid_at' => 'datetime',
+        'billplz_paid' => 'boolean',
+        'billplz_data' => 'array',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
+
+    public function items()
+    {
+        return $this->hasMany(PaymentItem::class);
+    }
+
+    
 }

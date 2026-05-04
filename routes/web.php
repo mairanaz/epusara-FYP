@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\AdminDeathReportController;
 use App\Http\Controllers\Admin\AdminKhairatMemberController;
 use App\Http\Controllers\Admin\AdminKhairatDependentController;
 use App\Http\Controllers\Admin\AdminKhairatFeeController;
+use App\Http\Controllers\Admin\AdminBurialMapController;
+use App\Http\Controllers\PaymentGatewayController;
 
 use Illuminate\Support\Facades\Route;
 
@@ -114,6 +116,9 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/user/payments', [PaymentController::class, 'store'])->name('user.payments.store');
     Route::get('/user/payments/{payment}/receipt', [PaymentController::class, 'receipt'])->name('user.payments.receipt');
 
+    // BILLPLZ PAYMENT GATEWAY
+    Route::get('/user/payments/{payment}/billplz', [PaymentGatewayController::class, 'createBill'])->name('payment.billplz');
+
     //USER DEATH-REPORTS
     Route::get('/lapor-kematian', [DeathReportController::class, 'create'])->name('death-reports.create');
     Route::post('/lapor-kematian', [DeathReportController::class, 'store'])->name('death-reports.store');
@@ -125,6 +130,10 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// BILLPLZ RETURN & CALLBACK
+Route::get('/payment/return', [PaymentGatewayController::class, 'paymentReturn'])->name('payment.return');
+Route::post('/payment/callback', [PaymentGatewayController::class, 'paymentCallback'])->name('payment.callback');
 
 // ADMIN routes
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
@@ -167,6 +176,9 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::get('/death-reports/{deathReport}/preview/{type}', [AdminDeathReportController::class, 'preview'])->name('death-reports.preview');
     Route::get('/death-reports/{deathReport}/select-plot', [AdminDeathReportController::class, 'selectPlot'])->name('death-reports.select-plot');
     Route::post('/death-reports/{deathReport}/store-plot', [AdminDeathReportController::class, 'storePlot'])->name('death-reports.store-plot');
+
+    //peta plot kubur
+    Route::get('/burial-map', [AdminBurialMapController::class, 'index'])->name('burial-map.index');
 });
 
 require __DIR__ . '/auth.php';

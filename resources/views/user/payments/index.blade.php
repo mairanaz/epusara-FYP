@@ -11,8 +11,8 @@
             </p>
         </div>
         <div class="mt-3 mt-md-0">
-            <a href="{{ route('user.payments.create') }}" class="btn btn-primary">
-                <i class="bx bx-plus-circle me-1"></i> Buat Bayaran
+            <a href="{{ route('user.payments.create') }}" class="btn btn-info">
+                <i class="bx bx-plus-circle me-1"></i> Teruskan Bayaran
             </a>
         </div>
     </div>
@@ -217,7 +217,7 @@
             <div class="card custom-card border-0 shadow-sm h-100">
                 <div class="card-body py-3">
                     <div class="text-muted small mb-1">Perlu Dibayar Sekarang</div>
-                    <div class="fw-bold text-primary">RM{{ number_format($currentPaymentAmount, 2) }}</div>
+                    <div class="fw-bold text-info">RM{{ number_format($currentPaymentAmount, 2) }}</div>
                     <small class="text-muted">{{ $nextPaymentLabel }}</small>
                 </div>
             </div>
@@ -262,7 +262,7 @@
                                 </tr>
                                 <tr>
                                     <th class="bg-light">Jumlah Bayaran Pertama</th>
-                                    <td class="fw-bold text-primary">RM{{ number_format($firstPaymentTotal, 2) }}</td>
+                                    <td class="fw-bold text-info">RM{{ number_format($firstPaymentTotal, 2) }}</td>
                                 </tr>
                                 <tr>
                                     <th class="bg-light">Bayaran Seterusnya</th>
@@ -276,8 +276,8 @@
                                     <td>RM{{ number_format($yearlyFee, 2) }}</td>
                                 </tr>
                                 <tr>
-                                    <th class="bg-light">Jumlah Bayaran Pertama</th>
-                                    <td class="fw-bold text-primary">RM{{ number_format($firstPaymentTotal, 2) }}</td>
+                                    <th class="bg-light">Jumlah Bayaran</th>
+                                    <td class="fw-bold text-info">RM{{ number_format($firstPaymentTotal, 2) }}</td>
                                 </tr>
                                 <tr>
                                     <th class="bg-light">Tahun Semasa</th>
@@ -327,8 +327,8 @@
                         <strong>RM{{ number_format($currentPaymentAmount, 2) }}</strong>.
                     </div>
 
-                    <a href="{{ route('user.payments.create') }}" class="btn btn-primary">
-                        <i class="bx bx-credit-card me-1"></i> Buat Bayaran
+                    <a href="{{ route('user.payments.create') }}" class="btn btn-info">
+                        <i class="bx bx-credit-card me-1"></i> Teruskan Bayaran
                     </a>
 
                 @elseif($totalOutstanding > 0)
@@ -339,7 +339,7 @@
                         <strong>RM{{ number_format($totalOutstanding, 2) }}</strong>.
                     </div>
 
-                    <a href="{{ route('user.payments.create') }}" class="btn btn-primary">
+                    <a href="{{ route('user.payments.create') }}" class="btn btn-info">
                         <i class="bx bx-credit-card me-1"></i> Teruskan Bayaran
                     </a>
 
@@ -450,38 +450,120 @@
                     </thead>
                     <tbody>
                         @forelse($payments as $index => $payment)
+                            @php
+                                $itemLabels = $payment->items->map(function ($item) {
+                                    return match($item->payment_type) {
+                                        'registration' => 'Yuran Pendaftaran',
+                                        'monthly' => 'Yuran Bulanan',
+                                        'yearly' => 'Yuran Tahunan',
+                                        default => ucfirst(str_replace('_', ' ', $item->payment_type)),
+                                    };
+                                })->unique()->values();
+
+                                $periodLabels = $payment->items->map(function ($item) {
+                                    if ($item->payment_type === 'monthly' && $item->payment_period) {
+                                        try {
+                                            return \Carbon\Carbon::createFromFormat('Y-m', $item->payment_period)->translatedFormat('F Y');
+                                        } catch (\Throwable $e) {
+                                            return $item->payment_period;
+                                        }
+                                    }
+
+                                    if ($item->payment_type === 'yearly' && $item->payment_period) {
+                                        return $item->payment_period;
+                                    }
+
+                                    return null;
+                                })->filter()->unique()->values();
+
+                                $statusClass = match($payment->status) {
+                                    'paid' => 'success',
+                                    'pending' => 'warning',
+                                    'failed' => 'danger',
+                                    'cancelled' => 'secondary',
+                                    default => 'secondary',
+                                };
+
+                                $statusLabel = match($payment->status) {
+                                    'paid' => 'Berjaya',
+                                    'pending' => 'Menunggu Bayaran',
+                                    'failed' => 'Gagal',
+                                    'cancelled' => 'Dibatalkan',
+                                    default => ucfirst($payment->status),
+                                };
+                            @endphp
+
                             <tr>
                                 <td>{{ $index + 1 }}</td>
-                                <td>{{ \Carbon\Carbon::parse($payment->paid_at)->format('d/m/Y H:i') }}</td>
+
                                 <td>
-                                    @if($payment->payment_type === 'registration')
-                                        Yuran Pendaftaran
-                                    @elseif($payment->payment_type === 'monthly')
-                                        Yuran Bulanan
-                                    @elseif($payment->payment_type === 'yearly')
-                                        Yuran Tahunan
-                                    @else
-                                        {{ ucfirst($payment->payment_type) }}
-                                    @endif
+                                    {{ $payment->paid_at ? \Carbon\Carbon::parse($payment->paid_at)->format('d/m/Y H:i') : '-' }}
                                 </td>
+
                                 <td>
-                                    @if($payment->payment_type === 'monthly' && $payment->payment_period)
-                                        {{ \Carbon\Carbon::createFromFormat('Y-m', $payment->payment_period)->translatedFormat('F Y') }}
-                                    @elseif($payment->payment_type === 'yearly' && $payment->payment_period)
-                                        {{ $payment->payment_period }}
+                                    @php
+                                        $mainPaymentLabel = match($payment->payment_type) {
+                                            'first_monthly' => 'Bayaran Pertama Bulanan',
+                                            'monthly' => 'Bayaran Bulanan',
+                                            'monthly_arrears' => 'Bayaran Tunggakan Bulanan',
+                                            'monthly_balance' => 'Bayaran Baki Kitaran',
+                                            'first_yearly' => 'Bayaran Pertama Tahunan',
+                                            'yearly' => 'Bayaran Tahunan',
+                                            default => ucfirst(str_replace('_', ' ', $payment->payment_type)),
+                                        };
+                                    @endphp
+
+                                    <div class="fw-semibold">{{ $mainPaymentLabel }}</div>
+
+                                    <small class="text-muted">
+                                        @forelse($itemLabels as $label)
+                                            {{ $label }}@if(!$loop->last), @endif
+                                        @empty
+                                            -
+                                        @endforelse
+                                    </small>
+                                </td>
+
+                                <td>
+                                    @if($periodLabels->count() > 1)
+                                        <div class="fw-semibold">
+                                            {{ $periodLabels->first() }} - {{ $periodLabels->last() }}
+                                        </div>
+                                        <small class="text-muted">
+                                            {{ $periodLabels->count() }} bulan
+                                        </small>
+                                    @elseif($periodLabels->count() === 1)
+                                        <div>{{ $periodLabels->first() }}</div>
                                     @else
                                         -
                                     @endif
                                 </td>
                                 <td>RM{{ number_format($payment->amount, 2) }}</td>
+
                                 <td>{{ $payment->receipt_no ?? '-' }}</td>
+
                                 <td>
-                                    <span class="badge bg-success">{{ ucfirst($payment->status) }}</span>
+                                    <span class="badge bg-{{ $statusClass }}">
+                                        {{ $statusLabel }}
+                                    </span>
                                 </td>
+
                                 <td>
-                                    <a href="{{ route('user.payments.receipt', $payment->id) }}" class="btn btn-sm btn-outline-primary">
-                                        Lihat Resit
-                                    </a>
+                                    @if($payment->status === 'pending')
+                                        <a href="{{ route('payment.billplz', $payment->id) }}" class="btn btn-sm btn-info mb-1">
+                                            <i class="bx bx-credit-card me-1"></i> Bayar Billplz
+                                        </a>
+                                    @endif
+
+                                    @if($payment->status === 'paid')
+                                        <a href="{{ route('user.payments.receipt', $payment->id) }}" class="btn btn-sm btn-outline-info">
+                                            Lihat Resit
+                                        </a>
+                                    @else
+                                        <a href="{{ route('user.payments.receipt', $payment->id) }}" class="btn btn-sm btn-outline-secondary">
+                                            Semak
+                                        </a>
+                                    @endif
                                 </td>
                             </tr>
                         @empty

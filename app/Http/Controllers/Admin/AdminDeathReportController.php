@@ -9,6 +9,7 @@ use App\Models\Dependent;
 use App\Models\BurialPlot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class AdminDeathReportController extends Controller
 {
@@ -198,16 +199,6 @@ class AdminDeathReportController extends Controller
                 ->with('error', 'Laporan ini sudah mempunyai lot kubur. Setiap laporan hanya dibenarkan satu lot kubur sahaja.');
         }
 
-        $plot = BurialPlot::where('id', $validated['burial_plot_id'])
-            ->where('status', 'available')
-            ->first();
-
-        if (!$plot) {
-            return back()
-                ->withInput()
-                ->with('error', 'Lot kubur telah dipilih atau tidak tersedia.');
-        }
-
         $zone = $this->determineZone($deathReport);
 
         if (!$zone) {
@@ -216,32 +207,56 @@ class AdminDeathReportController extends Controller
                 ->with('error', 'Zon kubur tidak dapat ditentukan. Sila semak jantina atau umur si mati.');
         }
 
-        if ($plot->zone !== $zone) {
+        try {
+            DB::transaction(function () use ($validated, $deathReport, $zone) {
+
+                $plot = BurialPlot::where('id', $validated['burial_plot_id'])
+                    ->where('zone', $zone)
+                    ->lockForUpdate()
+                    ->first();
+
+                if (!$plot) {
+                    throw new \Exception('Lot kubur tidak sepadan dengan zon si mati.');
+                }
+
+                if ($plot->status !== 'available') {
+                    throw new \Exception('Lot kubur ini telah digunakan. Sila pilih lot lain.');
+                }
+
+                if (!is_null($plot->death_report_id)) {
+                    throw new \Exception('Lot kubur ini telah mempunyai rekod laporan kematian.');
+                }
+
+                $plot->update([
+                    'status' => 'occupied',
+                    'death_report_id' => $deathReport->id,
+                    'buried_at' => $validated['burial_date'],
+                ]);
+
+                $deathReport->update([
+                    'burial_plot_id' => $plot->id,
+                    'burial_zone' => $plot->zone,
+                    'burial_plot_code' => $plot->plot_code,
+                    'burial_lot_no' => $plot->plot_code,
+                    'tarikh_kebumi' => $validated['burial_date'],
+                    'burial_date' => $validated['burial_date'],
+                    'status' => 'disahkan',
+                    'verified_by' => auth()->id(),
+                    'verified_at' => now(),
+                ]);
+            });
+
+            $this->syncDeathStatus($deathReport->fresh());
+
+            return redirect()
+                ->route('admin.death-reports.show', $deathReport)
+                ->with('success', 'Lot kubur berjaya dipilih dan disimpan.');
+
+        } catch (\Exception $e) {
             return back()
                 ->withInput()
-                ->with('error', 'Lot kubur tidak sepadan dengan zon si mati.');
+                ->with('error', $e->getMessage());
         }
-
-        $plot->status = 'occupied';
-        $plot->death_report_id = $deathReport->id;
-        $plot->buried_at = $validated['burial_date'];
-        $plot->save();
-
-        $deathReport->burial_plot_id = $plot->id;
-        $deathReport->burial_lot_no = $plot->plot_code;
-        $deathReport->burial_date = $validated['burial_date'];
-
-        $deathReport->status = 'disahkan';
-        $deathReport->verified_by = auth()->id();
-        $deathReport->verified_at = now();
-
-        $deathReport->save();
-
-        $this->syncDeathStatus($deathReport->fresh());
-
-        return redirect()
-            ->route('admin.death-reports.show', $deathReport)
-            ->with('success', 'Lot kubur berjaya dipilih dan disimpan.');
     }
 
     private function syncDeathStatus(DeathReport $deathReport): void

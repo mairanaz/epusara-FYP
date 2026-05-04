@@ -31,4 +31,14 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
+    'billplz' => [
+        'mode' => env('BILLPLZ_MODE', 'sandbox'),
+        'api_key' => env('BILLPLZ_API_KEY'),
+        'collection_id' => env('BILLPLZ_COLLECTION_ID'),
+        'x_signature' => env('BILLPLZ_X_SIGNATURE'),
+        'base_url' => env('BILLPLZ_MODE', 'sandbox') === 'production'
+            ? 'https://www.billplz.com/api/v3'
+            : 'https://www.billplz-sandbox.com/api/v3',
+    ],
+
 ];

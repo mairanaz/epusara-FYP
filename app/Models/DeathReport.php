@@ -18,9 +18,7 @@ class DeathReport extends Model
         'jantina',
         'alamat_terakhir',
         'tarikh_meninggal',
-        'umur',
         'sebab_kematian',
-        'no_permit_kebumi',
         'lokasi_mandi_jenazah',
         'pengurusan_jenazah_oleh',
         'lokasi_pengkebumian',
@@ -28,6 +26,8 @@ class DeathReport extends Model
         'alamat_tanah_perkuburan',
         'negeri_tanah_perkuburan',
         'catatan_pengurusan',
+        'umur',
+        'no_permit_kebumi',
         'nama_pelapor',
         'no_kp_pelapor',
         'no_tel_pelapor',
@@ -36,18 +36,26 @@ class DeathReport extends Model
         'permit_kebumi_path',
         'dokumen_sokongan_path',
         'status',
-        'catatan_admin',
+
+        // Maklumat plot kubur
         'burial_plot_id',
+        'burial_zone',
+        'burial_plot_code',
+        'tarikh_kebumi',
+        'burial_lot_no',
+        'burial_date',
+
+        // Semakan admin
         'verification_category',
         'verified_by',
         'verified_at',
-        'burial_lot_no',
-        'burial_date',
         'admin_notes',
+        'catatan_admin',
     ];
 
     protected $casts = [
         'tarikh_meninggal' => 'date',
+        'tarikh_kebumi' => 'date',
         'burial_date' => 'date',
         'verified_at' => 'datetime',
     ];
@@ -67,8 +75,34 @@ class DeathReport extends Model
         return $this->belongsTo(User::class, 'verified_by');
     }
 
+    /**
+     * Relationship utama jika death_reports.burial_plot_id digunakan.
+     */
     public function burialPlot()
     {
         return $this->belongsTo(BurialPlot::class, 'burial_plot_id');
+    }
+
+    /**
+     * Relationship alternatif jika burial_plots.death_report_id digunakan.
+     */
+    public function assignedBurialPlot()
+    {
+        return $this->hasOne(BurialPlot::class, 'death_report_id');
+    }
+
+    public function getFinalBurialPlotAttribute()
+    {
+        return $this->burialPlot ?: $this->assignedBurialPlot;
+    }
+
+    public function getFinalBurialDateAttribute()
+    {
+        return $this->burial_date ?: $this->tarikh_kebumi;
+    }
+
+    public function getFinalBurialLotNoAttribute()
+    {
+        return $this->burial_lot_no ?: $this->burial_plot_code;
     }
 }

@@ -10,27 +10,82 @@ class BurialPlotSeeder extends Seeder
     public function run(): void
     {
         $zones = [
-            'K' => ['rows' => 10, 'lots' => 10],
-            'P' => ['rows' => 10, 'lots' => 10],
-            'L' => ['rows' => 10, 'lots' => 10],
+            'K' => [
+                'prefix' => 'K-B',
+                'rows' => [
+                    1 => 9,
+                    2 => 9,
+                    3 => 10,
+                    4 => 11,
+                    5 => 12,
+                    6 => 13,
+                    7 => 13,
+                    8 => 14,
+                    9 => 15,
+                    10 => 16,
+                ],
+            ],
+
+            'P' => [
+                'prefix' => 'W-B',
+                'rows' => [
+                    1 => 13,
+                    2 => 14,
+                    3 => 15,
+                    4 => 16,
+                    5 => 17,
+                    6 => 17,
+                    7 => 18,
+                    8 => 20,
+                    9 => 20,
+                    10 => 21,
+                    11 => 22,
+                    12 => 23,
+                    13 => 24,
+                ],
+            ],
+
+            'L' => [
+                'prefix' => 'L-B',
+                'rows' => [
+                    1 => 54,
+                    2 => 55,
+                    3 => 56,
+                    4 => 56,
+                    5 => 50,
+                    6 => 44,
+                    7 => 35,
+                    8 => 29,
+                    9 => 25,
+                    10 => 18,
+                ],
+            ],
         ];
 
-        foreach ($zones as $zone => $config) {
-            for ($row = 1; $row <= $config['rows']; $row++) {
-                for ($lot = 1; $lot <= $config['lots']; $lot++) {
-                    $plotCode = $zone . '-B' . $row . '-' . str_pad($lot, 2, '0', STR_PAD_LEFT);
+        $validPlotCodes = [];
 
-                    BurialPlot::firstOrCreate(
+        foreach ($zones as $zone => $config) {
+            foreach ($config['rows'] as $row => $totalLots) {
+                for ($lot = 1; $lot <= $totalLots; $lot++) {
+                    $plotCode = $config['prefix'] . $row . '-' . str_pad($lot, 2, '0', STR_PAD_LEFT);
+
+                    $validPlotCodes[] = $plotCode;
+
+                    BurialPlot::updateOrCreate(
                         ['plot_code' => $plotCode],
                         [
                             'zone' => $zone,
                             'row_number' => $row,
                             'lot_number' => $lot,
-                            'status' => 'available',
                         ]
                     );
                 }
             }
         }
+
+        BurialPlot::whereNotIn('plot_code', $validPlotCodes)
+            ->where('status', 'available')
+            ->whereNull('death_report_id')
+            ->delete();
     }
 }

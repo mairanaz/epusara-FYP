@@ -46,10 +46,29 @@
         $isFirstPaymentMonthly = ($summary['registration_paid'] ?? 0) <= 0 && ($summary['monthly_paid_count'] ?? 0) <= 0;
         $isFirstPaymentYearly = $registrationPaid <= 0 && $annualPaidThisYear <= 0;
         
+        $unpaidDuePeriods = $summary['unpaid_due_periods'] ?? [];
+        $remainingCyclePeriods = $summary['remaining_cycle_periods'] ?? [];
+
+        $arrearsAmount = (float) ($summary['arrears_amount'] ?? 0);
+        $remainingCycleAmount = (float) ($summary['remaining_cycle_amount'] ?? 0);
+
         $totalOutstanding = (float) ($summary['total_outstanding'] ?? 0);
+
         $currentPaymentAmount = $plan === 'monthly'
-            ? ($isFirstPaymentMonthly ? (float) ($summary['first_monthly_total'] ?? 30) : 10.00)
-            : ($isFirstPaymentYearly ? (float) ($summary['first_yearly_total'] ?? 120) : (float) ($summary['annual_balance'] ?? 0));
+            ? (
+                $isFirstPaymentMonthly
+                    ? (float) ($summary['first_monthly_total'] ?? 30)
+                    : (
+                        count($unpaidDuePeriods) > 1
+                            ? $arrearsAmount
+                            : 10.00
+                    )
+            )
+            : (
+                $isFirstPaymentYearly
+                    ? (float) ($summary['first_yearly_total'] ?? 120)
+                    : (float) ($summary['annual_balance'] ?? 0)
+            );
 
     @endphp
 
@@ -85,15 +104,50 @@
                         @endif
                     </div>
 
-                    <div class="border rounded p-3 bg-light mb-3">
-                        <div class="d-flex justify-content-between mb-2">
-                            <span class="text-muted">Perlu Dibayar Sekarang</span>
-                            <span class="fw-bold text-primary">RM{{ number_format($currentPaymentAmount, 2) }}</span>
-                        </div>
-                        <div class="d-flex justify-content-between">
-                            <span class="text-muted">Jumlah Baki Keseluruhan</span>
-                            <span class="fw-bold text-danger">RM{{ number_format($totalOutstanding, 2) }}</span>
-                        </div>
+                        <div class="border rounded p-3 bg-light mb-3">
+                        @if($plan === 'monthly' && !$isFirstPaymentMonthly)
+                            <div class="mb-2">
+                                <div class="text-muted small">Pilihan Bayaran Tersedia</div>
+                                <div class="fw-semibold">
+                                    Sila pilih jenis bayaran di bahagian tindakan bayaran.
+                                </div>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Tunggakan Semasa</span>
+                                <span class="fw-bold text-warning">
+                                    RM{{ number_format($arrearsAmount, 2) }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Baki Kitaran</span>
+                                <span class="fw-bold text-success">
+                                    RM{{ number_format($remainingCycleAmount, 2) }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Jumlah Baki Keseluruhan</span>
+                                <span class="fw-bold text-danger">
+                                    RM{{ number_format($totalOutstanding, 2) }}
+                                </span>
+                            </div>
+                        @else
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Perlu Dibayar Sekarang</span>
+                                <span class="fw-bold text-info">
+                                    RM{{ number_format($currentPaymentAmount, 2) }}
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <span class="text-muted">Jumlah Baki Keseluruhan</span>
+                                <span class="fw-bold text-danger">
+                                    RM{{ number_format($totalOutstanding, 2) }}
+                                </span>
+                            </div>
+                        @endif
                     </div>
 
                     <div class="alert alert-light mb-0">
@@ -103,7 +157,7 @@
                             @if($plan === 'monthly')
                                 <li>Bayaran pertama pelan bulanan ialah RM20 + RM10 = RM30.</li>
                                 <li>Selepas itu, bayaran dibuat RM10 mengikut bulan seterusnya sahaja.</li>
-                                <li>Pelan bulanan tidak boleh dibayar sekaligus untuk baki setahun.</li>
+                                <li>Ahli boleh membayar yuran bulanan satu per satu, tunggakan, atau baki kitaran 12 bulan.</li>
                             @else
                                 <li>Bayaran pertama pelan tahunan ialah RM20 + RM100 = RM120.</li>
                                 <li>Selepas bayaran tahunan dijelaskan, tiada bayaran lain untuk tahun semasa.</li>
@@ -148,28 +202,88 @@
                                             Sesuai untuk ahli baru. Termasuk yuran pendaftaran dan bayaran bulan semasa.
                                         </div>
                                         <div class="mt-2">
-                                            <span class="badge bg-primary-transparent text-primary">
+                                            <span class="badge bg-info-transparent text-info">
                                                 Jumlah: RM{{ number_format($summary['first_monthly_total'], 2) }}
                                             </span>
                                         </div>
                                     </div>
                                 @else
-                                    <div class="border rounded p-3 mb-3">
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="payment_action" id="monthly_payment" value="monthly_payment" checked>
-                                            <label class="form-check-label fw-semibold" for="monthly_payment">
-                                                Bayaran Bulanan Seterusnya
-                                            </label>
+                                    @php
+                                        $nextMonthlyLabel = $nextMonthlyPeriod;
+
+                                        try {
+                                            $nextMonthlyLabel = \Carbon\Carbon::createFromFormat('Y-m', $nextMonthlyPeriod)->translatedFormat('F Y');
+                                        } catch (\Throwable $e) {
+                                            $nextMonthlyLabel = $nextMonthlyPeriod;
+                                        }
+
+                                        $firstArrearsLabel = count($unpaidDuePeriods) > 0 ? $unpaidDuePeriods[0]['label'] : null;
+                                        $lastArrearsLabel = count($unpaidDuePeriods) > 0 ? $unpaidDuePeriods[count($unpaidDuePeriods) - 1]['label'] : null;
+
+                                        $firstBalanceLabel = count($remainingCyclePeriods) > 0 ? $remainingCyclePeriods[0]['label'] : null;
+                                        $lastBalanceLabel = count($remainingCyclePeriods) > 0 ? $remainingCyclePeriods[count($remainingCyclePeriods) - 1]['label'] : null;
+                                    @endphp
+
+                                    @if(($summary['can_pay_monthly_now'] ?? true) && count($unpaidDuePeriods) <= 1)
+                                        <div class="border rounded p-3 mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="payment_action" id="monthly_payment" value="monthly_payment" checked>
+                                                <label class="form-check-label fw-semibold" for="monthly_payment">
+                                                    Bayaran Bulanan Seterusnya
+                                                </label>
+                                            </div>
+                                            <div class="text-muted small mt-2">
+                                                Bayaran untuk {{ $nextMonthlyLabel }}.
+                                            </div>
+                                            <div class="mt-2">
+                                                <span class="badge bg-info-transparent text-info">
+                                                    Amaun: RM10.00
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div class="text-muted small mt-2">
-                                            Bayaran hanya dibenarkan untuk tempoh seterusnya dalam kitaran 12 bulan keahlian anda.
+                                    @endif
+
+                                    @if(count($unpaidDuePeriods) > 1)
+                                        <div class="border rounded p-3 mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="payment_action" id="monthly_arrears" value="monthly_arrears" checked>
+                                                <label class="form-check-label fw-semibold" for="monthly_arrears">
+                                                    Bayar Tunggakan Bulanan
+                                                </label>
+                                            </div>
+
+                                            <div class="text-muted small mt-2">
+                                                Bayar semua tunggakan dari {{ $firstArrearsLabel }} hingga {{ $lastArrearsLabel }}.
+                                            </div>
+
+                                            <div class="mt-2">
+                                                <span class="badge bg-warning text-dark">
+                                                    Jumlah: RM{{ number_format($arrearsAmount, 2) }}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div class="mt-2">
-                                            <span class="badge bg-info-transparent text-info">
-                                                Amaun: RM10.00
-                                            </span>
+                                    @endif
+
+                                    @if(count($remainingCyclePeriods) > 0)
+                                        <div class="border rounded p-3 mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="payment_action" id="monthly_balance" value="monthly_balance">
+                                                <label class="form-check-label fw-semibold" for="monthly_balance">
+                                                    Bayar Baki Kitaran
+                                                </label>
+                                            </div>
+
+                                            <div class="text-muted small mt-2">
+                                                Bayar semua baki dari {{ $firstBalanceLabel }} hingga {{ $lastBalanceLabel }}.
+                                            </div>
+
+                                            <div class="mt-2">
+                                                <span class="badge bg-success-transparent text-success">
+                                                    Jumlah: RM{{ number_format($remainingCycleAmount, 2) }}
+                                                </span>
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 @endif
                             </div>
 
@@ -199,17 +313,49 @@
                                                     </tr>
                                                     <tr>
                                                         <td class="fw-semibold">Jumlah Bayaran</td>
-                                                        <td class="text-end fw-semibold text-primary">RM{{ number_format($summary['first_monthly_total'], 2) }}</td>
+                                                        <td class="text-end fw-semibold text-info">
+                                                            RM{{ number_format($summary['first_monthly_total'], 2) }}
+                                                        </td>
                                                     </tr>
                                                 @else
-                                                    <tr>
-                                                        <td>Yuran Bulanan</td>
-                                                        <td class="text-end">RM10.00</td>
-                                                    </tr>
-                                                    <tr>
-                                                        <td class="fw-semibold">Jumlah Bayaran</td>
-                                                        <td class="text-end fw-semibold text-primary">RM10.00</td>
-                                                    </tr>
+                                                    @if(count($unpaidDuePeriods) > 1)
+                                                        <tr>
+                                                            <td>Tunggakan Bulanan</td>
+                                                            <td class="text-end">
+                                                                {{ count($unpaidDuePeriods) }} bulan × RM10.00
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="fw-semibold">Jumlah Tunggakan</td>
+                                                            <td class="text-end fw-semibold text-info">
+                                                                RM{{ number_format($arrearsAmount, 2) }}
+                                                            </td>
+                                                        </tr>
+                                                    @elseif(($summary['can_pay_monthly_now'] ?? true) && count($unpaidDuePeriods) <= 1)
+                                                        <tr>
+                                                            <td>Yuran Bulanan</td>
+                                                            <td class="text-end">RM10.00</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="fw-semibold">Jumlah Bayaran</td>
+                                                            <td class="text-end fw-semibold text-info">RM10.00</td>
+                                                        </tr>
+                                                    @endif
+
+                                                    @if(count($remainingCyclePeriods) > 0)
+                                                        <tr>
+                                                            <td>Bayar Baki Kitaran</td>
+                                                            <td class="text-end">
+                                                                {{ count($remainingCyclePeriods) }} bulan × RM10.00
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td class="fw-semibold">Jumlah Baki Kitaran</td>
+                                                            <td class="text-end fw-semibold text-success">
+                                                                RM{{ number_format($remainingCycleAmount, 2) }}
+                                                            </td>
+                                                        </tr>
+                                                    @endif
                                                 @endif
                                             </tbody>
                                         </table>
@@ -227,14 +373,14 @@
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="payment_action" id="first_payment_yearly" value="first_payment" checked>
                                             <label class="form-check-label fw-semibold" for="first_payment_yearly">
-                                                Bayaran Pertama Tahunan
+                                                Bayaran Tahunan
                                             </label>
                                         </div>
                                         <div class="text-muted small mt-2">
-                                            Sesuai untuk ahli baru. Termasuk yuran pendaftaran dan yuran tahunan.
+                                            Termasuk yuran pendaftaran dan yuran tahunan.
                                         </div>
                                         <div class="mt-2">
-                                            <span class="badge bg-primary-transparent text-primary">
+                                            <span class="badge bg-info-transparent text-info">
                                                 Jumlah: RM{{ number_format($summary['first_yearly_total'], 2) }}
                                             </span>
                                         </div>
@@ -290,7 +436,7 @@
                                                         </tr>
                                                         <tr>
                                                             <td class="fw-semibold">Jumlah Bayaran</td>
-                                                            <td class="text-end fw-semibold text-primary">RM{{ number_format($summary['first_yearly_total'], 2) }}</td>
+                                                            <td class="text-end fw-semibold text-info">RM{{ number_format($summary['first_yearly_total'], 2) }}</td>
                                                         </tr>
                                                     @else
                                                         <tr>
@@ -299,7 +445,7 @@
                                                         </tr>
                                                         <tr>
                                                             <td class="fw-semibold">Jumlah Bayaran</td>
-                                                            <td class="text-end fw-semibold text-primary">RM{{ number_format($summary['annual_balance'], 2) }}</td>
+                                                            <td class="text-end fw-semibold text-info">RM{{ number_format($summary['annual_balance'], 2) }}</td>
                                                         </tr>
                                                     @endif
                                                 </tbody>
@@ -311,19 +457,29 @@
                         @endif
 
                         @if(
-                            ($plan === 'monthly' && ($summary['can_pay_monthly_now'] ?? true)) ||
+                            ($plan === 'monthly' && (
+                                $isFirstPaymentMonthly ||
+                                ($summary['can_pay_monthly_now'] ?? true) ||
+                                count($unpaidDuePeriods) > 0 ||
+                                count($remainingCyclePeriods) > 0
+                            )) ||
                             ($plan === 'yearly' && ($isFirstPaymentYearly || !$summary['is_fully_paid_yearly']))
                         )
                             <div class="mt-4 d-flex justify-content-end">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="bx bx-save me-1"></i> Buat Bayaran
+                                <button type="submit" class="btn btn-info">
+                                    <i class="bx bx-save me-1"></i> Teruskan Bayaran
                                 </button>
                             </div>
                         @endif
 
-                        @if($plan === 'monthly' && !($summary['can_pay_monthly_now'] ?? true))
-                            <div class="alert alert-warning">
-                                Bayaran untuk tempoh seterusnya belum dibuka kerana belum masuk bulan tersebut.
+                        @if(
+                            $plan === 'monthly' &&
+                            !$isFirstPaymentMonthly &&
+                            !($summary['can_pay_monthly_now'] ?? true) &&
+                            count($remainingCyclePeriods) <= 0
+                        )
+                            <div class="alert alert-success">
+                                Semua bayaran dalam kitaran semasa telah dijelaskan.
                             </div>
                         @endif
                     </form>
