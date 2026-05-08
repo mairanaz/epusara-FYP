@@ -105,4 +105,10 @@ class DeathReport extends Model
     {
         return $this->burial_lot_no ?: $this->burial_plot_code;
     }
+
+    public function graveOrder()
+    {
+        return $this->hasOne(\App\Models\GraveOrder::class);
+    }
+
 }

@@ -212,7 +212,7 @@
                         <div class="hero-meta mb-3">{{ $member->no_kp }}</div>
 
                         <span class="badge bg-{{ $statusClass }} status-badge">
-                            {{ ucfirst(str_replace('_', ' ', $member->status_permohonan ?? 'tiada status')) }}
+                            {{ $statusLabel }}
                         </span>
                     </div>
                 </div>
@@ -257,6 +257,15 @@
                     <div class="info-item">
                         <div class="info-label">No. MyKad</div>
                         <div class="info-value">{{ $member->no_kp }}</div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-label">Status Kehidupan</div>
+                        <div class="info-value">
+                            <span class="badge bg-{{ $statusClass }} status-badge">
+                                {{ $statusLabel }}
+                            </span>
+                        </div>
                     </div>
 
                     <div class="info-item">
@@ -403,17 +412,58 @@
                             <table class="table align-middle mb-0">
                                 <thead>
                                     <tr>
-                                        <th>Tarikh</th>
+                                        <th>No. Resit / Rujukan</th>
+                                        <th>Tarikh Bayaran</th>
                                         <th>Jumlah</th>
+                                        <th>Kaedah Bayaran</th>
                                         <th>Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @foreach($payments as $payment)
+                                        @php
+                                            $receiptNo = $payment->receipt_no
+                                                ?? $payment->no_resit
+                                                ?? $payment->billplz_bill_id
+                                                ?? $payment->reference_no
+                                                ?? 'PAY-' . str_pad($payment->id, 6, '0', STR_PAD_LEFT);
+
+                                            $paymentMethod = $payment->payment_method
+                                                ?? $payment->method
+                                                ?? $payment->gateway
+                                                ?? 'Billplz';
+                                        @endphp
+
                                         <tr>
-                                            <td>{{ $payment->created_at ? $payment->created_at->format('d/m/Y') : '-' }}</td>
-                                            <td>RM {{ number_format($payment->amount ?? 0, 2) }}</td>
-                                            <td>{{ ucfirst($payment->status ?? '-') }}</td>
+                                            <td class="fw-semibold">
+                                                {{ $receiptNo }}
+                                            </td>
+
+                                            <td>
+                                                {{ $payment->created_at ? $payment->created_at->format('d/m/Y') : '-' }}
+                                            </td>
+
+                                            <td class="fw-semibold">
+                                                RM {{ number_format($payment->amount ?? 0, 2) }}
+                                            </td>
+
+                                            <td>
+                                                {{ ucfirst($paymentMethod) }}
+                                            </td>
+
+                                            <td>
+                                                @if($payment->status == 'paid')
+                                                    <span class="badge bg-success">Berjaya</span>
+                                                @elseif($payment->status == 'failed')
+                                                    <span class="badge bg-danger">Gagal</span>
+                                                @elseif($payment->status == 'pending')
+                                                    <span class="badge bg-warning text-dark">Menunggu</span>
+                                                @else
+                                                    <span class="badge bg-secondary">
+                                                        {{ ucfirst($payment->status ?? '-') }}
+                                                    </span>
+                                                @endif
+                                            </td>
                                         </tr>
                                     @endforeach
                                 </tbody>

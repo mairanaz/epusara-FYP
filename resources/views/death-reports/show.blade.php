@@ -97,7 +97,7 @@
             <a href="{{ route('death-reports.index') }}" class="btn btn-light border">
                 <i class="bx bx-arrow-back me-1"></i> Kembali
             </a>
-            <a href="{{ route('death-reports.create') }}" class="btn btn-primary">
+            <a href="{{ route('death-reports.create') }}" class="btn btn-info">
                 <i class="bx bx-plus me-1"></i> Lapor Baharu
             </a>
         </div>
@@ -341,7 +341,7 @@
                             <div class="border rounded-3 p-3 h-100">
                                 <div class="fw-semibold mb-2">Sijil Mati</div>
                                 @if($deathReport->sijil_mati_path)
-                                    <a href="{{ asset('storage/' . $deathReport->sijil_mati_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ asset('storage/' . $deathReport->sijil_mati_path) }}" target="_blank" class="btn btn-sm btn-outline-info">
                                         <i class="bx bx-show me-1"></i> Lihat Dokumen
                                     </a>
                                 @else
@@ -354,7 +354,7 @@
                             <div class="border rounded-3 p-3 h-100">
                                 <div class="fw-semibold mb-2">Permit Kebumi</div>
                                 @if($deathReport->permit_kebumi_path)
-                                    <a href="{{ asset('storage/' . $deathReport->permit_kebumi_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ asset('storage/' . $deathReport->permit_kebumi_path) }}" target="_blank" class="btn btn-sm btn-outline-info">
                                         <i class="bx bx-show me-1"></i> Lihat Dokumen
                                     </a>
                                 @else
@@ -367,7 +367,7 @@
                             <div class="border rounded-3 p-3 h-100">
                                 <div class="fw-semibold mb-2">Dokumen Tambahan</div>
                                 @if($deathReport->dokumen_sokongan_path)
-                                    <a href="{{ asset('storage/' . $deathReport->dokumen_sokongan_path) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ asset('storage/' . $deathReport->dokumen_sokongan_path) }}" target="_blank" class="btn btn-sm btn-outline-info">
                                         <i class="bx bx-show me-1"></i> Lihat Dokumen
                                     </a>
                                 @else

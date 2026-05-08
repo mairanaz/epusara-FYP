@@ -332,7 +332,7 @@
                         <tr>
                             <th width="6%">#</th>
                             <th>Maklumat Tanggungan</th>
-                            <th>No. KP</th>
+                            <th>Umur</th>
                             <th>Pertalian</th>
                             <th>Pasangan</th>
                             <th>No. Telefon</th>
@@ -356,13 +356,39 @@
                                         <div>
                                             <div class="dependent-name">{{ $dependent->name ?? '-' }}</div>
                                             <div class="dependent-meta">
-                                                Tanggungan berdaftar
+                                                No. KP: {{ $dependent->no_kp ?? '-' }}
                                             </div>
                                         </div>
                                     </div>
                                 </td>
 
-                                <td class="fw-semibold">{{ $dependent->no_kp ?? '-' }}</td>
+                                <td class="fw-semibold">
+                                    @php
+                                        $umur = '-';
+
+                                        if (!empty($dependent->no_kp) && strlen($dependent->no_kp) >= 6) {
+                                            $yy = substr($dependent->no_kp, 0, 2);
+                                            $mm = substr($dependent->no_kp, 2, 2);
+                                            $dd = substr($dependent->no_kp, 4, 2);
+
+                                            $currentYear = now()->year;
+                                            $currentYY = (int) now()->format('y');
+
+                                            $year = ((int) $yy <= $currentYY)
+                                                ? 2000 + (int) $yy
+                                                : 1900 + (int) $yy;
+
+                                            try {
+                                                $birthDate = \Carbon\Carbon::createFromDate($year, (int) $mm, (int) $dd);
+                                                $umur = $birthDate->age . ' tahun';
+                                            } catch (\Exception $e) {
+                                                $umur = '-';
+                                            }
+                                        }
+                                    @endphp
+
+                                    {{ $umur }}
+                                </td>
 
                                 <td>
                                     <span class="custom-badge {{ relationBadgeClass($dependent->pertalian) }}">
@@ -380,7 +406,10 @@
 
                                 <td>
                                     <div class="fw-semibold">{{ $dependent->user->name ?? '-' }}</div>
-                                    <small class="text-muted">Ahli utama</small>
+                                    <div class="dependent-meta">
+                                        No. KP:
+                                        {{ $dependent->user?->profile?->no_kp ?? '-' }}
+                                    </div>
                                 </td>
                             </tr>
                         @empty

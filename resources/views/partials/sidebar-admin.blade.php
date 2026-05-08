@@ -1,7 +1,7 @@
-<aside class="app-sidebar sticky" id="sidebar">
+<aside class="app-sidebar sticky" id="sidebar-admin" data-sidebar-role="admin">
     <div class="main-sidebar-header d-flex align-items-center justify-content-center">
         <a href="{{ route('admin.dashboard') }}" class="header-logo d-flex align-items-center gap-2 text-decoration-none">
-            <img src="{{ asset('assets/images/logo_rtb.jpg') }}" alt="Logo RTB"
+            <img src="{{ asset('assets/images/logo_rtb-removebg-preview.png') }}" alt="Logo RTB"
                  style="height: 50px; width: auto; object-fit: contain;">
             <span style="font-size: 22px; font-weight: 800; color: #ffffff;">E-Pusara</span>
         </a>
@@ -51,13 +51,16 @@
                                 Permohonan Keahlian
                             </a>
                         </li>
-                        <li>
-                            <a href="{{ route('admin.khairat.fees.index') }}"
-                               class="submenu-link {{ request()->routeIs('admin.khairat.fees.*') ? 'active' : '' }}">
-                                Senarai Yuran
-                            </a>
-                        </li>
                     </ul>
+                </li>
+
+
+                <li class="slide">
+                    <a href="{{ route('admin.khairat.fees.index') }}"
+                        class="side-menu__item {{ request()->routeIs('admin.khairat.fees.*') ? 'active' : '' }}">
+                        <i class="bx bx-receipt side-menu__icon"></i>
+                        <span class="side-menu__label">Rekod Yuran</span>
+                    </a>
                 </li>
 
                 <li class="slide">
@@ -73,6 +76,14 @@
                     class="side-menu__item {{ request()->routeIs('admin.burial-map.*') ? 'active' : '' }}">
                         <i class="bx bx-map side-menu__icon"></i>
                         <span class="side-menu__label">Peta Plot Kubur</span>
+                    </a>
+                </li>
+
+                <li class="slide">
+                    <a href="{{ route('admin.grave-orders.index') }}"
+                    class="side-menu__item {{ request()->routeIs('admin.grave-orders.*') ? 'active' : '' }}">
+                        <i class="bx bx-building-house side-menu__icon"></i>
+                        <span class="side-menu__label">Tempahan Kepukan</span>
                     </a>
                 </li>
 

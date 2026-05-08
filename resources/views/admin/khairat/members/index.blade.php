@@ -140,33 +140,11 @@
 </style>
 
 @php
-    $approvedCount = $members->getCollection()->where('status_permohonan', 'approved')->count();
-    $pendingCount  = $members->getCollection()->where('status_permohonan', 'pending')->count();
-    $rejectedCount = $members->getCollection()->where('status_permohonan', 'rejected')->count();
-    $activeCount   = $members->getCollection()->where('status_permohonan', 'active')->count();
+    
 
     $currentKeyword = request('search');
-    $currentStatus  = request('status');
+    $currentStatusKehidupan = request('status_kehidupan');
 
-    $getStatusClass = function ($status) {
-        return match($status) {
-            'pending'  => 'warning text-dark',
-            'approved' => 'success',
-            'rejected' => 'danger',
-            'active'   => 'primary',
-            default    => 'secondary',
-        };
-    };
-
-    $getStatusLabel = function ($status) {
-        return match($status) {
-            'pending'  => 'Menunggu',
-            'approved' => 'Diluluskan',
-            'rejected' => 'Ditolak',
-            'active'   => 'Aktif',
-            default    => 'Tiada Status',
-        };
-    };
 @endphp
 
 <div class="container-fluid member-page">
@@ -186,26 +164,26 @@
     </div>
 
     <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card stats-card h-100">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="summary-label">Jumlah Ahli</div>
-                        <div class="summary-value">{{ $members->total() }}</div>
-                    </div>
-                    <div class="stats-icon bg-primary-subtle text-primary">
-                        <i class="bx bx-group"></i>
+            <div class="col-xl-4 col-md-6">
+                <div class="card stats-card h-100">
+                    <div class="card-body d-flex align-items-center justify-content-between">
+                        <div>
+                            <div class="summary-label">Jumlah Ahli Utama</div>
+                            <div class="summary-value">{{ $totalMembers }}</div>
+                        </div>
+                        <div class="stats-icon bg-primary-subtle text-primary">
+                            <i class="bx bx-group"></i>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Diluluskan / Aktif</div>
-                        <div class="summary-value">{{ $approvedCount + $activeCount }}</div>
+                        <div class="summary-label">Masih Hidup</div>
+                        <div class="summary-value">{{ $aliveCount }}</div>
                     </div>
                     <div class="stats-icon bg-success-subtle text-success">
                         <i class="bx bx-check-shield"></i>
@@ -214,26 +192,12 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Menunggu</div>
-                        <div class="summary-value">{{ $pendingCount }}</div>
-                    </div>
-                    <div class="stats-icon bg-warning-subtle text-warning">
-                        <i class="bx bx-time-five"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card stats-card h-100">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="summary-label">Ditolak</div>
-                        <div class="summary-value">{{ $rejectedCount }}</div>
+                        <div class="summary-label">Meninggal Dunia</div>
+                        <div class="summary-value">{{ $deceasedCount }}</div>
                     </div>
                     <div class="stats-icon bg-danger-subtle text-danger">
                         <i class="bx bx-x-circle"></i>
@@ -264,22 +228,42 @@
                     </div>
 
                     <div class="col-lg-3">
-                        <label class="form-label fw-semibold">Status</label>
-                        <select name="status" class="form-select">
+                        <label class="form-label fw-semibold">Status Kehidupan</label>
+                        <select name="status_kehidupan" class="form-select">
                             <option value="">Semua Status</option>
-                            <option value="pending" {{ $currentStatus == 'pending' ? 'selected' : '' }}>Menunggu</option>
-                            <option value="approved" {{ $currentStatus == 'approved' ? 'selected' : '' }}>Diluluskan</option>
-                            <option value="active" {{ $currentStatus == 'active' ? 'selected' : '' }}>Aktif</option>
-                            <option value="rejected" {{ $currentStatus == 'rejected' ? 'selected' : '' }}>Ditolak</option>
+                            <option value="hidup" {{ $currentStatusKehidupan == 'hidup' ? 'selected' : '' }}>
+                                Masih Hidup
+                            </option>
+                            <option value="meninggal" {{ $currentStatusKehidupan == 'meninggal' ? 'selected' : '' }}>
+                                Meninggal Dunia
+                            </option>
                         </select>
                     </div>
 
                     <div class="col-lg-3">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-info btn-wave w-100">
+                        <label class="form-label fw-semibold">Susunan Rekod</label>
+                        <select name="sort" class="form-select">
+                            <option value="name_asc" {{ request('sort', 'name_asc') == 'name_asc' ? 'selected' : '' }}>
+                                Nama A-Z
+                            </option>
+
+                            <option value="name_desc" {{ request('sort') == 'name_desc' ? 'selected' : '' }}>
+                                Nama Z-A
+                            </option>
+
+                            <option value="plan" {{ request('sort') == 'plan' ? 'selected' : '' }}>
+                                Pelan Bayaran
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-lg-12">
+                        <div class="d-flex justify-content-end gap-2">
+                            <button type="submit" class="btn btn-info btn-wave px-5">
                                 <i class="bx bx-search me-1"></i> Cari
                             </button>
-                            <a href="{{ url()->current() }}" class="btn btn-outline-info w-100">
+
+                            <a href="{{ url()->current() }}" class="btn btn-outline-info px-5">
                                 Reset
                             </a>
                         </div>
@@ -314,8 +298,13 @@
                     <tbody>
                         @forelse($members as $index => $member)
                             @php
-                                $statusClass = $getStatusClass($member->status_permohonan);
-                                $statusLabel = $getStatusLabel($member->status_permohonan);
+                                $statusKehidupan = strtolower($member->status_kehidupan ?? 'hidup');
+
+                                $isDeceased = in_array($statusKehidupan, ['meninggal', 'meninggal dunia']);
+
+                                $statusClass = $isDeceased ? 'danger' : 'success';
+                                $statusLabel = $isDeceased ? 'Meninggal Dunia' : 'Masih Hidup';
+
                                 $initial = strtoupper(substr($member->nama ?? 'A', 0, 1));
                             @endphp
 
@@ -345,13 +334,9 @@
                                 </td>
 
                                 <td>
-                                    @if($member->status_permohonan)
-                                        <span class="badge bg-{{ $statusClass }} status-badge">
-                                            {{ $statusLabel }}
-                                        </span>
-                                    @else
-                                        <span class="badge bg-secondary status-badge">Tiada Status</span>
-                                    @endif
+                                    <span class="badge bg-{{ $statusClass }} status-badge">
+                                        {{ $statusLabel }}
+                                    </span>
                                 </td>
 
                                 <td class="text-center">

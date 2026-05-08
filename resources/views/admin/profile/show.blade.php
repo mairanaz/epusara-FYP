@@ -172,20 +172,27 @@
                         <h2 class="fw-bold mb-1">{{ $profile->nama }}</h2>
                         <div class="text-muted mb-3">{{ $profile->no_kp }}</div>
 
-                        @if($profile->status_permohonan)
-                            <span class="badge status-badge
-                                @if($profile->status_permohonan === 'pending') bg-warning-subtle text-warning
-                                @elseif($profile->status_permohonan === 'approved') bg-success-subtle text-success
-                                @elseif($profile->status_permohonan === 'rejected') bg-danger-subtle text-danger
-                                @else bg-secondary-subtle text-secondary
-                                @endif">
-                                Status: {{ ucfirst(str_replace('_', ' ', $profile->status_permohonan)) }}
-                            </span>
-                        @else
-                            <span class="badge bg-secondary-subtle text-secondary status-badge">
-                                Status: Belum Dihantar
-                            </span>
-                        @endif
+                        @php
+                            $statusLabel = match($profile->status_permohonan) {
+                                'pending'  => 'Menunggu',
+                                'approved' => 'Diluluskan',
+                                'active'   => 'Diluluskan',
+                                'rejected' => 'Ditolak',
+                                default    => 'Belum Dihantar',
+                            };
+
+                            $statusBadgeClass = match($profile->status_permohonan) {
+                                'pending'  => 'bg-warning-subtle text-warning',
+                                'approved' => 'bg-success-subtle text-success',
+                                'active'   => 'bg-success-subtle text-success',
+                                'rejected' => 'bg-danger-subtle text-danger',
+                                default    => 'bg-secondary-subtle text-secondary',
+                            };
+                        @endphp
+
+                        <span class="badge {{ $statusBadgeClass }} status-badge">
+                            Status: {{ $statusLabel }}
+                        </span>
                     </div>
                 </div>
 
@@ -365,8 +372,8 @@
                             <div class="info-label">Status Permohonan</div>
                             <div class="info-value">
                                 @if($profile->status_permohonan)
-                                    <span class="badge bg-{{ $statusClass }} status-badge">
-                                        {{ ucfirst(str_replace('_', ' ', $profile->status_permohonan)) }}
+                                    <span class="badge {{ $statusBadgeClass }} status-badge">
+                                        {{ $statusLabel }}
                                     </span>
                                 @else
                                     <span class="badge bg-secondary status-badge">Belum Dihantar</span>

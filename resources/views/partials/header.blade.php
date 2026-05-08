@@ -9,19 +9,17 @@
             <div class="header-element">
                 <div class="horizontal-logo">
                     <a href="{{ auth()->check() ? (auth()->user()->role === 'admin' ? route('admin.dashboard') : route('user.dashboard')) : url('/') }}"
-                        class="header-logo">
-                        <img src="{{ asset('assets/images/brand-logos/desktop-logo.png') }}" alt="logo" class="desktop-logo">
-                        <img src="{{ asset('assets/images/brand-logos/toggle-logo.png') }}" alt="logo" class="toggle-logo">
-                        <img src="{{ asset('assets/images/brand-logos/desktop-dark.png') }}" alt="logo" class="desktop-dark">
-                        <img src="{{ asset('assets/images/brand-logos/toggle-dark.png') }}" alt="logo" class="toggle-dark">
-                        <img src="{{ asset('assets/images/brand-logos/desktop-white.png') }}" alt="logo" class="desktop-white">
-                        <img src="{{ asset('assets/images/brand-logos/toggle-white.png') }}" alt="logo" class="toggle-white">
+                    class="header-logo d-flex align-items-center">
+                        <img src="{{ asset('assets/images/logo_rtb.jpg') }}"
+                            alt="Logo RTB"
+                            style="height: 42px; width: 42px; object-fit: contain;">
                     </a>
                 </div>
             </div>
 
             <div class="header-element">
                 <a aria-label="Hide Sidebar"
+                    id="sidebar-toggle"
                    class="sidemenu-toggle header-link animated-arrow hor-toggle horizontal-navtoggle"
                    data-bs-toggle="sidebar"
                    href="javascript:void(0);">

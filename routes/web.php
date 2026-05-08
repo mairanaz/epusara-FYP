@@ -6,13 +6,18 @@ use App\Http\Controllers\UserDependentController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\WhatsAppController;
 use App\Http\Controllers\DeathReportController;
+use App\Http\Controllers\PaymentGatewayController;
+use App\Http\Controllers\GraveOrderController;
+
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminDeathReportController;
 use App\Http\Controllers\Admin\AdminKhairatMemberController;
 use App\Http\Controllers\Admin\AdminKhairatDependentController;
 use App\Http\Controllers\Admin\AdminKhairatFeeController;
 use App\Http\Controllers\Admin\AdminBurialMapController;
-use App\Http\Controllers\PaymentGatewayController;
+use App\Http\Controllers\Admin\AdminGraveOrderController;
+
+
 
 use Illuminate\Support\Facades\Route;
 
@@ -83,8 +88,7 @@ Route::middleware(['auth'])->group(function () {
         return view('dependent.dashboard');
     })->name('dependent.dashboard');
 
-    Route::get('/dependent/main-member', [UserProfileController::class, 'dependentMainMember'])
-        ->name('dependent.main-member');
+    Route::get('/dependent/main-member', [UserProfileController::class, 'dependentMainMember'])->name('dependent.main-member');
 
     // USER PROFILE (Maklumat Diri) - MULTI STEP
     Route::get('/user/profile', [UserProfileController::class, 'show'])->name('user.profile.show');
@@ -107,8 +111,7 @@ Route::middleware(['auth'])->group(function () {
     Route::put('/user/profile', [UserProfileController::class, 'update'])->name('user.profile.update');
 
     // USER DEPENDENTS / TANGGUNGAN
-    Route::resource('/user/dependents', UserDependentController::class)
-        ->names('user.dependents');
+    Route::resource('/user/dependents', UserDependentController::class)->names('user.dependents');
 
     // USER PAYMENTS
     Route::get('/user/payments', [PaymentController::class, 'index'])->name('user.payments.index');
@@ -124,6 +127,12 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/lapor-kematian', [DeathReportController::class, 'store'])->name('death-reports.store');
     Route::get('/status-laporan-kematian', [DeathReportController::class, 'index'])->name('death-reports.index');
     Route::get('/status-laporan-kematian/{deathReport}', [DeathReportController::class, 'show'])->name('death-reports.show');
+
+    // USER TEMPAHAN KEPUK / NISAN
+    Route::get('/tempahan-kepuk', [GraveOrderController::class, 'index'])->name('grave-orders.index');
+    Route::get('/tempahan-kepuk/create', [GraveOrderController::class, 'create'])->name('grave-orders.create');
+    Route::post('/tempahan-kepuk', [GraveOrderController::class, 'store'])->name('grave-orders.store');
+    Route::get('/tempahan-kepuk/{graveOrder}', [GraveOrderController::class, 'show'])->name('grave-orders.show');
 
     // Breeze profile setting
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -177,8 +186,23 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::get('/death-reports/{deathReport}/select-plot', [AdminDeathReportController::class, 'selectPlot'])->name('death-reports.select-plot');
     Route::post('/death-reports/{deathReport}/store-plot', [AdminDeathReportController::class, 'storePlot'])->name('death-reports.store-plot');
 
-    //peta plot kubur
+    /*
+    |--------------------------------------------------------------------------
+    | peta plot kubur
+    |--------------------------------------------------------------------------
+    */
     Route::get('/burial-map', [AdminBurialMapController::class, 'index'])->name('burial-map.index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tempahan kepuk dan nisan
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/grave-orders/export/excel', [AdminGraveOrderController::class, 'exportExcel'])->name('grave-orders.export.excel');
+    Route::get('/grave-orders/export/pdf', [AdminGraveOrderController::class, 'exportPdf'])->name('grave-orders.export.pdf');
+    Route::get('/grave-orders', [AdminGraveOrderController::class, 'index'])->name('grave-orders.index');
+    Route::get('/grave-orders/{graveOrder}', [AdminGraveOrderController::class, 'show'])->name('grave-orders.show');
+    Route::put('/grave-orders/{graveOrder}', [AdminGraveOrderController::class, 'update'])->name('grave-orders.update');
 });
 
 require __DIR__ . '/auth.php';

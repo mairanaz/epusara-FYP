@@ -1,4 +1,4 @@
-<aside class="app-sidebar sticky" id="sidebar">
+<aside class="app-sidebar sticky" id="sidebar-user" data-sidebar-role="user">
     <div class="main-sidebar-header d-flex align-items-center justify-content-center">
         @php
             $user = auth()->user();
@@ -15,7 +15,7 @@
         @endphp
 
         <a href="{{ $homeRoute }}" class="header-logo d-flex align-items-center gap-2 text-decoration-none">
-            <img src="{{ asset('assets/images/logo_rtb.jpg') }}" alt="Logo RTB"
+            <img src="{{ asset('assets/images/logo_rtb-removebg-preview.png') }}" alt="Logo RTB"
                  style="height: 50px; width: auto; object-fit: contain;">
             <span style="font-size: 22px; font-weight: 800; color: #ffffff;">E-Pusara</span>
         </a>
@@ -79,6 +79,16 @@
                         </a>
                     </li>
 
+                    <li class="slide">
+                        <a href="{{ route('grave-orders.index') }}"
+                        class="side-menu__item {{ request()->routeIs('grave-orders.*') ? 'active' : '' }}">
+                            <i class="bx bx-package side-menu__icon"></i>
+                            <span class="side-menu__label">Tempahan Kepukan</span>
+                        </a>
+                    </li>
+
+                
+
                 @elseif($user->account_type === 'utama')
                     <li class="slide__category"><span class="category-name">Ahli</span></li>
 
@@ -123,6 +133,15 @@
                             <span class="side-menu__label">Laporan Kematian</span>
                         </a>
                     </li>
+
+                    <li class="slide">
+                        <a href="{{ route('grave-orders.index') }}"
+                        class="side-menu__item {{ request()->routeIs('grave-orders.*') ? 'active' : '' }}">
+                            <i class="bx bx-package side-menu__icon"></i>
+                            <span class="side-menu__label">Tempahan Kepukan</span>
+                        </a>
+                    </li>
+
                 @endif
 
             </ul>

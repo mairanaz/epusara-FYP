@@ -137,31 +137,44 @@
     .application-page .hero-subtitle {
         color: #7a6b5f;
     }
+
+    .application-page .applicant-type-text {
+        margin-top: 4px;
+        margin-bottom: 6px;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .application-page .applicant-type-text.main-text {
+        color: #4f46e5;
+    }
+
+    .application-page .applicant-type-text.dependent-text {
+        color: #d97706;
+    }
+
 </style>
 
 @php
-    $pendingCount = $profiles->getCollection()->where('status_permohonan', 'pending')->count();
-    $rejectedCount = $profiles->getCollection()->where('status_permohonan', 'rejected')->count();
-
-    function getStatusClass($status) {
+    $getStatusClass = function ($status) {
         return match($status) {
-            'pending' => 'warning text-dark',
+            'pending'  => 'warning text-dark',
             'approved' => 'success',
+            'active'   => 'success',
             'rejected' => 'danger',
-            'active' => 'primary',
-            default => 'secondary',
+            default    => 'secondary',
         };
-    }
+    };
 
-    function getStatusLabel($status) {
+    $getStatusLabel = function ($status) {
         return match($status) {
-            'pending' => 'Menunggu',
+            'pending'  => 'Menunggu',
             'approved' => 'Diluluskan',
+            'active'   => 'Diluluskan',
             'rejected' => 'Ditolak',
-            'active' => 'Aktif',
-            default => 'Belum Dihantar',
+            default    => 'Belum Dihantar',
         };
-    }
+    };
 @endphp
 
 <div class="container-fluid application-page">
@@ -195,40 +208,54 @@
     @endif
 
     <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6">
-            <div class="card stats-card h-100">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="summary-label">Jumlah Permohonan</div>
-                        <div class="summary-value">{{ $profiles->total() }}</div>
-                    </div>
-                    <div class="stats-icon bg-primary-subtle text-primary">
-                        <i class="bx bx-file"></i>
-                    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="summary-label">Jumlah Permohonan</div>
+                    <div class="summary-value">{{ $totalApplications ?? $profiles->total() }}</div>
+                </div>
+                <div class="stats-icon bg-primary-subtle text-primary">
+                    <i class="bx bx-file"></i>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-xl-3 col-md-6">
-            <div class="card stats-card h-100">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="summary-label">Menunggu</div>
-                        <div class="summary-value">{{ $pendingCount }}</div>
-                    </div>
-                    <div class="stats-icon bg-warning-subtle text-warning">
-                        <i class="bx bx-time-five"></i>
-                    </div>
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="summary-label">Menunggu</div>
+                    <div class="summary-value">{{ $pendingCount ?? 0 }}</div>
+                </div>
+                <div class="stats-icon bg-warning-subtle text-warning">
+                    <i class="bx bx-time-five"></i>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-xl-3 col-md-6">
-            <div class="card stats-card h-100">
-                <div class="card-body d-flex align-items-center justify-content-between">
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="summary-label">Diluluskan</div>
+                    <div class="summary-value">{{ $approvedCount ?? 0 }}</div>
+                </div>
+                <div class="stats-icon bg-success-subtle text-success">
+                    <i class="bx bx-check-shield"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="card stats-card h-100">
+            <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
                         <div class="summary-label">Ditolak</div>
-                        <div class="summary-value">{{ $rejectedCount }}</div>
+                        <div class="summary-value">{{ $rejectedCount ?? 0 }}</div>
                     </div>
                     <div class="stats-icon bg-danger-subtle text-danger">
                         <i class="bx bx-x-circle"></i>
@@ -262,10 +289,15 @@
                         <label class="form-label fw-semibold">Status</label>
                         <select name="status" class="form-select">
                             <option value="">Semua Status</option>
-                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Menunggu</option>
-                            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>Diluluskan</option>
-                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Ditolak</option>
-                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Aktif</option>
+                            <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>
+                                Menunggu
+                            </option>
+                            <option value="approved" {{ request('status') == 'approved' ? 'selected' : '' }}>
+                                Diluluskan
+                            </option>
+                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>
+                                Ditolak
+                            </option>
                         </select>
                     </div>
 
@@ -308,8 +340,8 @@
                     <tbody>
                         @forelse($profiles as $index => $profile)
                             @php
-                                $statusClass = getStatusClass($profile->status_permohonan);
-                                $statusLabel = getStatusLabel($profile->status_permohonan);
+                                $statusClass = $getStatusClass($profile->status_permohonan);
+                                $statusLabel = $getStatusLabel($profile->status_permohonan);
                                 $initial = strtoupper(substr($profile->nama ?? 'A', 0, 1));
                             @endphp
                             <tr>
@@ -320,13 +352,26 @@
                                 <td>
                                     <div class="d-flex align-items-start gap-3">
                                         <div class="person-avatar">{{ $initial }}</div>
+
                                         <div>
-                                            <div class="person-name">{{ $profile->nama }}</div>
-                                            <div class="person-meta">No. MyKad: {{ $profile->no_kp }}</div>
-                                            <div class="person-meta">Telefon: {{ $profile->no_tel_bimbit ?? '-' }}</div>
+                                            <div class="person-name">
+                                                {{ $profile->nama }}
+                                            </div>
+
+                                            <div class="applicant-type-text {{ $profile->is_dependent_profile ? 'dependent-text' : 'main-text' }}">
+                                                @if($profile->is_dependent_profile)
+                                                    Tanggungan = {{ ucfirst($profile->dependent_relation ?? '-') }}
+                                                @else
+                                                    Ahli Utama
+                                                @endif
+                                            </div>
+
+                                        <div class="person-meta">No. MyKad: {{ $profile->no_kp }}</div>
                                         </div>
                                     </div>
                                 </td>
+
+                                
 
                                 <td>
                                     <div class="fw-semibold">
