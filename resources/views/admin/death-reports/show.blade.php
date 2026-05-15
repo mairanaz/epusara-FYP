@@ -209,7 +209,9 @@
 
                         <div class="col-md-6">
                             <label class="text-muted fs-12 d-block mb-1">Umur</label>
-                            <div class="fw-semibold">{{ $deathReport->umur ?: '-' }}</div>
+                            <div class="fw-semibold">
+                                {{ $deathReport->umur !== null ? $deathReport->umur . ' tahun' : '-' }}
+                            </div>
                         </div>
 
                         <div class="col-md-6">

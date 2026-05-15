@@ -10,11 +10,6 @@
                 Semak pelan yuran, status bayaran, baki semasa dan rekod bayaran anda.
             </p>
         </div>
-        <div class="mt-3 mt-md-0">
-            <a href="{{ route('user.payments.create') }}" class="btn btn-info">
-                <i class="bx bx-plus-circle me-1"></i> Teruskan Bayaran
-            </a>
-        </div>
     </div>
 
     @if(session('error'))
@@ -60,6 +55,23 @@
     $schedulePeriods = $summary['schedule_periods'] ?? [];
     $paidPeriods = $summary['paid_periods'] ?? [];
     $membershipStartPeriod = $summary['membership_start_period'] ?? now()->format('Y-m');
+
+    $membershipEndPeriod = $summary['membership_end_period']
+        ?? Carbon::createFromFormat('Y-m', $membershipStartPeriod)->addMonths(11)->format('Y-m');
+
+    try {
+        $membershipStartLabel = Carbon::createFromFormat('Y-m', $membershipStartPeriod)->translatedFormat('F Y');
+    } catch (\Throwable $e) {
+        $membershipStartLabel = $membershipStartPeriod;
+    }
+
+    try {
+        $membershipEndLabel = Carbon::createFromFormat('Y-m', $membershipEndPeriod)->translatedFormat('F Y');
+    } catch (\Throwable $e) {
+        $membershipEndLabel = $membershipEndPeriod;
+    }
+
+    $membershipSessionLabel = $membershipStartLabel . ' - ' . $membershipEndLabel;
 
     $registrationBalance = max(0, $registrationFee - $registrationPaid);
 
@@ -117,7 +129,7 @@
             }
         }
     } else {
-        $nextPaymentLabel = 'Bayaran Tahunan ' . $currentYear;
+        $nextPaymentLabel = 'Bayaran Tahunan ' . $membershipSessionLabel;
     }
 
     $noticeType = 'info';
@@ -146,11 +158,11 @@
         } elseif (!$isFullyPaidYearly) {
             $noticeType = 'warning';
             $noticeTitle = 'Peringatan Bayaran';
-            $noticeMessage = 'Bayaran tahunan anda bagi tahun semasa masih belum lengkap.';
+            $noticeMessage = 'Bayaran tahunan anda masih belum lengkap.';
         } else {
             $noticeType = 'success';
             $noticeTitle = 'Bayaran Terkini';
-            $noticeMessage = 'Bayaran tahunan bagi tahun semasa telah dijelaskan sepenuhnya.';
+            $noticeMessage = 'Bayaran tahunan anda telah dijelaskan sepenuhnya.';
         }
     }
 
@@ -280,8 +292,8 @@
                                     <td class="fw-bold text-info">RM{{ number_format($firstPaymentTotal, 2) }}</td>
                                 </tr>
                                 <tr>
-                                    <th class="bg-light">Tahun Semasa</th>
-                                    <td>{{ $currentYear }}</td>
+                                    <th class="bg-light">Tempoh Yuran</th>
+                                    <td>{{ $membershipSessionLabel }}</td>
                                 </tr>
                             @endif
 
@@ -302,9 +314,9 @@
                             <li>Yuran pendaftaran dikenakan sekali sahaja.</li>
                             @if($plan === 'monthly')
                                 <li>Pelan bulanan dibayar RM{{ number_format($monthlyFee, 2) }} setiap bulan.</li>
-                                <li>Bayaran pertama ialah <strong>RM{{ number_format($firstPaymentTotal, 2) }}</strong> iaitu yuran pendaftaran dan yuran bulan semasa.</li>
+                                <li>Bayaran pertama ialah <strong>RM{{ number_format($firstPaymentTotal, 2) }}</strong> iaitu yuran pendaftaran dan yuran bulan pertama.</li>
                             @else
-                                <li>Pelan tahunan dibayar RM{{ number_format($yearlyFee, 2) }} untuk tahun semasa.</li>
+                                <li>Pelan tahunan dibayar RM{{ number_format($yearlyFee, 2) }} untuk tempoh 12 bulan.</li>
                                 <li>Bayaran pertama ialah <strong>RM{{ number_format($firstPaymentTotal, 2) }}</strong> iaitu yuran pendaftaran dan yuran tahunan.</li>
                             @endif
                         </ul>
@@ -470,7 +482,20 @@
                                     }
 
                                     if ($item->payment_type === 'yearly' && $item->payment_period) {
-                                        return $item->payment_period;
+                                        try {
+                                            if (str_contains($item->payment_period, '_to_')) {
+                                                [$startPeriod, $endPeriod] = explode('_to_', $item->payment_period);
+
+                                                $startLabel = \Carbon\Carbon::createFromFormat('Y-m', $startPeriod)->translatedFormat('F Y');
+                                                $endLabel = \Carbon\Carbon::createFromFormat('Y-m', $endPeriod)->translatedFormat('F Y');
+
+                                                return $startLabel . ' - ' . $endLabel;
+                                            }
+
+                                            return $item->payment_period;
+                                        } catch (\Throwable $e) {
+                                            return $item->payment_period;
+                                        }
                                     }
 
                                     return null;

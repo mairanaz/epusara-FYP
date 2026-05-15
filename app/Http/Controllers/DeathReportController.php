@@ -260,7 +260,7 @@ class DeathReportController extends Controller
             $data['nama_si_mati'] = $mainProfile->nama;
             $data['no_kp_si_mati'] = $mainProfile->no_kp;
             $data['jantina'] = $this->getGenderFromIc($mainProfile->no_kp) ?? $mainProfile->jantina;
-            $data['umur'] = $this->getAgeFromIc($mainProfile->no_kp);
+            $data['umur'] = $this->getAgeFromIc($mainProfile->no_kp, $validated['tarikh_meninggal']);
         } else {
             $dependentQuery = Dependent::where('user_id', $familyUserId)
                 ->where('id', $validated['deceased_id']);
@@ -282,7 +282,7 @@ class DeathReportController extends Controller
             $data['nama_si_mati'] = $dependent->name;
             $data['no_kp_si_mati'] = $dependent->no_kp;
             $data['jantina'] = $this->getGenderFromIc($dependent->no_kp);
-            $data['umur'] = $this->getAgeFromIc($dependent->no_kp);
+            $data['umur'] = $this->getAgeFromIc($dependent->no_kp, $validated['tarikh_meninggal']);
         }
 
         if (empty($data['nama_si_mati']) || empty($data['no_kp_si_mati'])) {
@@ -302,16 +302,19 @@ class DeathReportController extends Controller
         }
 
         if ($request->hasFile('sijil_mati')) {
-            $data['sijil_mati_path'] = $request->file('sijil_mati')->store('death-reports', 'public');
-        }
+    $data['sijil_mati_path'] = $request->file('sijil_mati')
+        ->store('death-reports/sijil-mati', 'public');
+}
 
-        if ($request->hasFile('permit_kebumi')) {
-            $data['permit_kebumi_path'] = $request->file('permit_kebumi')->store('death-reports', 'public');
-        }
+if ($request->hasFile('permit_kebumi')) {
+    $data['permit_kebumi_path'] = $request->file('permit_kebumi')
+        ->store('death-reports/permit-kebumi', 'public');
+}
 
-        if ($request->hasFile('dokumen_sokongan')) {
-            $data['dokumen_sokongan_path'] = $request->file('dokumen_sokongan')->store('death-reports', 'public');
-        }
+if ($request->hasFile('dokumen_sokongan')) {
+    $data['dokumen_sokongan_path'] = $request->file('dokumen_sokongan')
+        ->store('death-reports/dokumen-sokongan', 'public');
+}
 
         DeathReport::create($data);
 
@@ -332,8 +335,12 @@ class DeathReportController extends Controller
         return $lastDigit % 2 === 0 ? 'Perempuan' : 'Lelaki';
     }
 
-    private function getAgeFromIc(?string $ic): ?int
+    private function getAgeFromIc(?string $ic, ?string $tarikhMeninggal): ?int
     {
+        if (!$ic || !$tarikhMeninggal) {
+            return null;
+        }
+
         $digits = preg_replace('/\D/', '', (string) $ic);
 
         if (strlen($digits) < 6) {
@@ -344,22 +351,27 @@ class DeathReportController extends Controller
         $mm = (int) substr($digits, 2, 2);
         $dd = (int) substr($digits, 4, 2);
 
-        if ($mm < 1 || $mm > 12 || $dd < 1 || $dd > 31) {
-            return null;
-        }
-
         $currentYearTwoDigits = (int) now()->format('y');
         $century = $yy <= $currentYearTwoDigits ? 2000 : 1900;
         $year = $century + $yy;
 
+        if (!checkdate($mm, $dd, $year)) {
+            return null;
+        }
+
         try {
-            $birthDate = Carbon::createFromDate($year, $mm, $dd);
-            return $birthDate->age;
+            $birthDate = Carbon::createFromDate($year, $mm, $dd)->startOfDay();
+            $deathDate = Carbon::parse($tarikhMeninggal)->startOfDay();
+
+            if ($birthDate->gt($deathDate)) {
+                return null;
+            }
+
+            return $birthDate->diffInYears($deathDate);
         } catch (\Exception $e) {
             return null;
         }
     }
-
     public function index()
     {
         $authUser = auth()->user();

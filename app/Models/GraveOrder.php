@@ -29,6 +29,8 @@ class GraveOrder extends Model
         'declaration' => 'boolean',
         'approved_at' => 'datetime',
         'completed_at' => 'datetime',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
         'amount' => 'decimal:2',
     ];
 
@@ -215,6 +217,7 @@ class GraveOrder extends Model
         return match ($this->status) {
             'pending' => 'Menunggu Kelulusan',
             'approved' => 'Diluluskan',
+            'completed' => 'Siap',
             'cancelled' => 'Dibatalkan',
             default => ucfirst($this->status),
         };
@@ -224,8 +227,9 @@ class GraveOrder extends Model
     {
         return match ($this->status) {
             'pending' => 'warning',
-            'approved' => 'success',
-            'cancelled' => 'secondary',
+            'approved' => 'primary',
+            'completed' => 'success',
+            'cancelled' => 'danger',
             default => 'secondary',
         };
     }

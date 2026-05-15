@@ -12,11 +12,12 @@ class AdminKhairatDependentController extends Controller
     {
         /*
         |--------------------------------------------------------------------------
-        | Statistik Tetap - Semua Tanggungan
+        | Statistik Tetap - Tanggungan Aktif Sahaja
         |--------------------------------------------------------------------------
-        | Statistik ini tidak berubah walaupun admin buat carian / filter.
+        | Akid yang sudah tidak_layak tidak dikira sebagai tanggungan aktif.
         */
-        $statQuery = Dependent::query();
+        $statQuery = Dependent::query()
+            ->where('status_tanggungan', 'aktif');
 
         $totalCount = (clone $statQuery)->count();
 
@@ -36,9 +37,10 @@ class AdminKhairatDependentController extends Controller
         |--------------------------------------------------------------------------
         | Senarai Tanggungan + Carian / Filter
         |--------------------------------------------------------------------------
-        | Bahagian ini sahaja yang berubah bila admin buat carian.
+        | Papar tanggungan aktif sahaja.
         */
-        $query = Dependent::with(['user', 'user.profile']);
+        $query = Dependent::with(['user', 'user.profile'])
+            ->where('status_tanggungan', 'aktif');
 
         if ($request->filled('search')) {
             $search = trim($request->search);

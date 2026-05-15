@@ -200,6 +200,13 @@
 
                     <div class="col-md-6">
                         <div class="info-row">
+                            <div class="text-muted small">Dibuat Oleh</div>
+                            <div class="fw-bold">{{ $graveOrder->user->name ?? '-' }}</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="info-row">
                             <div class="text-muted small">No. Lot Kubur</div>
                             <div class="fw-bold">{{ $lotNo }}</div>
                         </div>

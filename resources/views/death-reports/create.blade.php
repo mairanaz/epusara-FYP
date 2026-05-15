@@ -24,6 +24,26 @@
 @endphp
 
 <style>
+    .upload-preview img {
+    max-width: 180px;
+    max-height: 180px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    object-fit: cover;
+    display: block;
+}
+
+.upload-pdf-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    color: #334155;
+    font-size: 14px;
+}
     .progress-card {
         background: #fff;
         border-radius: 18px;
@@ -602,50 +622,123 @@
                 </div>
 
                 {{-- STEP 3 --}}
-                <div class="step-section d-none" id="step-3">
-                    <div class="card wizard-card mb-4">
-                        <div class="card-header bg-white border-bottom">
-                            <h5 class="mb-0 fw-semibold">Dokumen Sokongan</h5>
-                        </div>
+<div class="step-section d-none" id="step-3">
+    <div class="card wizard-card mb-4">
+        <div class="card-header bg-white border-bottom">
+            <h5 class="mb-0 fw-semibold">Dokumen Sokongan</h5>
+        </div>
 
-                        <div class="card-body">
-                            <div class="text-muted small mb-3">
-                                Muat naik dokumen jika ada untuk memudahkan semakan pentadbir.
-                            </div>
+        <div class="card-body">
+            <div class="text-muted small mb-3">
+                Muat naik dokumen sokongan jika ada. Anda boleh ambil gambar terus menggunakan kamera telefon
+                atau pilih fail daripada galeri / folder.
+            </div>
 
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Sijil Mati</label>
-                                <input type="file" name="sijil_mati" class="form-control">
-                                <small class="text-muted">
-                                    Format: JPG, JPEG, PNG, PDF. Maksimum 2MB.
-                                </small>
-                            </div>
+            {{-- Sijil Mati --}}
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Sijil Mati</label>
 
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Permit Kebumi</label>
-                                <input type="file" name="permit_kebumi" class="form-control">
-                                <small class="text-muted">
-                                    Format: JPG, JPEG, PNG, PDF. Maksimum 2MB.
-                                </small>
-                            </div>
+                <div class="border rounded-3 p-3 bg-light">
+                    <input type="file"
+                           name="sijil_mati"
+                           id="sijil_mati"
+                           class="d-none upload-input"
+                           accept="image/*,.pdf"
+                           capture="environment"
+                           data-preview="sijil_mati_preview"
+                           data-filename="sijil_mati_name">
 
-                            <div class="mb-0">
-                                <label class="form-label fw-semibold">Dokumen Sokongan Tambahan</label>
-                                <input type="file" name="dokumen_sokongan" class="form-control">
-                            </div>
+                    <label for="sijil_mati" class="btn btn-outline-success mb-2">
+                        <i class="ri-camera-line me-1"></i>
+                        Ambil Gambar / Pilih Fail
+                    </label>
 
-                            <div class="d-flex justify-content-between mt-4">
-                                <button type="button" class="btn btn-outline-secondary prev-step" data-prev="2">
-                                    Sebelumnya
-                                </button>
-
-                                <button type="button" class="btn btn-info next-step" data-next="4">
-                                    Seterusnya
-                                </button>
-                            </div>
-                        </div>
+                    <div class="small text-muted mb-2" id="sijil_mati_name">
+                        Tiada fail dipilih
                     </div>
+
+                    <div id="sijil_mati_preview" class="upload-preview d-none mt-2"></div>
+
+                    <small class="text-muted d-block mt-2">
+                        Format: JPG, JPEG, PNG, PDF. Maksimum 2MB.
+                    </small>
                 </div>
+            </div>
+
+            {{-- Permit Kebumi --}}
+            <div class="mb-4">
+                <label class="form-label fw-semibold">Permit Kebumi</label>
+
+                <div class="border rounded-3 p-3 bg-light">
+                    <input type="file"
+                           name="permit_kebumi"
+                           id="permit_kebumi"
+                           class="d-none upload-input"
+                           accept="image/*,.pdf"
+                           capture="environment"
+                           data-preview="permit_kebumi_preview"
+                           data-filename="permit_kebumi_name">
+
+                    <label for="permit_kebumi" class="btn btn-outline-success mb-2">
+                        <i class="ri-camera-line me-1"></i>
+                        Ambil Gambar / Pilih Fail
+                    </label>
+
+                    <div class="small text-muted mb-2" id="permit_kebumi_name">
+                        Tiada fail dipilih
+                    </div>
+
+                    <div id="permit_kebumi_preview" class="upload-preview d-none mt-2"></div>
+
+                    <small class="text-muted d-block mt-2">
+                        Format: JPG, JPEG, PNG, PDF. Maksimum 2MB.
+                    </small>
+                </div>
+            </div>
+
+            {{-- Dokumen Sokongan Tambahan --}}
+            <div class="mb-0">
+                <label class="form-label fw-semibold">Dokumen Sokongan Tambahan</label>
+
+                <div class="border rounded-3 p-3 bg-light">
+                    <input type="file"
+                           name="dokumen_sokongan"
+                           id="dokumen_sokongan"
+                           class="d-none upload-input"
+                           accept="image/*,.pdf"
+                           capture="environment"
+                           data-preview="dokumen_sokongan_preview"
+                           data-filename="dokumen_sokongan_name">
+
+                    <label for="dokumen_sokongan" class="btn btn-outline-success mb-2">
+                        <i class="ri-camera-line me-1"></i>
+                        Ambil Gambar / Pilih Fail
+                    </label>
+
+                    <div class="small text-muted mb-2" id="dokumen_sokongan_name">
+                        Tiada fail dipilih
+                    </div>
+
+                    <div id="dokumen_sokongan_preview" class="upload-preview d-none mt-2"></div>
+
+                    <small class="text-muted d-block mt-2">
+                        Format: JPG, JPEG, PNG, PDF. Maksimum 2MB.
+                    </small>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" class="btn btn-outline-secondary prev-step" data-prev="2">
+                    Sebelumnya
+                </button>
+
+                <button type="button" class="btn btn-info next-step" data-next="4">
+                    Seterusnya
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
 
                 {{-- STEP 4 --}}
                 <div class="step-section d-none" id="step-4">
@@ -1044,6 +1137,49 @@
         toggleLuarRTB();
         showStep(1);
     });
+
+    document.querySelectorAll('.upload-input').forEach(input => {
+    input.addEventListener('change', function () {
+        const file = this.files && this.files.length > 0 ? this.files[0] : null;
+
+        const fileNameId = this.dataset.filename;
+        const previewId = this.dataset.preview;
+
+        const fileNameText = document.getElementById(fileNameId);
+        const previewBox = document.getElementById(previewId);
+
+        if (!fileNameText || !previewBox) return;
+
+        previewBox.innerHTML = '';
+        previewBox.classList.add('d-none');
+
+        if (!file) {
+            fileNameText.textContent = 'Tiada fail dipilih';
+            return;
+        }
+
+        fileNameText.textContent = file.name;
+
+        if (file.type.startsWith('image/')) {
+            const imageUrl = URL.createObjectURL(file);
+
+            previewBox.innerHTML = `
+                <img src="${imageUrl}" alt="Preview dokumen">
+            `;
+
+            previewBox.classList.remove('d-none');
+        } else if (file.type === 'application/pdf') {
+            previewBox.innerHTML = `
+                <div class="upload-pdf-box">
+                    <i class="ri-file-pdf-line"></i>
+                    <span>Fail PDF dipilih</span>
+                </div>
+            `;
+
+            previewBox.classList.remove('d-none');
+        }
+    });
+});
 </script>
 
 @endsection

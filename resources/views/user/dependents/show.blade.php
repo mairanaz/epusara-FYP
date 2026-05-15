@@ -101,6 +101,47 @@
                         </div>
 
                         <div class="col-md-6">
+                            <label class="form-label text-muted">Status Perkahwinan</label>
+                            <div class="fw-semibold fs-14">
+                                {{ $dependent->status_perkahwinan ? ucfirst($dependent->status_perkahwinan) : '-' }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Tinggal Bersama Ahli Utama</label>
+                            <div class="fw-semibold fs-14">
+                                {{ $dependent->tinggal_bersama ? 'Ya' : 'Tidak' }}
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label text-muted">Status Tanggungan</label>
+                            <div>
+                                @if(($dependent->status_tanggungan ?? 'aktif') === 'aktif')
+                                    <span class="badge bg-success">Layak / Aktif</span>
+
+                                @elseif($dependent->status_tanggungan === 'tidak_layak')
+                                    <span class="badge bg-danger">Tidak Layak</span>
+                                    <div class="small text-muted mt-1">
+                                        {{ $dependent->sebab_tidak_layak ?? '-' }}
+                                    </div>
+
+                                    @if($dependent->tarikh_keluar_tanggungan)
+                                        <div class="small text-muted">
+                                            Tarikh keluar: {{ \Carbon\Carbon::parse($dependent->tarikh_keluar_tanggungan)->format('d/m/Y') }}
+                                        </div>
+                                    @endif
+
+                                @elseif($dependent->status_tanggungan === 'meninggal')
+                                    <span class="badge bg-dark">Meninggal Dunia</span>
+
+                                @else
+                                    <span class="badge bg-secondary">Tidak Diketahui</span>
+                                @endif
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
                             <label class="form-label text-muted">No. Telefon</label>
                             <div class="fw-semibold fs-14">{{ $dependent->no_tel ?? '-' }}</div>
                         </div>

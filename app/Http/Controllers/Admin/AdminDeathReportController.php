@@ -10,6 +10,7 @@ use App\Models\BurialPlot;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class AdminDeathReportController extends Controller
 {
@@ -36,7 +37,8 @@ class AdminDeathReportController extends Controller
             $query->where('verification_category', $request->verification_category);
         }
 
-        $deathReports = $query->latest()->paginate(10)->withQueryString();
+        $deathReports = $query->latest()->paginate(10);
+        $deathReports->appends($request->query());
 
         $summary = [
             'total' => DeathReport::count(),
@@ -110,7 +112,7 @@ class AdminDeathReportController extends Controller
         }
 
         return redirect()
-            ->route('admin.death-reports.show', $deathReport)
+            ->route('admin.death-reports.index', $deathReport)
             ->with('success', 'Semakan laporan kematian berjaya dikemaskini.');
     }
 
@@ -127,8 +129,10 @@ class AdminDeathReportController extends Controller
             abort(404, 'Fail tidak dijumpai.');
         }
 
-        $fullPath = Storage::disk('public')->path($path);
-        $mimeType = Storage::disk('public')->mimeType($path) ?? 'application/octet-stream';
+        $fullPath = storage_path('app/public/' . ltrim($path, '/'));
+        $mimeType = file_exists($fullPath)
+            ? mime_content_type($fullPath)
+            : 'application/octet-stream';
 
         return response()->file($fullPath, [
             'Content-Type' => $mimeType,
@@ -136,12 +140,20 @@ class AdminDeathReportController extends Controller
         ]);
     }
 
-    private function determineZone($deathReport)
+    private function determineZone(DeathReport $deathReport)
     {
         $jantina = strtolower(trim($deathReport->jantina ?? ''));
-        $umur = is_numeric($deathReport->umur) ? (int) $deathReport->umur : null;
 
-        if (!is_null($umur) && $umur <= 12) {
+        $isKanakKanak = $this->isOneYearAndBelowFromIc(
+            $deathReport->no_kp_si_mati,
+            $deathReport->tarikh_meninggal
+        );
+
+        /*
+        * Zon K = Kanak-kanak
+        * Syarat sistem: si mati berumur 1 tahun dan ke bawah sahaja.
+        */
+        if ($isKanakKanak === true) {
             return 'K';
         }
 
@@ -154,6 +166,42 @@ class AdminDeathReportController extends Controller
         }
 
         return null;
+    }
+
+    private function isOneYearAndBelowFromIc(?string $noKp, ?string $tarikhMeninggal): ?bool
+    {
+        if (!$noKp || !$tarikhMeninggal) {
+            return null;
+        }
+
+        $ic = preg_replace('/\D/', '', $noKp);
+
+        if (strlen($ic) < 6) {
+            return null;
+        }
+
+        $yy = (int) substr($ic, 0, 2);
+        $mm = (int) substr($ic, 2, 2);
+        $dd = (int) substr($ic, 4, 2);
+
+        $currentYearTwoDigit = (int) now()->format('y');
+
+        $year = $yy <= $currentYearTwoDigit
+            ? 2000 + $yy
+            : 1900 + $yy;
+
+        if (!checkdate($mm, $dd, $year)) {
+            return null;
+        }
+
+        $tarikhLahir = Carbon::createFromDate($year, $mm, $dd)->startOfDay();
+        $tarikhMati = Carbon::parse($tarikhMeninggal)->startOfDay();
+
+        if ($tarikhLahir->gt($tarikhMati)) {
+            return null;
+        }
+
+        return $tarikhMati->lte($tarikhLahir->copy()->addYear());
     }
 
     public function selectPlot(DeathReport $deathReport)

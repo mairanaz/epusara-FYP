@@ -108,7 +108,7 @@ class AdminProfileController extends Controller
         ));
     }
 
-    public function approve(UserProfile $profile)
+  public function approve(UserProfile $profile)
     {
         if (in_array($profile->status_permohonan, ['approved', 'active'])) {
             return redirect()->route('admin.profile.show', $profile)
@@ -125,14 +125,37 @@ class AdminProfileController extends Controller
                 ->with('error', 'Hanya permohonan berstatus menunggu boleh diluluskan.');
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Update status permohonan ahli
+        |--------------------------------------------------------------------------
+        */
         $profile->update([
             'status_permohonan' => 'approved',
             'status_kehidupan' => 'hidup',
             'catatan_permohonan' => 'Permohonan telah diluluskan oleh pentadbir.',
         ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Jika profile ini ada user login, update akaun user
+        |--------------------------------------------------------------------------
+        | Ini penting untuk kes naik taraf:
+        | tanggungan -> ahli utama
+        |--------------------------------------------------------------------------
+        */
+        $user = $profile->user;
+
+        if ($user) {
+            $user->update([
+                'account_type' => 'utama',
+                'linked_profile_id' => $profile->id,
+                'linked_dependent_id' => null,
+            ]);
+        }
+
         return redirect()->route('admin.profile.show', $profile)
-            ->with('success', 'Permohonan berjaya diluluskan.');
+            ->with('success', 'Permohonan berjaya diluluskan dan akaun pengguna telah dikemaskini sebagai ahli utama.');
     }
 
     public function reject(Request $request, UserProfile $profile)

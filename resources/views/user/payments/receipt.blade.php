@@ -164,7 +164,20 @@
             }
 
             if ($item->payment_type === 'yearly' && $item->payment_period) {
-                return $item->payment_period;
+                try {
+                    if (str_contains($item->payment_period, '_to_')) {
+                        [$startPeriod, $endPeriod] = explode('_to_', $item->payment_period);
+
+                        $startLabel = \Carbon\Carbon::createFromFormat('Y-m', $startPeriod)->translatedFormat('F Y');
+                        $endLabel = \Carbon\Carbon::createFromFormat('Y-m', $endPeriod)->translatedFormat('F Y');
+
+                        return $startLabel . ' - ' . $endLabel;
+                    }
+
+                    return $item->payment_period;
+                } catch (\Throwable $e) {
+                    return $item->payment_period;
+                }
             }
 
             return null;
@@ -294,8 +307,21 @@
                                             $itemPeriodLabel = $item->payment_period;
                                         }
                                     } elseif ($item->payment_type === 'yearly' && $item->payment_period) {
-                                        $itemPeriodLabel = $item->payment_period;
-                                    }
+                                            try {
+                                                if (str_contains($item->payment_period, '_to_')) {
+                                                    [$startPeriod, $endPeriod] = explode('_to_', $item->payment_period);
+
+                                                    $startLabel = \Carbon\Carbon::createFromFormat('Y-m', $startPeriod)->translatedFormat('F Y');
+                                                    $endLabel = \Carbon\Carbon::createFromFormat('Y-m', $endPeriod)->translatedFormat('F Y');
+
+                                                    $itemPeriodLabel = $startLabel . ' - ' . $endLabel;
+                                                } else {
+                                                    $itemPeriodLabel = $item->payment_period;
+                                                }
+                                            } catch (\Throwable $e) {
+                                                $itemPeriodLabel = $item->payment_period;
+                                            }
+                                        }
                                 @endphp
 
                                 <tr>

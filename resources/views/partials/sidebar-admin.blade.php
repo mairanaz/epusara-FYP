@@ -11,8 +11,9 @@
         <nav class="main-menu-container nav nav-pills flex-column">
             <ul class="main-menu">
 
+                {{-- UTAMA --}}
                 <li class="slide__category">
-                    <span class="category-name">Admin</span>
+                    <span class="category-name">Utama</span>
                 </li>
 
                 <li class="slide">
@@ -25,7 +26,7 @@
 
                 <li class="slide">
                     <a href="javascript:void(0);"
-                       class="side-menu__item khairat-toggle"
+                       class="side-menu__item khairat-toggle {{ request()->routeIs('admin.khairat.members.*') || request()->routeIs('admin.khairat.dependents.*') || request()->routeIs('admin.profile.*') ? 'active' : '' }}"
                        id="khairatToggle">
                         <i class="bx bx-folder side-menu__icon"></i>
                         <span class="side-menu__label">Pengurusan Khairat</span>
@@ -39,51 +40,80 @@
                                 Senarai Ahli
                             </a>
                         </li>
+
                         <li>
                             <a href="{{ route('admin.khairat.dependents.index') }}"
                                class="submenu-link {{ request()->routeIs('admin.khairat.dependents.*') ? 'active' : '' }}">
                                 Senarai Tanggungan
                             </a>
                         </li>
+
                         <li>
                             <a href="{{ route('admin.profile.index') }}"
                                class="submenu-link {{ request()->routeIs('admin.profile.*') ? 'active' : '' }}">
-                                Permohonan Keahlian
+                                Permohonan Ahli
                             </a>
                         </li>
                     </ul>
                 </li>
 
 
-                <li class="slide">
-                    <a href="{{ route('admin.khairat.fees.index') }}"
-                        class="side-menu__item {{ request()->routeIs('admin.khairat.fees.*') ? 'active' : '' }}">
-                        <i class="bx bx-receipt side-menu__icon"></i>
-                        <span class="side-menu__label">Rekod Yuran</span>
-                    </a>
+                {{-- MENU OPERASI --}}
+                <li class="slide__category">
+                    <span class="category-name">Menu Operasi</span>
                 </li>
 
                 <li class="slide">
                     <a href="{{ route('admin.death-reports.index') }}"
                        class="side-menu__item {{ request()->routeIs('admin.death-reports.*') ? 'active' : '' }}">
                         <i class="bx bx-notepad side-menu__icon"></i>
-                        <span class="side-menu__label">Laporan Kematian</span>
-                    </a>
-                </li>
-
-                <li class="slide">
-                    <a href="{{ route('admin.burial-map.index') }}"
-                    class="side-menu__item {{ request()->routeIs('admin.burial-map.*') ? 'active' : '' }}">
-                        <i class="bx bx-map side-menu__icon"></i>
-                        <span class="side-menu__label">Peta Plot Kubur</span>
+                        <span class="side-menu__label">Pengesahan Kematian</span>
                     </a>
                 </li>
 
                 <li class="slide">
                     <a href="{{ route('admin.grave-orders.index') }}"
-                    class="side-menu__item {{ request()->routeIs('admin.grave-orders.*') ? 'active' : '' }}">
+                       class="side-menu__item {{ request()->routeIs('admin.grave-orders.*') ? 'active' : '' }}">
                         <i class="bx bx-building-house side-menu__icon"></i>
                         <span class="side-menu__label">Tempahan Kepukan</span>
+                    </a>
+                </li>
+
+                <li class="slide">
+                    <a href="{{ route('admin.burial-map.index') }}"
+                       class="side-menu__item {{ request()->routeIs('admin.burial-map.*') ? 'active' : '' }}">
+                        <i class="bx bx-map side-menu__icon"></i>
+                        <span class="side-menu__label">Peta Lot Kubur</span>
+                    </a>
+                </li>
+
+                <li class="slide">
+                    <a href="{{ route('admin.burial-records.index') }}"
+                    class="side-menu__item {{ request()->routeIs('admin.burial-records.*') ? 'active' : '' }}">
+                        <i class="bx bx-map-pin side-menu__icon"></i>
+                        <span class="side-menu__label">Rekod Kubur</span>
+                    </a>
+                </li>
+
+
+                {{-- LAPORAN / STATISTIK --}}
+                <li class="slide__category">
+                    <span class="category-name">Laporan / Statistik</span>
+                </li>
+
+                <li class="slide">
+                    <a href="{{ route('admin.khairat.fees.index') }}"
+                       class="side-menu__item {{ request()->routeIs('admin.khairat.fees.*') ? 'active' : '' }}">
+                        <i class="bx bx-receipt side-menu__icon"></i>
+                        <span class="side-menu__label">Rekod Yuran</span>
+                    </a>
+                </li>
+
+                <li class="slide">
+                    <a href="{{ route('admin.reports.grave-orders.index') }}"
+                       class="side-menu__item {{ request()->routeIs('admin.reports.grave-orders.*') ? 'active' : '' }}">
+                        <i class="bx bx-bar-chart-alt-2 side-menu__icon"></i>
+                        <span class="side-menu__label">Laporan Kepukan</span>
                     </a>
                 </li>
 
@@ -93,6 +123,12 @@
 </aside>
 
 <style>
+    /*
+    |--------------------------------------------------------------------------
+    | Sidebar Submenu - Pengurusan Khairat
+    |--------------------------------------------------------------------------
+    */
+
     .khairat-submenu {
         max-height: 0;
         overflow: hidden;
@@ -147,6 +183,7 @@
 
     .submenu-link.active::before {
         border-color: #ffffff;
+        background-color: #ffffff;
     }
 
     .submenu-link:hover {
@@ -183,15 +220,56 @@
     .khairat-toggle {
         transition: background-color 0.18s ease, color 0.18s ease;
     }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Sidebar Category Spacing
+    |--------------------------------------------------------------------------
+    */
+
+    #sidebar-admin .slide__category {
+        margin: 18px 0 8px 0;
+        padding: 0 20px;
+    }
+
+    #sidebar-admin .slide__category:first-child {
+        margin-top: 8px;
+    }
+
+    #sidebar-admin .category-name {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.45);
+    }
+
+    #sidebar-admin .main-menu {
+        padding-bottom: 24px;
+    }
+
+    #sidebar-admin .main-menu > .slide {
+        margin-bottom: 4px;
+    }
 </style>
 
 <script>
 (function () {
+    const isKhairatPage =
+        "{{ request()->routeIs('admin.khairat.members.*') || request()->routeIs('admin.khairat.dependents.*') || request()->routeIs('admin.profile.*') ? 'true' : 'false' }}" === "true";
+
     const savedState = localStorage.getItem('khairatSubmenuOpen');
-    document.documentElement.setAttribute(
-        'data-khairat-open',
-        savedState === 'true' ? 'true' : 'false'
-    );
+
+    if (isKhairatPage) {
+        document.documentElement.setAttribute('data-khairat-open', 'true');
+        localStorage.setItem('khairatSubmenuOpen', 'true');
+    } else {
+        document.documentElement.setAttribute(
+            'data-khairat-open',
+            savedState === 'true' ? 'true' : 'false'
+        );
+    }
 })();
 </script>
 
@@ -203,6 +281,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!toggle || !submenu || !arrow) return;
 
+    const isKhairatPage =
+        "{{ request()->routeIs('admin.khairat.members.*') || request()->routeIs('admin.khairat.dependents.*') || request()->routeIs('admin.profile.*') ? 'true' : 'false' }}" === "true";
+
     const applyState = (isOpen) => {
         submenu.classList.toggle('show', isOpen);
         arrow.classList.toggle('rotate', isOpen);
@@ -210,11 +291,16 @@ document.addEventListener('DOMContentLoaded', function () {
         localStorage.setItem('khairatSubmenuOpen', isOpen ? 'true' : 'false');
     };
 
-    const savedState = localStorage.getItem('khairatSubmenuOpen') === 'true';
-    applyState(savedState);
+    if (isKhairatPage) {
+        applyState(true);
+    } else {
+        const savedState = localStorage.getItem('khairatSubmenuOpen') === 'true';
+        applyState(savedState);
+    }
 
     toggle.addEventListener('click', function (e) {
         e.preventDefault();
+
         const isOpen = !submenu.classList.contains('show');
         applyState(isOpen);
     });

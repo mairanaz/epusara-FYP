@@ -300,7 +300,11 @@
                             @php
                                 $statusKehidupan = strtolower($member->status_kehidupan ?? 'hidup');
 
-                                $isDeceased = in_array($statusKehidupan, ['meninggal', 'meninggal dunia']);
+                                $isDeceased = in_array($statusKehidupan, [
+                                    'meninggal',
+                                    'meninggal dunia',
+                                    'meninggal_dunia'
+                                ]);
 
                                 $statusClass = $isDeceased ? 'danger' : 'success';
                                 $statusLabel = $isDeceased ? 'Meninggal Dunia' : 'Masih Hidup';

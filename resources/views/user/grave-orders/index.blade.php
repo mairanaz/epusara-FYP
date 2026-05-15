@@ -226,12 +226,13 @@
                     <tr>
                         <th style="width: 60px;">Bil</th>
                         <th>Nama Si Mati</th>
+                        <th>Dibuat Oleh</th>
                         <th>No. Lot Kubur</th>
                         <th>Jenis Tempahan</th>
                         <th>Jumlah Bayaran</th>
                         <th>Status</th>
                         <th>Tarikh Mohon</th>
-                        <th class="text-end">Tindakan</th>
+                        <th>Tindakan</th>
                     </tr>
                 </thead>
 
@@ -264,6 +265,16 @@
 
                                 <div class="text-muted small text-uppercase">
                                     {{ $order->category === 'kanak-kanak' ? 'Kanak-kanak' : 'Dewasa' }}
+                                </div>
+                            </td>
+
+                            <td>
+                                <div class="fw-bold">
+                                    {{ $order->user->name ?? '-' }}
+                                </div>
+
+                                <div class="text-muted small">
+                                    Pemohon tempahan
                                 </div>
                             </td>
 
@@ -338,7 +349,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="8">
+                            <td colspan="9">
                                 <div class="empty-box">
                                     <i class="bi bi-inbox fs-1 d-block mb-3"></i>
 

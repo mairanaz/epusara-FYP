@@ -55,6 +55,12 @@
                         </a>
                     </li>
 
+                    {{-- MAKLUMAT AKAUN --}}
+                    <li class="slide__category">
+                        <span class="category-name">Maklumat Akaun</span>
+                    </li>
+
+
                     <li class="slide">
                         <a href="{{ route('user.profile.show') }}"
                            class="side-menu__item {{ request()->routeIs('user.profile.*') ? 'active' : '' }}">
@@ -71,11 +77,29 @@
                         </a>
                     </li>
 
+                    {{-- PENGURUSAN KEMATIAN --}}
+                    <li class="slide__category">
+                        <span class="category-name">Pengurusan Kematian</span>
+                    </li>
+
                     <li class="slide">
                         <a href="{{ route('death-reports.index') }}"
                         class="side-menu__item {{ request()->routeIs('death-reports.index') || request()->routeIs('death-reports.show') ? 'active' : '' }}">
                             <i class="bx bx-file side-menu__icon"></i>
                             <span class="side-menu__label">Laporan Kematian</span>
+                        </a>
+                    </li>
+
+                    {{-- TEMPAHAN / KUBUR --}}
+                    <li class="slide__category">
+                        <span class="category-name">Tempahan / Kubur</span>
+                    </li>
+
+                    <li class="slide">
+                        <a href="{{ route('user.grave-locations.index') }}"
+                        class="side-menu__item {{ request()->routeIs('user.grave-locations.*') ? 'active' : '' }}">
+                            <i class="bx bx-map side-menu__icon"></i>
+                            <span class="side-menu__label">Lokasi Kubur</span>
                         </a>
                     </li>
 
@@ -100,21 +124,18 @@
                         </a>
                     </li>
 
+                    {{-- MAKLUMAT AKAUN --}}
+                    <li class="slide__category">
+                        <span class="category-name">Maklumat Akaun</span>
+                    </li>
+
                     <li class="slide">
                         <a href="{{ route('user.profile.show') }}"
                            class="side-menu__item {{ request()->routeIs('user.profile.*') ? 'active' : '' }}">
                             <i class="bx bx-user side-menu__icon"></i>
                             <span class="side-menu__label">Profil</span>
                         </a>
-                    </li>
-
-                    <li class="slide">
-                        <a href="{{ route('user.dependents.index') }}"
-                           class="side-menu__item {{ request()->routeIs('user.dependents.*') ? 'active' : '' }}">
-                            <i class="bx bx-group side-menu__icon"></i>
-                            <span class="side-menu__label">Tanggungan</span>
-                        </a>
-                    </li>
+                    </li>  
 
                     @if(in_array($profileStatus, ['approved', 'active']))
                         <li class="slide">
@@ -126,11 +147,42 @@
                         </li>
                     @endif
 
+                    {{-- MAKLUMAT KELUARGA --}}
+                    <li class="slide__category">
+                        <span class="category-name">Maklumat Keluarga</span>
+                    </li>
+
+                    <li class="slide">
+                        <a href="{{ route('user.dependents.index') }}"
+                           class="side-menu__item {{ request()->routeIs('user.dependents.*') ? 'active' : '' }}">
+                            <i class="bx bx-group side-menu__icon"></i>
+                            <span class="side-menu__label">Tanggungan</span>
+                        </a>
+                    </li>
+
+                    {{-- PENGURUSAN KEMATIAN --}}
+                    <li class="slide__category">
+                        <span class="category-name">Pengurusan Kematian</span>
+                    </li>
+
                     <li class="slide">
                         <a href="{{ route('death-reports.index') }}"
                         class="side-menu__item {{ request()->routeIs('death-reports.index') || request()->routeIs('death-reports.show') ? 'active' : '' }}">
                             <i class="bx bx-file side-menu__icon"></i>
                             <span class="side-menu__label">Laporan Kematian</span>
+                        </a>
+                    </li>
+
+                    {{-- TEMPAHAN / KUBUR --}}
+                    <li class="slide__category">
+                        <span class="category-name">Tempahan / Kubur</span>
+                    </li>
+
+                    <li class="slide">
+                        <a href="{{ route('user.grave-locations.index') }}"
+                        class="side-menu__item {{ request()->routeIs('user.grave-locations.*') ? 'active' : '' }}">
+                            <i class="bx bx-map side-menu__icon"></i>
+                            <span class="side-menu__label">Lokasi Kubur</span>
                         </a>
                     </li>
 

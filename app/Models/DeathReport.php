@@ -111,4 +111,9 @@ class DeathReport extends Model
         return $this->hasOne(\App\Models\GraveOrder::class);
     }
 
+    public function graveOrders()
+    {
+        return $this->hasMany(\App\Models\GraveOrder::class);
+    }
+
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\DeathReport;
 use App\Models\GraveOrder;
+use App\Models\Dependent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -11,27 +12,47 @@ class GraveOrderController extends Controller
 {
     public function index()
     {
-       $orders = GraveOrder::with(['deathReport', 'burialPlot'])
-        ->where('user_id', Auth::id())
-        ->orderByRaw("CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END")
-        ->latest()
-        ->paginate(10);
+        $mainUserId = $this->getMainUserId();
+
+        $orders = GraveOrder::with([
+                'user.profile',
+                'deathReport.dependent',
+                'deathReport.burialPlot',
+                'deathReport.assignedBurialPlot',
+                'burialPlot',
+            ])
+            ->whereHas('deathReport', function ($query) use ($mainUserId) {
+                $query->where('user_id', $mainUserId)
+                    ->orWhereHas('dependent', function ($q) use ($mainUserId) {
+                        $q->where('user_id', $mainUserId);
+                    });
+            })
+            ->orderByRaw("CASE WHEN status = 'cancelled' THEN 1 ELSE 0 END")
+            ->latest()
+            ->paginate(10);
 
         return view('user.grave-orders.index', compact('orders'));
     }
 
     public function create()
     {
+        $mainUserId = $this->getMainUserId();
+
         $deathReports = DeathReport::with([
                 'graveOrder',
                 'burialPlot',
                 'assignedBurialPlot',
                 'dependent',
             ])
-            ->where('user_id', Auth::id())
             ->where('status', 'disahkan')
             ->whereDoesntHave('graveOrder', function ($query) {
                 $query->whereIn('status', ['pending', 'approved']);
+            })
+            ->where(function ($query) use ($mainUserId) {
+                $query->where('user_id', $mainUserId)
+                    ->orWhereHas('dependent', function ($q) use ($mainUserId) {
+                        $q->where('user_id', $mainUserId);
+                    });
             })
             ->latest()
             ->get();
@@ -57,10 +78,16 @@ class GraveOrderController extends Controller
             'declaration.accepted' => 'Sila sahkan perakuan sebelum menghantar permohonan.',
         ]);
 
-        $deathReport = DeathReport::with(['burialPlot', 'assignedBurialPlot'])
+        $mainUserId = $this->getMainUserId();
+        $deathReport = DeathReport::with(['burialPlot', 'assignedBurialPlot', 'dependent'])
             ->where('id', $request->death_report_id)
-            ->where('user_id', Auth::id())
             ->where('status', 'disahkan')
+            ->where(function ($query) use ($mainUserId) {
+                $query->where('user_id', $mainUserId)
+                    ->orWhereHas('dependent', function ($q) use ($mainUserId) {
+                        $q->where('user_id', $mainUserId);
+                    });
+            })
             ->firstOrFail();
 
         $umur = is_numeric($deathReport->umur) ? (int) $deathReport->umur : null;
@@ -123,10 +150,51 @@ class GraveOrderController extends Controller
 
     public function show(GraveOrder $graveOrder)
     {
-        abort_if($graveOrder->user_id !== Auth::id(), 403);
+        $mainUserId = $this->getMainUserId();
 
-        $graveOrder->load(['deathReport', 'burialPlot']);
+        $graveOrder->load([
+            'user.profile',
+            'deathReport.dependent',
+            'deathReport.burialPlot',
+            'deathReport.assignedBurialPlot',
+            'burialPlot',
+        ]);
+
+        $isFamilyOrder = false;
+
+        if ($graveOrder->deathReport) {
+            if ($graveOrder->deathReport->user_id == $mainUserId) {
+                $isFamilyOrder = true;
+            }
+
+            if (
+                $graveOrder->deathReport->dependent &&
+                $graveOrder->deathReport->dependent->user_id == $mainUserId
+            ) {
+                $isFamilyOrder = true;
+            }
+        }
+
+        abort_if(!$isFamilyOrder, 403);
 
         return view('user.grave-orders.show', compact('graveOrder'));
     }
+
+    private function getMainUserId()
+    {
+        $user = Auth::user();
+
+        // Kalau user login ini ialah akaun tanggungan
+        if ($user->linked_dependent_id) {
+            $dependent = Dependent::find($user->linked_dependent_id);
+
+            if ($dependent) {
+                return $dependent->user_id; // user_id ahli utama
+            }
+        }
+
+        // Kalau user login ialah ahli utama
+        return $user->id;
+    }
+
 }

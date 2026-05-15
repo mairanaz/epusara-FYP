@@ -135,9 +135,26 @@
         color: #6b7280;
     }
 
-        .death-page .hero-subtitle {
+
+    .death-page .hero-subtitle {
         color: #6b7280;
     }
+
+    .death-page .pagination svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    .death-page .pagination {
+        margin-bottom: 0;
+    }
+
+    .death-page nav svg {
+        width: 18px !important;
+        height: 18px !important;
+    }
+
+    
 </style>
 
 @php
@@ -169,8 +186,18 @@
     </div>
 
     @if(session('success'))
-        <div class="alert alert-success border-0 shadow-sm rounded-4">
-            {{ session('success') }}
+        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bx bx-check-circle me-1"></i>
+            <strong>Berjaya!</strong> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm rounded-4 mb-4" role="alert">
+            <i class="bx bx-error-circle me-1"></i>
+            <strong>Ralat!</strong> {{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 

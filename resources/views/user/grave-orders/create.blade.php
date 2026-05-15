@@ -323,6 +323,7 @@
 </style>
 
 @php
+    $pemohonTempahan = Auth::user()->name;
     $deathReportsData = $deathReports->map(function ($report) {
         $plot = $report->final_burial_plot;
 
@@ -342,7 +343,7 @@
             'nama_waris' => $report->nama_pelapor ?? '-',
             'no_tel_waris' => $report->no_tel_pelapor ?? '-',
             'pertalian_waris' => $report->pertalian_pelapor ?? '-',
-            'alamat_waris' => $report->alamat_terakhir ?? '-',
+            'alamat_terakhir' => $report->alamat_terakhir ?? '-',
         ];
     })->values();
 
@@ -537,6 +538,11 @@
                                     </div>
 
                                     <div class="col-md-3">
+                                        <div class="section-label">Tempat Kematian</div>
+                                        <div class="section-value" id="infoLastAddress">-</div>
+                                    </div>
+
+                                    <div class="col-md-3">
                                         <div class="section-label">Kategori Tempahan</div>
                                         <div class="section-value text-info" id="infoDetectedCategory">-</div>
                                     </div>
@@ -562,11 +568,6 @@
                                         <div class="col-md-4">
                                             <div class="section-label">Pertalian</div>
                                             <div class="section-value" id="infoWarisRelation">-</div>
-                                        </div>
-
-                                        <div class="col-md-12">
-                                            <div class="section-label">Alamat / Alamat Terakhir</div>
-                                            <div class="section-value" id="infoWarisAddress">-</div>
                                         </div>
                                     </div>
                                 </div>
@@ -712,8 +713,8 @@
                         </div>
 
                         <div class="border-bottom pb-3 mb-3">
-                            <div class="text-muted small">Nama Waris</div>
-                            <div class="fw-bold" id="summaryWaris">Belum dipilih</div>
+                            <div class="text-muted small">Pemohon Tempahan</div>
+                            <div class="fw-bold" id="summaryPemohon">{{ $pemohonTempahan }}</div>
                         </div>
 
                         <div class="border-bottom pb-3 mb-3">
@@ -897,10 +898,10 @@
     const infoWarisName = document.getElementById('infoWarisName');
     const infoWarisPhone = document.getElementById('infoWarisPhone');
     const infoWarisRelation = document.getElementById('infoWarisRelation');
-    const infoWarisAddress = document.getElementById('infoWarisAddress');
+    const infoLastAddress = document.getElementById('infoLastAddress');
 
     const summaryName = document.getElementById('summaryName');
-    const summaryWaris = document.getElementById('summaryWaris');
+    const summaryPemohon = document.getElementById('summaryPemohon');
     const summaryLot = document.getElementById('summaryLot');
 
     const categoryInput = document.getElementById('categoryInput');
@@ -1064,10 +1065,10 @@
         infoWarisName.textContent = '-';
         infoWarisPhone.textContent = '-';
         infoWarisRelation.textContent = '-';
-        infoWarisAddress.textContent = '-';
+        infoLastAddress.textContent = '-';
 
         summaryName.textContent = 'Belum dipilih';
-        summaryWaris.textContent = 'Belum dipilih';
+        summaryPemohon.textContent = @json($pemohonTempahan);
         summaryLot.textContent = '-';
 
         selectedDetectedCategory = null;
@@ -1100,10 +1101,10 @@
         infoWarisName.textContent = selected.nama_waris || '-';
         infoWarisPhone.textContent = selected.no_tel_waris || '-';
         infoWarisRelation.textContent = selected.pertalian_waris || '-';
-        infoWarisAddress.textContent = selected.alamat_waris || '-';
+        infoLastAddress.textContent = selected.alamat_terakhir || '-';
 
         summaryName.textContent = selected.nama_si_mati || '-';
-        summaryWaris.textContent = selected.nama_waris || '-';
+        summaryPemohon.textContent = @json($pemohonTempahan);
         summaryLot.textContent = selected.plot_code || '-';
 
         selectedDetectedCategory = selected.detected_category;

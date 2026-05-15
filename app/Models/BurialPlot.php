@@ -17,10 +17,13 @@ class BurialPlot extends Model
         'status',
         'death_report_id',
         'buried_at',
+        'grave_image',
+        'grave_image_updated_at',
     ];
 
     protected $casts = [
         'buried_at' => 'date',
+        'grave_image_updated_at' => 'datetime',
     ];
 
     public function deathReport()
@@ -56,4 +59,10 @@ class BurialPlot extends Model
     {
         return $this->status === 'occupied';
     }
+
+    public function graveOrders()
+    {
+        return $this->hasMany(GraveOrder::class);
+    }
+
 }

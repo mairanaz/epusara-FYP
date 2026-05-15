@@ -153,6 +153,9 @@
         color: #d97706;
     }
 
+    .application-page .applicant-type-text.upgrade-text {
+        color: #059669;
+    }
 </style>
 
 @php
@@ -208,51 +211,51 @@
     @endif
 
     <div class="row g-3 mb-4">
-    <div class="col-xl-3 col-md-6">
-        <div class="card stats-card h-100">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div>
-                    <div class="summary-label">Jumlah Permohonan</div>
-                    <div class="summary-value">{{ $totalApplications ?? $profiles->total() }}</div>
-                </div>
-                <div class="stats-icon bg-primary-subtle text-primary">
-                    <i class="bx bx-file"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-xl-3 col-md-6">
-        <div class="card stats-card h-100">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div>
-                    <div class="summary-label">Menunggu</div>
-                    <div class="summary-value">{{ $pendingCount ?? 0 }}</div>
-                </div>
-                <div class="stats-icon bg-warning-subtle text-warning">
-                    <i class="bx bx-time-five"></i>
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="summary-label">Jumlah Permohonan</div>
+                        <div class="summary-value">{{ $totalApplications ?? $profiles->total() }}</div>
+                    </div>
+                    <div class="stats-icon bg-primary-subtle text-primary">
+                        <i class="bx bx-file"></i>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card stats-card h-100">
-            <div class="card-body d-flex align-items-center justify-content-between">
-                <div>
-                    <div class="summary-label">Diluluskan</div>
-                    <div class="summary-value">{{ $approvedCount ?? 0 }}</div>
-                </div>
-                <div class="stats-icon bg-success-subtle text-success">
-                    <i class="bx bx-check-shield"></i>
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="summary-label">Menunggu</div>
+                        <div class="summary-value">{{ $pendingCount ?? 0 }}</div>
+                    </div>
+                    <div class="stats-icon bg-warning-subtle text-warning">
+                        <i class="bx bx-time-five"></i>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <div class="col-xl-3 col-md-6">
-        <div class="card stats-card h-100">
-            <div class="card-body d-flex align-items-center justify-content-between">
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="summary-label">Diluluskan</div>
+                        <div class="summary-value">{{ $approvedCount ?? 0 }}</div>
+                    </div>
+                    <div class="stats-icon bg-success-subtle text-success">
+                        <i class="bx bx-check-shield"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card stats-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
                         <div class="summary-label">Ditolak</div>
                         <div class="summary-value">{{ $rejectedCount ?? 0 }}</div>
@@ -343,7 +346,27 @@
                                 $statusClass = $getStatusClass($profile->status_permohonan);
                                 $statusLabel = $getStatusLabel($profile->status_permohonan);
                                 $initial = strtoupper(substr($profile->nama ?? 'A', 0, 1));
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Semak rekod lama dalam table dependents
+                                |--------------------------------------------------------------------------
+                                | Jika no_kp pernah wujud sebagai tanggungan dan status_tanggungan
+                                | sudah tidak_layak, maka permohonan ini ialah naik taraf ahli utama.
+                                |--------------------------------------------------------------------------
+                                */
+                                $dependentRecord = \App\Models\Dependent::where('no_kp', $profile->no_kp)
+                                    ->latest()
+                                    ->first();
+
+                                $isUpgradedFromDependent = $dependentRecord
+                                    && ($dependentRecord->status_tanggungan ?? null) === 'tidak_layak'
+                                    && in_array($profile->status_permohonan, ['approved', 'active']);
+
+                                $isStillActiveDependent = $dependentRecord
+                                    && ($dependentRecord->status_tanggungan ?? 'aktif') === 'aktif';
                             @endphp
+
                             <tr>
                                 <td class="fw-semibold text-muted">
                                     {{ $profiles->firstItem() + $index }}
@@ -358,20 +381,26 @@
                                                 {{ $profile->nama }}
                                             </div>
 
-                                            <div class="applicant-type-text {{ $profile->is_dependent_profile ? 'dependent-text' : 'main-text' }}">
-                                                @if($profile->is_dependent_profile)
-                                                    Tanggungan = {{ ucfirst($profile->dependent_relation ?? '-') }}
-                                                @else
+                                            @if($isUpgradedFromDependent)
+                                                <div class="applicant-type-text upgrade-text">
+                                                    Naik Taraf Ahli Utama
+                                                </div>
+                                            @elseif($isStillActiveDependent)
+                                                <div class="applicant-type-text dependent-text">
+                                                    Tanggungan = {{ ucwords($dependentRecord->pertalian ?? '-') }}
+                                                </div>
+                                            @else
+                                                <div class="applicant-type-text main-text">
                                                     Ahli Utama
-                                                @endif
-                                            </div>
+                                                </div>
+                                            @endif
 
-                                        <div class="person-meta">No. MyKad: {{ $profile->no_kp }}</div>
+                                            <div class="person-meta">
+                                                No. MyKad: {{ $profile->no_kp }}
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
-
-                                
 
                                 <td>
                                     <div class="fw-semibold">

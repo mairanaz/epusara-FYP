@@ -15,18 +15,24 @@ class Dependent extends Model
         'no_kp',
         'pasangan',
         'pertalian',
+        'status_perkahwinan',
+        'tinggal_bersama',
+        'status_tanggungan',
+        'sebab_tidak_layak',
+        'tarikh_keluar_tanggungan',
         'no_tel',
         'status_kehidupan',
         'tarikh_kematian',
     ];
 
     protected $casts = [
+        'tinggal_bersama' => 'boolean',
         'tarikh_kematian' => 'date',
+        'tarikh_keluar_tanggungan' => 'date',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-    
 }

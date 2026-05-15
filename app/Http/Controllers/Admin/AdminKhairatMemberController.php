@@ -14,18 +14,28 @@ class AdminKhairatMemberController extends Controller
     {
         /*
         |--------------------------------------------------------------------------
+        | Status Kehidupan
+        |--------------------------------------------------------------------------
+        | Database ada simpan "meninggal_dunia", jadi kita masukkan sekali.
+        */
+        $aliveStatuses = ['hidup', 'aktif'];
+        $deceasedStatuses = ['meninggal', 'meninggal dunia', 'meninggal_dunia'];
+
+        /*
+        |--------------------------------------------------------------------------
         | Query Asas - Ahli Utama Sahaja
         |--------------------------------------------------------------------------
         | Senarai Ahli hanya paparkan ahli utama yang sudah diluluskan / aktif.
         | Tanggungan tidak dipaparkan di sini.
         */
         $mainMemberQuery = UserProfile::query()
-            ->whereIn('status_permohonan', ['approved', 'active'])
-            ->whereNotExists(function ($query) {
-                $query->selectRaw(1)
-                    ->from('dependents')
-                    ->whereColumn('dependents.no_kp', 'user_profiles.no_kp');
-            });
+    ->whereIn('status_permohonan', ['approved', 'active'])
+    ->whereNotExists(function ($query) {
+        $query->selectRaw(1)
+            ->from('dependents')
+            ->whereColumn('dependents.no_kp', 'user_profiles.no_kp')
+            ->where('dependents.status_tanggungan', 'aktif');
+    });
 
         /*
         |--------------------------------------------------------------------------
@@ -35,14 +45,14 @@ class AdminKhairatMemberController extends Controller
         $totalMembers = (clone $mainMemberQuery)->count();
 
         $aliveCount = (clone $mainMemberQuery)
-            ->where(function ($query) {
+            ->where(function ($query) use ($aliveStatuses) {
                 $query->whereNull('status_kehidupan')
-                    ->orWhereIn('status_kehidupan', ['hidup', 'aktif']);
+                    ->orWhereIn('status_kehidupan', $aliveStatuses);
             })
             ->count();
 
         $deceasedCount = (clone $mainMemberQuery)
-            ->whereIn('status_kehidupan', ['meninggal', 'meninggal dunia'])
+            ->whereIn('status_kehidupan', $deceasedStatuses)
             ->count();
 
         /*
@@ -57,21 +67,21 @@ class AdminKhairatMemberController extends Controller
 
             $query->where(function ($q) use ($search) {
                 $q->where('nama', 'like', "%{$search}%")
-                ->orWhere('no_kp', 'like', "%{$search}%")
-                ->orWhere('no_tel_bimbit', 'like', "%{$search}%");
+                    ->orWhere('no_kp', 'like', "%{$search}%")
+                    ->orWhere('no_tel_bimbit', 'like', "%{$search}%");
             });
         }
 
         if ($request->filled('status_kehidupan')) {
             if ($request->status_kehidupan === 'hidup') {
-                $query->where(function ($q) {
+                $query->where(function ($q) use ($aliveStatuses) {
                     $q->whereNull('status_kehidupan')
-                    ->orWhereIn('status_kehidupan', ['hidup', 'aktif']);
+                        ->orWhereIn('status_kehidupan', $aliveStatuses);
                 });
             }
 
             if ($request->status_kehidupan === 'meninggal') {
-                $query->whereIn('status_kehidupan', ['meninggal', 'meninggal dunia']);
+                $query->whereIn('status_kehidupan', $deceasedStatuses);
             }
         }
 
@@ -111,7 +121,11 @@ class AdminKhairatMemberController extends Controller
 
         $statusKehidupan = strtolower($member->status_kehidupan ?? 'hidup');
 
-        $isDeceased = in_array($statusKehidupan, ['meninggal', 'meninggal dunia']);
+        $isDeceased = in_array($statusKehidupan, [
+            'meninggal',
+            'meninggal dunia',
+            'meninggal_dunia',
+        ]);
 
         $statusClass = $isDeceased ? 'danger' : 'success';
         $statusLabel = $isDeceased ? 'Meninggal Dunia' : 'Masih Hidup';

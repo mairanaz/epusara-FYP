@@ -131,6 +131,42 @@
                             </div>
 
                             <div class="col-md-6">
+                                <label class="form-label">Status Perkahwinan</label>
+                                <select name="status_perkahwinan" id="status_perkahwinan" class="form-select @error('status_perkahwinan') is-invalid @enderror">
+                                    <option value="">-- Pilih Status --</option>
+                                    <option value="bujang" {{ old('status_perkahwinan', $dependent->status_perkahwinan) == 'bujang' ? 'selected' : '' }}>Bujang</option>
+                                    <option value="berkahwin" {{ old('status_perkahwinan', $dependent->status_perkahwinan) == 'berkahwin' ? 'selected' : '' }}>Berkahwin</option>
+                                    <option value="duda" {{ old('status_perkahwinan', $dependent->status_perkahwinan) == 'duda' ? 'selected' : '' }}>Duda</option>
+                                    <option value="janda" {{ old('status_perkahwinan', $dependent->status_perkahwinan) == 'janda' ? 'selected' : '' }}>Janda</option>
+                                </select>
+
+                                @error('status_perkahwinan')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+
+                                <small class="text-muted">
+                                    Anak hanya layak sebagai tanggungan jika masih bujang.
+                                </small>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label">Tinggal Bersama Ahli Utama?</label>
+                                <select name="tinggal_bersama" id="tinggal_bersama" class="form-select @error('tinggal_bersama') is-invalid @enderror" required>
+                                    <option value="">-- Pilih --</option>
+                                    <option value="1" {{ old('tinggal_bersama', $dependent->tinggal_bersama) == '1' ? 'selected' : '' }}>Ya</option>
+                                    <option value="0" {{ old('tinggal_bersama', $dependent->tinggal_bersama) == '0' ? 'selected' : '' }}>Tidak</option>
+                                </select>
+
+                                @error('tinggal_bersama')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+
+                                <small class="text-muted">
+                                    Ibu/bapa kandung atau mertua wajib tinggal bersama ahli utama.
+                                </small>
+                            </div>
+
+                            <div class="col-md-6">
                                 <label class="form-label">No. Telefon</label>
                                 <input type="text" name="no_tel" class="form-control"
                                        value="{{ old('no_tel', $dependent->no_tel) }}">
@@ -186,9 +222,13 @@
 document.addEventListener('DOMContentLoaded', function () {
     const pasanganSelect = document.getElementById('pasangan');
     const pertalianSelect = document.getElementById('pertalian');
+    const statusPerkahwinanSelect = document.getElementById('status_perkahwinan');
+    const tinggalBersamaSelect = document.getElementById('tinggal_bersama');
 
     const spouseRelation = @json($spouseRelation);
     const selectedPertalian = @json(old('pertalian', $dependent->pertalian));
+    const selectedStatusPerkahwinan = @json(old('status_perkahwinan', $dependent->status_perkahwinan));
+    const selectedTinggalBersama = @json(old('tinggal_bersama', $dependent->tinggal_bersama));
 
     const nonSpouseRelations = [
         'anak',
@@ -229,8 +269,48 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    pasanganSelect.addEventListener('change', renderPertalianOptions);
+    function handleEligibilityFields() {
+        const pertalian = pertalianSelect.value;
+
+        statusPerkahwinanSelect.removeAttribute('required');
+        tinggalBersamaSelect.removeAttribute('required');
+
+        if (pertalian === 'suami' || pertalian === 'isteri') {
+            statusPerkahwinanSelect.value = 'berkahwin';
+            tinggalBersamaSelect.value = selectedTinggalBersama ?? '1';
+        }
+
+        if (pertalian === 'anak') {
+            statusPerkahwinanSelect.setAttribute('required', true);
+
+            if (selectedStatusPerkahwinan) {
+                statusPerkahwinanSelect.value = selectedStatusPerkahwinan;
+            }
+        }
+
+        if (
+            pertalian === 'bapa kandung' ||
+            pertalian === 'ibu kandung' ||
+            pertalian === 'bapa mertua' ||
+            pertalian === 'ibu mertua'
+        ) {
+            tinggalBersamaSelect.setAttribute('required', true);
+
+            if (selectedTinggalBersama !== null && selectedTinggalBersama !== '') {
+                tinggalBersamaSelect.value = selectedTinggalBersama;
+            }
+        }
+    }
+
+    pasanganSelect.addEventListener('change', function () {
+        renderPertalianOptions();
+        handleEligibilityFields();
+    });
+
+    pertalianSelect.addEventListener('change', handleEligibilityFields);
+
     renderPertalianOptions();
+    handleEligibilityFields();
 });
 </script>
 @endsection

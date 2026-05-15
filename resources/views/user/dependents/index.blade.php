@@ -22,6 +22,13 @@
         </div>
     @endif
 
+    @if(session('warning'))
+        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="ri-error-warning-line me-1"></i> {{ session('warning') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    @endif
+
     <div class="row">
         <div class="col-xl-3 col-md-6 col-sm-6">
             <div class="card custom-card">
@@ -94,7 +101,8 @@
                             <th>Pasangan</th>
                             <th>Pertalian</th>
                             <th>No. Tel</th>
-                            <th>Status</th>
+                            <th>Status Kehidupan</th>
+                            <th>Status Tanggungan</th>
                             <th width="220">Tindakan</th>
                         </tr>
                     </thead>
@@ -133,6 +141,33 @@
                                 </td>
 
                                 <td>
+                                    @if(($dependent->status_tanggungan ?? 'aktif') === 'aktif')
+                                        <span class="badge bg-success">Layak / Aktif</span>
+
+                                    @elseif($dependent->status_tanggungan === 'tidak_layak')
+                                        <span class="badge bg-danger">Tidak Layak</span>
+
+                                        @if($dependent->sebab_tidak_layak)
+                                            <div class="small text-muted mt-1">
+                                                {{ $dependent->sebab_tidak_layak }}
+                                            </div>
+                                        @endif
+
+                                        @if($dependent->tarikh_keluar_tanggungan)
+                                            <div class="small text-muted">
+                                                Keluar: {{ \Carbon\Carbon::parse($dependent->tarikh_keluar_tanggungan)->format('d/m/Y') }}
+                                            </div>
+                                        @endif
+
+                                    @elseif($dependent->status_tanggungan === 'meninggal')
+                                        <span class="badge bg-dark">Meninggal Dunia</span>
+
+                                    @else
+                                        <span class="badge bg-secondary">Tidak Diketahui</span>
+                                    @endif
+                                </td>
+
+                                <td>
                                     <div class="d-flex flex-wrap gap-1">
                                         <a href="{{ route('user.dependents.show', $dependent->id) }}" class="btn btn-info-light btn-sm">
                                             <i class="ri-eye-line me-1"></i> Lihat
@@ -157,7 +192,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center py-5">
+                                <td colspan="9" class="text-center py-5">
                                     <div class="d-flex flex-column align-items-center">
                                         <div class="avatar avatar-xl bg-light text-muted mb-3">
                                             <i class="ri-team-line fs-2"></i>
