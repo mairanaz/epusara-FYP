@@ -12,6 +12,7 @@ use App\Http\Controllers\PaymentGatewayController;
 use App\Http\Controllers\GraveOrderController;
 use App\Http\Controllers\UserGraveLocationController;
 use App\Http\Controllers\UserUpgradeMembershipController;
+use App\Http\Controllers\PublicGraveSearchController;
 
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminDeathReportController;
@@ -22,6 +23,7 @@ use App\Http\Controllers\Admin\AdminBurialMapController;
 use App\Http\Controllers\Admin\AdminGraveOrderController;
 use App\Http\Controllers\Admin\GraveOrderReportController;
 use App\Http\Controllers\Admin\AdminBurialRecordController;
+use App\Http\Controllers\Admin\AdminDeathReportReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,6 +37,12 @@ Route::get('/', function () {
 
 Route::get('/whatsapp/lapor-kematian', [WhatsAppController::class, 'laporKematian'])
     ->name('whatsapp.lapor-kematian');
+
+Route::get('/ziarah-kubur', [PublicGraveSearchController::class, 'index'])
+    ->name('public.grave-search.index');
+
+Route::get('/ziarah-kubur/{deathReport}', [PublicGraveSearchController::class, 'show'])
+    ->name('public.grave-search.show');
 
 /*
 |--------------------------------------------------------------------------
@@ -333,8 +341,15 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
         Route::get('/fees', [AdminKhairatFeeController::class, 'index'])
             ->name('fees.index');
 
+        Route::get('/fees/export/excel', [AdminKhairatFeeController::class, 'exportExcel'])
+            ->name('fees.export.excel');
+
+        Route::get('/fees/export/pdf', [AdminKhairatFeeController::class, 'previewPdf'])
+            ->name('fees.export.pdf');
+
         Route::get('/fees/{payment}', [AdminKhairatFeeController::class, 'show'])
             ->name('fees.show');
+
     });
 
     /*
@@ -357,7 +372,7 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
 
     /*
     |--------------------------------------------------------------------------
-    | LAPORAN KEMATIAN
+    | PENGURUSAN KEMATIAN
     |--------------------------------------------------------------------------
     */
 
@@ -418,6 +433,8 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     Route::get('/reports/grave-orders', [GraveOrderReportController::class, 'index'])
         ->name('reports.grave-orders.index');
 
+    Route::get('/reports/deaths', [AdminDeathReportReportController::class, 'index'])
+            ->name('reports.deaths.index');
     /*
     |--------------------------------------------------------------------------
     | REKOD KUBUR

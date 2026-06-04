@@ -110,6 +110,14 @@
                 </li>
 
                 <li class="slide">
+                    <a href="{{ route('admin.reports.deaths.index') }}"
+                       class="side-menu__item {{ request()->routeIs('admin.reports.deaths.*') ? 'active' : '' }}">
+                        <i class="bx bx-user-x side-menu__icon"></i>
+                        <span class="side-menu__label">Laporan Kematian</span>
+                    </a>
+                </li>
+
+                <li class="slide">
                     <a href="{{ route('admin.reports.grave-orders.index') }}"
                        class="side-menu__item {{ request()->routeIs('admin.reports.grave-orders.*') ? 'active' : '' }}">
                         <i class="bx bx-bar-chart-alt-2 side-menu__icon"></i>

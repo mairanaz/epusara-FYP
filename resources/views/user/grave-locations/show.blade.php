@@ -30,6 +30,19 @@
             'main_road_width' => 1750,
             'road_center_x' => null,
         ],
+        'W' => [
+            'class' => 'zone-perempuan',
+            'label' => 'Zon Perempuan',
+            'col' => 88,
+            'svg_width' => 2250,
+            'svg_height' => 2650,
+            'grave_start_x' => 150,
+            'grave_start_y' => 440,
+            'row_gap' => 160,
+            'right_road_x' => 2050,
+            'main_road_width' => 1750,
+            'road_center_x' => null,
+        ],
         'L' => [
             'class' => 'zone-lelaki',
             'label' => 'Zon Lelaki',
@@ -108,15 +121,80 @@
         $rightTreeX = $rightRoadX + 135;
 
         $svgWidth = max($mapConfig['svg_width'], $rightRoadX + 430);
+} else {
+    $rightRoadX = null;
+    $rightFeatureX = null;
+    $compassX = $mapConfig['svg_width'] - 235;
+    $pondokX = null;
+    $rightTreeX = null;
+    $svgWidth = $mapConfig['svg_width'];
+}
+
+/*
+|--------------------------------------------------------------------------
+| Lokasi SVG bagi lot yang dipilih
+|--------------------------------------------------------------------------
+| Digunakan untuk menunjukkan laluan rujukan daripada pintu masuk
+| menuju lot pusara yang dipilih.
+*/
+$selectedX = $graveStartX;
+$selectedY = $graveStartY;
+
+$selectedRowIndex = $plots->keys()->search($selectedPlot->row_number);
+$selectedRowIndex = $selectedRowIndex === false ? 0 : $selectedRowIndex;
+
+$selectedY = $graveStartY + ($selectedRowIndex * $graveRowGap);
+
+$selectedRowPlots = $plots->get($selectedPlot->row_number, collect())->values();
+
+if ($zone === 'L') {
+    if ($selectedPlot->lot_number <= 28) {
+        $selectedPosition = $selectedRowPlots
+            ->where('lot_number', '<=', 28)
+            ->values()
+            ->search(fn ($plot) => $plot->id === $selectedPlot->id);
+
+        $selectedPosition = $selectedPosition === false ? 0 : $selectedPosition;
+        $selectedX = $graveStartX + ($selectedPosition * $graveCol);
     } else {
-        $rightRoadX = null;
-        $rightFeatureX = null;
-        $compassX = $mapConfig['svg_width'] - 235;
-        $pondokX = null;
-        $rightTreeX = null;
-        $svgWidth = $mapConfig['svg_width'];
+        $selectedPosition = $selectedRowPlots
+            ->where('lot_number', '>', 28)
+            ->values()
+            ->search(fn ($plot) => $plot->id === $selectedPlot->id);
+
+        $selectedPosition = $selectedPosition === false ? 0 : $selectedPosition;
+        $selectedX = $mapConfig['road_center_x'] + 220 + ($selectedPosition * $graveCol);
     }
-@endphp
+} else {
+        $selectedPosition = $selectedRowPlots
+            ->search(fn ($plot) => $plot->id === $selectedPlot->id);
+
+        $selectedPosition = $selectedPosition === false ? 0 : $selectedPosition;
+        $selectedX = $graveStartX + ($selectedPosition * $graveCol);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Maklumat baris lot
+    |--------------------------------------------------------------------------
+    */
+    $plotParts = explode('-', $selectedPlot->plot_code ?? '');
+    $selectedRowLabel = $plotParts[1] ?? ('Baris ' . $selectedPlot->row_number);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Kedudukan pintu masuk dan laluan panduan
+    |--------------------------------------------------------------------------
+    | Pintu masuk diletakkan pada bahagian kiri atas pelan.
+    | Pastikan kedudukan ini bersesuaian dengan lokasi sebenar perkuburan.
+    */
+    $entranceX = $topRoadStartX + 18;
+    $entranceY = 109;
+
+    $guideLaneX = $graveStartX - 55;
+    $guideTargetX = $selectedX + ($graveWidth / 2);
+    $guideTargetY = $selectedY - 28;
+    @endphp
 
 <div class="container-fluid cemetery-page">
 
@@ -193,36 +271,62 @@
                     </div>
                 </div>
 
-                {{-- Lokasi Ditanda --}}
-                <div class="card border-0 shadow-sm cemetery-card">
-                    <div class="card-body">
-                        <div class="panel-title-wrap">
-                            <span class="panel-icon blue"><i class="bx bx-map-pin"></i></span>
-                            <div>
-                                <div class="panel-title">Lokasi Ditanda</div>
-                                <div class="panel-subtitle">Lot si mati dipaparkan dengan warna hijau</div>
-                            </div>
-                        </div>
+                {{-- Panduan Ke Lot Pusara --}}
+<div class="card border-0 shadow-sm cemetery-card">
+    <div class="card-body">
+        <div class="panel-title-wrap">
+            <span class="panel-icon blue"><i class="bx bx-walk"></i></span>
+            <div>
+                <div class="panel-title">Panduan Ke Lot Pusara</div>
+                <div class="panel-subtitle">Bermula dari pintu masuk utama</div>
+            </div>
+        </div>
 
-                        <div class="selected-lot-box user-selected-lot">
-                            {{ $selectedPlot->plot_code ?? '-' }}
-                        </div>
-
-                        <div class="selected-note">
-                            Lot berwarna hijau ialah lokasi kubur si mati.
-                            Lot lain dipaparkan sebagai rujukan kedudukan sahaja.
-                        </div>
-
-                        @if(!empty($selectedPlot->grave_image))
-                            <button type="button"
-                                    class="btn btn-success w-100 rounded-pill py-2 mt-3"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#graveImageModal">
-                                <i class="bx bx-image me-1"></i> Lihat Gambar Kubur
-                            </button>
-                        @endif
-                    </div>
+        <div class="route-step-list">
+            <div class="route-step-item">
+                <span class="route-step-number blue">1</span>
+                <div>
+                    <div class="route-step-title">Pintu Masuk Utama</div>
+                    <div class="route-step-note">Anda bermula dari sini</div>
                 </div>
+            </div>
+
+            <div class="route-step-item">
+                <span class="route-step-number blue">2</span>
+                <div>
+                    <div class="route-step-title">Rujuk Laluan Panduan</div>
+                    <div class="route-step-note">Ikuti garisan biru menuju kawasan lot</div>
+                </div>
+            </div>
+
+            <div class="route-step-item">
+                <span class="route-step-number green">3</span>
+                <div>
+                    <div class="route-step-title">Cari Baris {{ $selectedRowLabel }}</div>
+                    <div class="route-step-note">Lot hijau ialah destinasi anda</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="selected-lot-box user-selected-lot mt-3">
+            <i class="bx bx-map-pin me-1"></i>
+            {{ $selectedPlot->plot_code ?? '-' }}
+        </div>
+
+        <div class="selected-note">
+            Garisan biru pada pelan digunakan sebagai panduan arah dalam kawasan perkuburan.
+        </div>
+
+        @if(!empty($selectedPlot->grave_image))
+            <button type="button"
+                    class="btn btn-success w-100 rounded-pill py-2 mt-3"
+                    data-bs-toggle="modal"
+                    data-bs-target="#graveImageModal">
+                <i class="bx bx-image me-1"></i> Lihat Gambar Kubur
+            </button>
+        @endif
+    </div>
+</div>
 
                 {{-- Petunjuk --}}
                 <div class="card border-0 shadow-sm cemetery-card">
@@ -236,6 +340,16 @@
                         </div>
 
                         <div class="legend-list">
+                            <div class="legend-item">
+                                <span class="entrance-legend"></span>
+                                <span>Pintu Masuk Utama</span>
+                            </div>
+
+                            <div class="legend-item">
+                                <span class="route-legend"></span>
+                                <span>Laluan Rujukan</span>
+                            </div>
+
                             <div class="legend-item">
                                 <span class="legend-box selected-box-user"></span>
                                 <span>Lokasi Kubur Si Mati</span>
@@ -504,6 +618,95 @@
                                                     opacity="0.8"/>
                                             @endif
 
+                                        </g>
+
+                                        {{-- Laluan rujukan dari pintu masuk ke lot dipilih --}}
+                                        <g class="svg-route-guide">
+
+                                            <path d="
+                                                M {{ $entranceX }} {{ $entranceY }}
+                                                L {{ $guideLaneX }} {{ $entranceY }}
+                                                L {{ $guideLaneX }} {{ $guideTargetY }}
+                                                L {{ $guideTargetX }} {{ $guideTargetY }}
+                                            "
+                                            class="svg-guide-route-outline"/>
+
+                                            <path d="
+                                                M {{ $entranceX }} {{ $entranceY }}
+                                                L {{ $guideLaneX }} {{ $entranceY }}
+                                                L {{ $guideLaneX }} {{ $guideTargetY }}
+                                                L {{ $guideTargetX }} {{ $guideTargetY }}
+                                            "
+                                            class="svg-guide-route"/>
+
+                                            <polygon points="
+                                                {{ $guideTargetX - 12 }},{{ $guideTargetY - 8 }}
+                                                {{ $guideTargetX + 12 }},{{ $guideTargetY - 8 }}
+                                                {{ $guideTargetX }},{{ $guideTargetY + 13 }}
+                                            "
+                                            class="svg-guide-arrow"/>
+
+                                            <g transform="translate({{ $guideLaneX + 18 }}, {{ max($guideTargetY - 95, 205) }})">
+                                                <rect x="0"
+                                                    y="0"
+                                                    width="170"
+                                                    height="40"
+                                                    rx="20"
+                                                    class="svg-guide-label-card"/>
+
+                                                <text x="85"
+                                                    y="26"
+                                                    text-anchor="middle"
+                                                    class="svg-guide-label">
+                                                    Laluan Rujukan
+                                                </text>
+                                            </g>
+                                        </g>
+
+                                        {{-- Pintu Masuk Utama --}}
+                                        <g class="svg-entrance"
+                                        transform="translate({{ $entranceX - 28 }}, {{ $entranceY - 28 }})"
+                                        filter="url(#softShadow)">
+
+                                            <circle cx="28"
+                                                    cy="28"
+                                                    r="27"
+                                                    class="svg-entrance-marker"/>
+
+                                            <rect x="19"
+                                                y="15"
+                                                width="18"
+                                                height="25"
+                                                rx="2"
+                                                class="svg-entrance-door"/>
+
+                                            <circle cx="32"
+                                                    cy="28"
+                                                    r="2"
+                                                    fill="#2563eb"/>
+                                        </g>
+
+                                        {{-- Label Pintu Masuk --}}
+                                        <g transform="translate({{ $entranceX + 48 }}, {{ $entranceY - 35 }})"
+                                        filter="url(#softShadow)">
+                                            <rect x="0"
+                                                y="0"
+                                                width="245"
+                                                height="68"
+                                                rx="16"
+                                                class="svg-entrance-card"/>
+
+                                            <text x="16"
+                                                y="28"
+                                                class="svg-entrance-title">
+                                                PINTU MASUK UTAMA
+                                            </text>
+
+                                            <text x="16"
+                                                y="51"
+                                                class="svg-entrance-subtitle">
+                                                Anda bermula dari sini
+                                            </text>
                                         </g>
 
                                         {{-- Label jalan --}}
@@ -983,6 +1186,71 @@
         margin-top: 12px;
     }
 
+    .route-step-list {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .route-step-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .route-step-number {
+        width: 27px;
+        height: 27px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 12px;
+        font-weight: 800;
+    }
+
+    .route-step-number.blue {
+        background: #dbeafe;
+        color: #2563eb;
+    }
+
+    .route-step-number.green {
+        background: #dcfce7;
+        color: #16a34a;
+    }
+
+    .route-step-title {
+        font-size: 13px;
+        font-weight: 800;
+        color: #111827;
+    }
+
+    .route-step-note {
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.45;
+        margin-top: 2px;
+    }
+
+    .entrance-legend {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #2563eb;
+        border: 2px solid #dbeafe;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
+    .route-legend {
+        width: 22px;
+        height: 0;
+        border-top: 3px dashed #2563eb;
+        display: inline-block;
+        flex-shrink: 0;
+    }
+
     .legend-list {
         display: flex;
         flex-direction: column;
@@ -1344,6 +1612,69 @@
         stroke: #22c55e;
         stroke-width: 5;
         stroke-dasharray: 12 8;
+    }
+
+    .svg-entrance-marker {
+        fill: #2563eb;
+        stroke: #ffffff;
+        stroke-width: 4;
+    }
+
+    .svg-entrance-door {
+        fill: #ffffff;
+    }
+
+    .svg-entrance-card {
+        fill: rgba(255, 255, 255, .96);
+        stroke: #bfdbfe;
+        stroke-width: 2;
+    }
+
+    .svg-entrance-title {
+        font-size: 17px;
+        font-weight: 900;
+        fill: #1e3a8a;
+    }
+
+    .svg-entrance-subtitle {
+        font-size: 13px;
+        font-weight: 700;
+        fill: #475569;
+    }
+
+    .svg-guide-route {
+        fill: none;
+        stroke: #2563eb;
+        stroke-width: 7;
+        stroke-dasharray: 16 12;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        opacity: .95;
+    }
+
+    .svg-guide-route-outline {
+        fill: none;
+        stroke: rgba(255, 255, 255, .8);
+        stroke-width: 13;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        opacity: .65;
+    }
+
+    .svg-guide-arrow {
+        fill: #2563eb;
+    }
+
+    .svg-guide-label-card {
+        fill: #eff6ff;
+        stroke: #bfdbfe;
+        stroke-width: 2;
+    }
+
+    .svg-guide-label {
+        font-size: 14px;
+        font-weight: 900;
+        fill: #1d4ed8;
     }
 
     .svg-pin {

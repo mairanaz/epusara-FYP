@@ -4,12 +4,15 @@
 <div class="container-fluid">
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
-        <div>
+        <div id="tour-dependent-header">
             <h1 class="page-title fw-semibold fs-18 mb-1">Senarai Tanggungan</h1>
             <p class="text-muted mb-0">Urus maklumat tanggungan ahli khairat dengan lebih teratur</p>
         </div>
+
         <div>
-            <a href="{{ route('user.dependents.create') }}" class="btn btn-info">
+            <a href="{{ route('user.dependents.create') }}"
+            id="tour-add-dependent"
+            class="btn btn-info">
                 <i class="ri-user-add-line me-1"></i> Tambah Tanggungan
             </a>
         </div>
@@ -29,7 +32,7 @@
         </div>
     @endif
 
-    <div class="row">
+    <div class="row" id="tour-dependent-summary">
         <div class="col-xl-3 col-md-6 col-sm-6">
             <div class="card custom-card">
                 <div class="card-body">
@@ -83,12 +86,11 @@
         </div>
     </div>
 
-    <div class="card custom-card">
+    <div class="card custom-card" id="tour-dependent-records">
         <div class="card-header justify-content-between">
             <div class="card-title">
                 Rekod Tanggungan
             </div>
-        </div>
 
         <div class="card-body">
             <div class="table-responsive">
@@ -108,7 +110,7 @@
                     </thead>
                     <tbody>
                         @forelse($dependents as $index => $dependent)
-                            <tr>
+                            <tr @if($index === 0) id="tour-first-dependent-record" @endif>
                                 <td>{{ $index + 1 }}</td>
 
                                 <td>
@@ -168,21 +170,26 @@
                                 </td>
 
                                 <td>
-                                    <div class="d-flex flex-wrap gap-1">
-                                        <a href="{{ route('user.dependents.show', $dependent->id) }}" class="btn btn-info-light btn-sm">
+                                    <div class="d-flex flex-wrap gap-1"
+                                        @if($index === 0) id="tour-dependent-actions" @endif>
+
+                                        <a href="{{ route('user.dependents.show', $dependent->id) }}"
+                                        class="btn btn-info-light btn-sm">
                                             <i class="ri-eye-line me-1"></i> Lihat
                                         </a>
 
-                                        <a href="{{ route('user.dependents.edit', $dependent->id) }}" class="btn btn-warning-light btn-sm">
+                                        <a href="{{ route('user.dependents.edit', $dependent->id) }}"
+                                        class="btn btn-warning-light btn-sm">
                                             <i class="ri-pencil-line me-1"></i> Edit
                                         </a>
 
                                         <form action="{{ route('user.dependents.destroy', $dependent->id) }}"
-                                              method="POST"
-                                              class="d-inline"
-                                              onsubmit="return confirm('Adakah anda pasti mahu padam data ini?')">
+                                            method="POST"
+                                            class="d-inline"
+                                            onsubmit="return confirm('Adakah anda pasti mahu padam data ini?')">
                                             @csrf
                                             @method('DELETE')
+
                                             <button type="submit" class="btn btn-danger-light btn-sm">
                                                 <i class="ri-delete-bin-line me-1"></i> Padam
                                             </button>
@@ -213,3 +220,127 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tourButton = document.getElementById('btnPageTour');
+
+        if (!tourButton) {
+            return;
+        }
+
+        tourButton.addEventListener('click', function () {
+            if (!window.driver || !window.driver.js) {
+                console.error('Driver.js tidak berjaya dimuatkan.');
+                return;
+            }
+
+            const driver = window.driver.js.driver;
+
+            const allSteps = [
+                {
+                    element: '#tour-dependent-header',
+                    popover: {
+                        title: 'Pengurusan Tanggungan',
+                        description: 'Halaman ini digunakan untuk mengurus maklumat pasangan atau anak yang berdaftar di bawah keahlian khairat anda.',
+                        side: 'bottom',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-add-dependent',
+                    popover: {
+                        title: 'Tambah Tanggungan Baharu',
+                        description: 'Klik di sini untuk mendaftarkan tanggungan baharu. Pastikan maklumat peribadi dan hubungan tanggungan diisi dengan betul.',
+                        side: 'bottom',
+                        align: 'end'
+                    }
+                },
+                {
+                    element: '#tour-dependent-summary',
+                    popover: {
+                        title: 'Ringkasan Tanggungan',
+                        description: 'Bahagian ini menunjukkan jumlah tanggungan, bilangan yang masih aktif dan rekod tanggungan yang telah meninggal dunia.',
+                        side: 'bottom',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-dependent-records',
+                    popover: {
+                        title: 'Rekod Tanggungan Anda',
+                        description: 'Semua tanggungan yang telah didaftarkan dipaparkan di sini bersama maklumat pengenalan, pertalian, nombor telefon dan status.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-first-dependent-record',
+                    popover: {
+                        title: 'Status Tanggungan',
+                        description: 'Semak status kehidupan dan kelayakan tanggungan di sini. Tanggungan yang tidak lagi layak atau telah meninggal dunia akan ditandakan melalui status rekod.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-dependent-actions',
+                    popover: {
+                        title: 'Urus Rekod Tanggungan',
+                        description: 'Gunakan butang Lihat untuk menyemak maklumat lengkap, Edit untuk mengemas kini rekod, atau Padam jika rekod perlu dibuang.',
+                        side: 'left',
+                        align: 'center'
+                    }
+                }
+            ];
+
+            const availableSteps = allSteps.filter(function (step) {
+                return document.querySelector(step.element);
+            });
+
+            if (availableSteps.length === 0) {
+                console.warn('Tiada elemen tour ditemui pada halaman ini.');
+                return;
+            }
+
+            let dependentTour;
+
+            dependentTour = driver({
+                animate: true,
+                smoothScroll: true,
+                popoverClass: 'epusara-tour-popover',
+
+                allowClose: true,
+                overlayColor: '#0f172a',
+                overlayOpacity: 0.58,
+                stagePadding: 10,
+                stageRadius: 10,
+                popoverOffset: 14,
+                disableActiveInteraction: true,
+
+                showProgress: false,
+
+                nextBtnText: 'Seterusnya →',
+                prevBtnText: '← Sebelumnya',
+                doneBtnText: 'Selesai',
+
+                onPopoverRender: function () {
+                    const currentIndex = dependentTour.getActiveIndex() ?? 0;
+                    window.updateEpusaraTourPopover(
+                        dependentTour,
+                        currentIndex,
+                        availableSteps.length
+                    );
+                },
+
+                steps: availableSteps
+            });
+
+            dependentTour.drive();
+
+            dependentTour.drive();
+        });
+    });
+</script>
+@endpush

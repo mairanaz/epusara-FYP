@@ -122,15 +122,29 @@
 
     @php
 
-        $paymentTypeLabel = match($payment->payment_type) {
-            'first_monthly' => 'Bayaran Pertama Bulanan',
-            'monthly' => 'Bayaran Bulanan',
-            'monthly_arrears' => 'Bayaran Tunggakan Bulanan',
-            'monthly_balance' => 'Bayaran Baki Kitaran',
-            'first_yearly' => 'Bayaran Pertama Tahunan',
-            'yearly' => 'Bayaran Tahunan',
-            default => ucfirst(str_replace('_', ' ', $payment->payment_type)),
-        };
+        $monthlyItemCount = $payment->items
+            ->where('payment_type', 'monthly')
+            ->count();
+
+        $paymentNotes = strtolower($payment->notes ?? '');
+
+        $isPayByAmount = $payment->payment_type === 'monthly' && (
+            str_contains($paymentNotes, 'ikut jumlah') ||
+            str_contains($paymentNotes, 'beberapa bulan') ||
+            $monthlyItemCount > 1
+        );
+
+        $paymentTypeLabel = $isPayByAmount
+            ? 'Bayar Ikut Jumlah'
+            : match($payment->payment_type) {
+                'first_monthly' => 'Bayaran Pertama Bulanan',
+                'monthly' => 'Bayaran Bulanan',
+                'monthly_arrears' => 'Bayaran Tunggakan Bulanan',
+                'monthly_balance' => 'Bayaran Baki Kitaran',
+                'first_yearly' => 'Bayaran Pertama Tahunan',
+                'yearly' => 'Bayaran Tahunan',
+                default => ucfirst(str_replace('_', ' ', $payment->payment_type)),
+            };
 
         $paymentPlanLabel = match($payment->payment_plan) {
             'monthly' => 'Pelan Bulanan',
@@ -183,9 +197,13 @@
             return null;
         })->filter()->unique()->values();
 
-        $periodLabel = $periodLabels->isNotEmpty()
-            ? $periodLabels->implode(', ')
-            : '-';
+        if ($periodLabels->count() > 1) {
+            $periodLabel = $periodLabels->first() . ' hingga ' . $periodLabels->last();
+        } elseif ($periodLabels->count() === 1) {
+            $periodLabel = $periodLabels->first();
+        } else {
+            $periodLabel = '-';
+        }
 
         $memberName = auth()->user()->name ?? '-';
     @endphp

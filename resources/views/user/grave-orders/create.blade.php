@@ -354,7 +354,7 @@
 
 <div class="container-fluid">
 
-    <div class="booking-header">
+    <div class="booking-header" id="tour-order-form-header">
         <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
                 <div class="text-muted small mb-1">
@@ -418,7 +418,7 @@
     @endif
 
     @if($deathReports->isEmpty())
-        <div class="soft-card p-5 text-center">
+        <div class="soft-card p-5 text-center" id="tour-order-form-empty">
             <i class="bi bi-info-circle fs-1 text-info"></i>
 
             <h5 class="fw-bold mt-3">
@@ -445,7 +445,7 @@
             <div class="row g-4">
                 <div class="col-xl-8 left-order-col">
 
-                    <div class="soft-card p-4 mb-4">
+                    <div class="soft-card p-4 mb-4" id="tour-order-form-deceased-select">
                         <label class="form-label fw-semibold">
                             Pilih Waris / Si Mati
                         </label>
@@ -576,7 +576,7 @@
                         </div>
                     </div>
 
-                    <div class="soft-card p-4">
+                    <div class="soft-card p-4" id="tour-order-form-options">
                         <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
                             <div>
                                 <h5 class="fw-bold mb-1">
@@ -634,6 +634,7 @@
 
                                         <div class="col-md-6 col-lg-4">
                                             <div class="option-card {{ $oldCategory === $category && $oldOrderType === $key ? 'active' : '' }}"
+                                                @if($loop->first && $category === $oldCategory) id="tour-order-form-first-option" @endif
                                                 data-type="{{ $key }}"
                                                 data-category="{{ $category }}"
                                                 data-label="{{ $option['label'] }}"
@@ -690,7 +691,7 @@
                 </div>
 
                 <div class="col-xl-4">
-                    <div class="soft-card p-4 summary-card mb-4">
+                    <div class="soft-card p-4 summary-card mb-4" id="tour-order-form-summary">
                         <div class="d-flex align-items-center gap-3 mb-4">
                             <div class="summary-icon">
                                 <i class="bi bi-clipboard-check"></i>
@@ -739,7 +740,7 @@
                             </span>
                         </div>
 
-                        <div class="form-check mb-4">
+                        <div class="form-check mb-4" id="tour-order-form-declaration">
                             <input class="form-check-input"
                                    type="checkbox"
                                    name="declaration"
@@ -753,7 +754,9 @@
                             </label>
                         </div>
 
-                        <button type="submit" class="btn btn-submit-main w-100 mb-2">
+                        <button type="submit"
+                                class="btn btn-submit-main w-100 mb-2"
+                                id="tour-order-form-submit">
                             <i class="bi bi-send me-1"></i> Hantar Permohonan
                         </button>
 
@@ -1354,3 +1357,160 @@ document.querySelectorAll('.option-card').forEach(card => {
 
 </script>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tourButton = document.getElementById('btnPageTour');
+
+        if (!tourButton) {
+            return;
+        }
+
+        tourButton.addEventListener('click', function () {
+            if (!window.driver || !window.driver.js) {
+                console.error('Driver.js tidak berjaya dimuatkan.');
+                return;
+            }
+
+            const driver = window.driver.js.driver;
+
+            const allSteps = [
+                {
+                    element: '#tour-order-form-header',
+                    popover: {
+                        title: 'Permohonan Tempahan Kepuk / Nisan',
+                        description: 'Permohonan ini melalui empat peringkat: pilih si mati, pilih tempahan, semak harga dan hantar permohonan.',
+                        side: 'bottom',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-order-form-empty',
+                    popover: {
+                        title: 'Tiada Rekod Layak Untuk Tempahan',
+                        description: 'Tempahan hanya boleh dibuat untuk laporan kematian yang telah diluluskan dan belum mempunyai tempahan aktif. Semak status laporan anda terlebih dahulu.',
+                        side: 'bottom',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-order-form-deceased-select',
+                    popover: {
+                        title: 'Pilih Si Mati',
+                        description: 'Pilih si mati yang ingin dibuat tempahan. Hanya rekod yang telah disahkan dan masih layak akan dipaparkan dalam senarai ini.',
+                        side: 'bottom',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#deceasedInfoCard',
+                    popover: {
+                        title: 'Semak Maklumat Si Mati',
+                        description: 'Selepas memilih si mati, semak nama, lot kubur, kategori tempahan dan maklumat waris sebelum meneruskan permohonan.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-order-form-options',
+                    popover: {
+                        title: 'Pilih Kepuk atau Batu Nisan',
+                        description: 'Pilih jenis tempahan yang dikehendaki. Sistem akan menentukan kategori dewasa atau kanak-kanak berdasarkan maklumat si mati.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-order-form-first-option',
+                    popover: {
+                        title: 'Lihat Detail dan Harga',
+                        description: 'Klik Detail untuk melihat gambar dan maklumat tempahan. Klik Pilih untuk memasukkan pilihan ke dalam ringkasan tempahan.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-order-form-summary',
+                    popover: {
+                        title: 'Ringkasan Tempahan',
+                        description: 'Semak nama si mati, nombor lot kubur, pilihan tempahan dan jumlah bayaran sebelum menghantar permohonan.',
+                        side: 'left',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-order-form-declaration',
+                    popover: {
+                        title: 'Pengesahan Maklumat',
+                        description: 'Tandakan pengakuan ini selepas anda memastikan semua maklumat dan pilihan tempahan adalah tepat.',
+                        side: 'left',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-order-form-submit',
+                    popover: {
+                        title: 'Hantar Permohonan',
+                        description: 'Klik butang ini untuk menghantar permohonan kepada pentadbir bagi proses semakan.',
+                        side: 'left',
+                        align: 'center'
+                    }
+                }
+            ];
+
+            /*
+            |--------------------------------------------------------------------------
+            | Paparkan step yang tersedia sahaja
+            |--------------------------------------------------------------------------
+            | Jika tiada laporan kematian yang layak, borang tempahan tidak akan
+            | dipaparkan. Tour hanya menerangkan header dan mesej tiada rekod.
+            */
+            const availableSteps = allSteps.filter(function (step) {
+                return document.querySelector(step.element);
+            });
+
+            if (availableSteps.length === 0) {
+                console.warn('Tiada elemen tour ditemui pada halaman ini.');
+                return;
+            }
+
+            let orderFormTour;
+
+            orderFormTour = driver({
+                animate: true,
+                smoothScroll: true,
+                popoverClass: 'epusara-tour-popover',
+
+                allowClose: true,
+                overlayColor: '#0f172a',
+                overlayOpacity: 0.58,
+                stagePadding: 10,
+                stageRadius: 10,
+                popoverOffset: 14,
+                disableActiveInteraction: true,
+
+                showProgress: false,
+
+                nextBtnText: 'Seterusnya →',
+                prevBtnText: '← Sebelumnya',
+                doneBtnText: 'Selesai',
+
+                onPopoverRender: function () {
+                    const currentIndex = orderFormTour.getActiveIndex() ?? 0;
+
+                    window.updateEpusaraTourPopover(
+                        orderFormTour,
+                        currentIndex,
+                        availableSteps.length
+                    );
+                },
+
+                steps: availableSteps
+            });
+
+            orderFormTour.drive();
+        });
+    });
+</script>
+@endpush

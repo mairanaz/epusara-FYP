@@ -111,7 +111,7 @@
     </style>
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
-        <div>
+        <div id="tour-profile-header">
             <h1 class="page-title fw-semibold fs-20 mb-1">
                 {{ $isDependent ? 'Maklumat Tanggungan' : 'Maklumat Ahli' }}
             </h1>
@@ -121,7 +121,9 @@
         </div>
 
         <div class="btn-list mt-3 mt-md-0">
-            <a class="btn btn-info" href="{{ route('user.profile.edit') }}">
+            <a class="btn btn-info"
+            id="tour-profile-edit"
+            href="{{ route('user.profile.edit') }}">
                 Edit Maklumat
             </a>
         </div>
@@ -141,7 +143,7 @@
         </div>
     @endif
 
-    <div class="profile-summary section-spacing">
+    <div class="profile-summary section-spacing" id="tour-profile-summary">
         <div class="row align-items-center g-3">
             <div class="col-md-8">
                 <h3>{{ $profile->nama }}</h3>
@@ -165,7 +167,7 @@
     </div>
 
     @if($status === 'pending')
-        <div class="status-box section-spacing">
+        <div class="status-box section-spacing" id="tour-profile-status">
             <div class="fw-semibold mb-1">Permohonan Sedang Disemak</div>
             <div class="text-muted">
                 Permohonan keahlian anda telah dihantar dan sedang menunggu semakan pihak pentadbiran.
@@ -176,7 +178,8 @@
         </div>
     @elseif($status === 'approved')
         @if($isDependent)
-            <div class="status-box section-spacing">
+            <div class="status-box section-spacing d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3"
+     id="tour-profile-status">
                 <div class="fw-semibold mb-1">Permohonan Diluluskan</div>
                 <div class="text-muted">
                     Maklumat anda telah disahkan oleh pihak pentadbiran.
@@ -196,7 +199,7 @@
             </div>
         @endif
     @elseif($status === 'rejected')
-        <div class="status-box section-spacing">
+        <div class="status-box section-spacing" id="tour-profile-status">
             <div class="fw-semibold mb-1 text-danger">Permohonan Ditolak</div>
             <div class="text-muted">Permohonan anda telah ditolak oleh pihak pentadbiran.</div>
             @if($profile->catatan_permohonan)
@@ -204,7 +207,7 @@
             @endif
         </div>
     @elseif($status === 'active')
-        <div class="status-box section-spacing">
+        <div class="status-box section-spacing" id="tour-profile-status">
             <div class="fw-semibold mb-1 text-success">Keahlian Aktif</div>
             <div class="text-muted">
                 Akaun keahlian anda telah aktif dan disahkan.
@@ -215,7 +218,7 @@
     <div class="row g-4">
 
         <div class="col-xl-6">
-            <div class="formal-card h-100">
+            <div class="formal-card h-100" id="tour-profile-personal">
                 <div class="formal-header">A. Maklumat Peribadi</div>
                 <div class="formal-body">
                     <div class="info-row">
@@ -247,7 +250,7 @@
         </div>
 
         <div class="col-xl-6">
-            <div class="formal-card h-100">
+            <div class="formal-card h-100" id="tour-profile-contact">
                 <div class="formal-header">B. Maklumat Perhubungan</div>
                 <div class="formal-body">
                     <div class="info-row">
@@ -267,7 +270,7 @@
         </div>
 
         <div class="col-xl-6">
-            <div class="formal-card h-100">
+            <div class="formal-card h-100" id="tour-profile-community">
                 <div class="formal-header">C. Maklumat Kariah</div>
                 <div class="formal-body">
                     <div class="info-row">
@@ -287,7 +290,7 @@
         </div>
 
         <div class="col-xl-6">
-            <div class="formal-card h-100">
+            <div class="formal-card h-100" id="tour-profile-employment">
                 <div class="formal-header">D. Maklumat Pekerjaan</div>
                 <div class="formal-body">
                     <div class="info-row">
@@ -308,7 +311,7 @@
 
         @unless($isDependent)
         <div class="col-12">
-            <div class="formal-card">
+            <div class="formal-card" id="tour-profile-heir">
                 <div class="formal-header">E. Maklumat Waris</div>
                 <div class="formal-body">
                     <div class="table-responsive">
@@ -335,7 +338,7 @@
         @endunless
 
         <div class="col-12">
-            <div class="formal-card">
+            <div class="formal-card" id="tour-profile-application">
                 <div class="formal-header">
                     {{ $isDependent ? 'E. Maklumat Permohonan' : 'F. Maklumat Permohonan' }}
                 </div>
@@ -366,7 +369,7 @@
 
         @unless($isDependent)
         <div class="col-12">
-            <div class="formal-card">
+            <div class="formal-card" id="tour-profile-payment">
                 <div class="formal-header">G. Maklumat Bayaran</div>
                 <div class="formal-body">
                     <div class="table-responsive">
@@ -411,3 +414,179 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tourButton = document.getElementById('btnPageTour');
+
+        if (!tourButton) {
+            return;
+        }
+
+        tourButton.addEventListener('click', function () {
+            if (!window.driver || !window.driver.js) {
+                console.error('Driver.js tidak berjaya dimuatkan.');
+                return;
+            }
+
+            const driver = window.driver.js.driver;
+
+            const allSteps = [
+                {
+                    element: '#tour-profile-header',
+                    popover: {
+                        title: 'Maklumat Profil',
+                        description: 'Halaman ini memaparkan maklumat peribadi, status permohonan dan butiran keahlian anda dalam sistem e-Pusara.',
+                        side: 'bottom',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-profile-edit',
+                    popover: {
+                        title: 'Kemas Kini Maklumat',
+                        description: 'Klik butang ini untuk mengemas kini maklumat profil anda sekiranya terdapat perubahan pada data peribadi atau perhubungan.',
+                        side: 'bottom',
+                        align: 'end'
+                    }
+                },
+                {
+                    element: '#tour-profile-summary',
+                    popover: {
+                        title: 'Ringkasan Profil dan Status',
+                        description: 'Bahagian ini menunjukkan nama, nombor MyKad, status permohonan dan tarikh permohonan keahlian anda.',
+                        side: 'bottom',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-profile-status',
+                    popover: {
+                        title: 'Status Keahlian',
+                        description: 'Semak perkembangan permohonan atau status keahlian anda di sini. Arahan tambahan akan dipaparkan jika tindakan diperlukan.',
+                        side: 'bottom',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-profile-personal',
+                    popover: {
+                        title: 'Maklumat Peribadi',
+                        description: 'Semak maklumat asas anda seperti nama, nombor MyKad, tarikh lahir, jantina, agama dan kewarganegaraan.',
+                        side: 'right',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-profile-contact',
+                    popover: {
+                        title: 'Maklumat Perhubungan',
+                        description: 'Pastikan alamat rumah dan nombor telefon sentiasa tepat supaya pihak pentadbiran dapat menghubungi anda jika diperlukan.',
+                        side: 'left',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-profile-community',
+                    popover: {
+                        title: 'Maklumat Kariah',
+                        description: 'Bahagian ini menunjukkan maklumat tempat tinggal dalam kariah dan tempoh menetap yang berkaitan dengan kelayakan keahlian.',
+                        side: 'right',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-profile-employment',
+                    popover: {
+                        title: 'Maklumat Pekerjaan',
+                        description: 'Semak maklumat pekerjaan dan majikan yang telah didaftarkan dalam permohonan anda.',
+                        side: 'left',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-profile-heir',
+                    popover: {
+                        title: 'Maklumat Waris',
+                        description: 'Maklumat waris digunakan bagi tujuan urusan khairat dan untuk dihubungi oleh pihak pentadbiran apabila diperlukan.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-profile-application',
+                    popover: {
+                        title: 'Maklumat Permohonan',
+                        description: 'Lihat tarikh penghantaran, status semasa dan catatan pentadbir bagi permohonan keahlian anda.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-profile-payment',
+                    popover: {
+                        title: 'Maklumat Pelan Bayaran',
+                        description: 'Bahagian ini memaparkan kaedah bayaran yang dipilih serta jumlah bayaran permulaan berkaitan keahlian anda.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                }
+            ];
+
+            /*
+            |--------------------------------------------------------------------------
+            | Hanya paparkan bahagian yang wujud
+            |--------------------------------------------------------------------------
+            | Maklumat Waris dan Maklumat Bayaran tidak dipaparkan untuk
+            | akaun tanggungan, jadi step tersebut akan dilangkau automatik.
+            */
+            const availableSteps = allSteps.filter(function (step) {
+                return document.querySelector(step.element);
+            });
+
+            if (availableSteps.length === 0) {
+                console.warn('Tiada elemen tour ditemui pada halaman ini.');
+                return;
+            }
+
+           let profileTour;
+
+            profileTour = driver({
+                animate: true,
+                smoothScroll: true,
+                popoverClass: 'epusara-tour-popover',
+
+                allowClose: true,
+                overlayColor: '#0f172a',
+                overlayOpacity: 0.58,
+                stagePadding: 10,
+                stageRadius: 10,
+                popoverOffset: 14,
+                disableActiveInteraction: true,
+
+                showProgress: false,
+
+                nextBtnText: 'Seterusnya →',
+                prevBtnText: '← Sebelumnya',
+                doneBtnText: 'Selesai',
+
+                onPopoverRender: function () {
+                    const currentIndex = profileTour.getActiveIndex() ?? 0;
+                    window.updateEpusaraTourPopover(
+                        profileTour,
+                        currentIndex,
+                        availableSteps.length
+                    );
+                },
+
+                steps: availableSteps
+            });
+
+            profileTour.drive();
+
+            profileTour.drive();
+        });
+    });
+</script>
+@endpush

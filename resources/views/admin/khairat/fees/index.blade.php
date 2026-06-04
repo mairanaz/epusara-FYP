@@ -62,25 +62,6 @@
         border-bottom: 1px solid #eef0f5;
     }
 
-    .fee-report-page .fee-admin-box {
-        padding: 18px;
-        background: linear-gradient(135deg, #7c5cf0, #8b5cf6);
-        color: #fff;
-    }
-
-    .fee-report-page .fee-admin-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: rgba(255,255,255,0.22);
-        font-weight: 800;
-        border: 2px solid rgba(255,255,255,0.5);
-        flex-shrink: 0;
-    }
-
     .fee-report-page .fee-nav {
         list-style: none;
         padding: 18px;
@@ -318,38 +299,13 @@
         font-size: 13px;
     }
 
-    .fee-report-page .chart-placeholder {
-        height: 210px;
-        border-radius: 16px;
-        background:
-            linear-gradient(180deg, rgba(124,92,240,.08), rgba(124,92,240,.02)),
-            repeating-linear-gradient(
-                to right,
-                transparent 0,
-                transparent 38px,
-                rgba(148,163,184,.12) 39px,
-                rgba(148,163,184,.12) 40px
-            );
+    .fee-report-page .chart-box {
+        min-height: 285px;
         border: 1px solid #eef0f5;
-        display: flex;
-        align-items: end;
-        gap: 10px;
-        padding: 18px;
+        border-radius: 16px;
+        padding: 10px 12px 0;
+        background: #fff;
     }
-
-    .fee-report-page .bar {
-        flex: 1;
-        border-radius: 999px 999px 0 0;
-        background: linear-gradient(180deg, #8b5cf6, #c4b5fd);
-        min-height: 35px;
-    }
-
-    .fee-report-page .bar:nth-child(1) { height: 42%; }
-    .fee-report-page .bar:nth-child(2) { height: 58%; }
-    .fee-report-page .bar:nth-child(3) { height: 35%; }
-    .fee-report-page .bar:nth-child(4) { height: 72%; }
-    .fee-report-page .bar:nth-child(5) { height: 64%; }
-    .fee-report-page .bar:nth-child(6) { height: 88%; }
 
     .fee-report-page .export-footer {
         padding: 18px 20px;
@@ -547,11 +503,27 @@
         };
     };
 
-    $totalRegistration = collect($months)->sum('registration');
-    $totalMonthly = collect($months)->sum('monthly');
-    $totalAnnual = collect($months)->sum('annual');
+    $totalRegistration = collect($feeTypes)
+    ->firstWhere('name', 'Yuran Pendaftaran')['amount'] ?? 0;
+
+    $totalMonthly = collect($feeTypes)
+        ->firstWhere('name', 'Yuran Bulanan')['amount'] ?? 0;
+
+    $totalAnnual = collect($feeTypes)
+        ->firstWhere('name', 'Yuran Tahunan')['amount'] ?? 0;
 
     $displayTotalAmount = $totalAmount;
+
+    $chartMonthLabels = collect($months)
+        ->map(fn ($month) => $month['short'])
+        ->values()
+        ->toArray();
+
+    $chartMonthAmounts = collect($months)
+        ->map(fn ($month) => (float) $month['amount'])
+        ->values()
+        ->toArray();
+
 @endphp
 
 <div class="container-fluid fee-report-page">
@@ -583,16 +555,6 @@
                     <i class="ri-file-chart-line me-1"></i>
                     Jana Laporan
                 </a>
-            </div>
-
-            <div class="fee-admin-box">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="fee-admin-avatar">A</div>
-                    <div>
-                        <div class="fw-bold">Admin Khairat</div>
-                        <div class="small opacity-75">Laporan Kewangan</div>
-                    </div>
-                </div>
             </div>
 
             <ul class="fee-nav">
@@ -777,14 +739,13 @@
                 </div>
 
                 <div class="px-4 pb-3">
-                    <h6 class="fw-bold mb-3">Graf Kutipan Ringkas</h6>
-                    <div class="chart-placeholder">
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
-                        <div class="bar"></div>
+                    <h6 class="fw-bold mb-1">Trend Kutipan Bulanan Tahun {{ $currentYear }}</h6>
+                        <div class="muted-small mb-3">
+                            Graf ini memaparkan jumlah kutipan setiap bulan bagi tahun dipilih.
+                        </div>
+
+                    <div class="chart-box">
+                        <div id="fee-column-datalabels"></div>
                     </div>
                 </div>
 
@@ -849,6 +810,7 @@
 
                     <ul class="report-list">
                         @foreach($feeTypes as $feeType)
+                             @continue(($feeType['amount'] ?? 0) <= 0 && ($feeType['count'] ?? 0) <= 0)
                             <li>
                                 <div class="d-flex align-items-center gap-3">
                                     <div class="month-dot">
@@ -1025,28 +987,34 @@
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <a href="{{ request()->fullUrlWithQuery(['export' => 'excel']) }}" class="btn btn-success w-100 py-3">
+                            <a href="{{ route('admin.khairat.fees.export.excel', request()->query()) }}"
+                            class="btn btn-success w-100 py-3">
                                 <i class="ri-file-excel-2-line me-1"></i>
                                 Export Excel
                             </a>
                         </div>
 
                         <div class="col-md-6">
-                            <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}" class="btn btn-danger w-100 py-3">
+                            <a href="{{ route('admin.khairat.fees.export.pdf', request()->query()) }}"
+                            class="btn btn-danger w-100 py-3"
+                            target="_blank">
                                 <i class="ri-file-pdf-2-line me-1"></i>
                                 Preview PDF
                             </a>
                         </div>
 
                         <div class="col-md-6">
-                            <button type="button" class="btn btn-light w-100 py-3" onclick="window.print()">
+                            <a href="{{ route('admin.khairat.fees.export.pdf', request()->query()) }}"
+                            class="btn btn-light w-100 py-3"
+                            target="_blank">
                                 <i class="ri-printer-line me-1"></i>
                                 Cetak Laporan
-                            </button>
+                            </a>
                         </div>
 
                         <div class="col-md-6">
-                            <a href="{{ request()->fullUrlWithQuery(['tab' => 'summary']) }}" class="btn btn-primary w-100 py-3">
+                            <a href="{{ request()->fullUrlWithQuery(['tab' => 'summary']) }}"
+                            class="btn btn-primary w-100 py-3">
                                 <i class="ri-eye-line me-1"></i>
                                 Lihat Ringkasan
                             </a>
@@ -1077,7 +1045,14 @@
             <div class="detail-body">
                 @if($activeTab == 'summary')
                     <div class="mb-4">
-                        <div class="detail-title">Ringkasan {{ $currentYear }}</div>
+                        <div class="detail-title">
+                            Ringkasan 
+                            @if($currentMonth)
+                                {{ $months[$currentMonth]['name'] ?? '' }} {{ $currentYear }}
+                            @else
+                                {{ $currentYear }}
+                            @endif
+                        </div>
                         <div class="muted-small">Gambaran keseluruhan kutipan yuran ahli.</div>
                     </div>
 
@@ -1102,10 +1077,12 @@
 
                     <div class="detail-card">
                         <h6 class="fw-bold mb-3">Pecahan Kutipan</h6>
-                        <div class="detail-row">
-                            <span>Yuran Pendaftaran</span>
-                            <span>RM {{ number_format($totalRegistration, 2) }}</span>
-                        </div>
+                        @if($totalRegistration > 0)
+                            <div class="detail-row">
+                                <span>Yuran Pendaftaran</span>
+                                <span>RM {{ number_format($totalRegistration, 2) }}</span>
+                            </div>
+                        @endif
                         <div class="detail-row">
                             <span>Yuran Bulanan</span>
                             <span>RM {{ number_format($totalMonthly, 2) }}</span>
@@ -1470,24 +1447,100 @@
 
             <div class="export-footer">
                 <div class="d-flex flex-wrap gap-2 justify-content-between">
-                    <a href="{{ request()->fullUrlWithQuery(['export' => 'excel']) }}" class="btn btn-success">
+                    <a href="{{ route('admin.khairat.fees.export.excel', request()->query()) }}" class="btn btn-success">
                         <i class="ri-file-excel-2-line me-1"></i>
                         Excel
                     </a>
 
-                    <a href="{{ request()->fullUrlWithQuery(['export' => 'pdf']) }}" class="btn btn-danger">
+                    <a href="{{ route('admin.khairat.fees.export.pdf', request()->query()) }}" class="btn btn-danger" target="_blank">
                         <i class="ri-file-pdf-2-line me-1"></i>
                         Preview PDF
                     </a>
 
-                    <button type="button" class="btn btn-light" onclick="window.print()">
+                    <a href="{{ route('admin.khairat.fees.export.pdf', request()->query()) }}" class="btn btn-light" target="_blank">
                         <i class="ri-printer-line me-1"></i>
                         Cetak
-                    </button>
+                    </a>
                 </div>
             </div>
         </div>
 
     </div>
 </div>
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const chartElement = document.querySelector("#fee-column-datalabels");
+
+        if (!chartElement || typeof ApexCharts === 'undefined') {
+            return;
+        }
+
+        const options = {
+            series: [{
+                name: 'Jumlah Kutipan',
+                data: @json($chartMonthAmounts)
+            }],
+            chart: {
+                type: 'bar',
+                height: 265,
+                toolbar: {
+                    show: false
+                }
+            },
+            plotOptions: {
+                bar: {
+                    borderRadius: 6,
+                    columnWidth: '45%',
+                    dataLabels: {
+                        position: 'top'
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function (val) {
+                    return val > 0 ? 'RM ' + Number(val).toFixed(0) : '';
+                },
+                offsetY: -20,
+                style: {
+                    fontSize: '12px',
+                    colors: ['#304758']
+                }
+            },
+            xaxis: {
+                categories: @json($chartMonthLabels),
+                position: 'bottom',
+                labels: {
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 600
+                    }
+                }
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val) {
+                        return 'RM ' + Number(val).toFixed(0);
+                    }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) {
+                        return 'RM ' + Number(val).toFixed(2);
+                    }
+                }
+            },
+            colors: ['#845adf'],
+            grid: {
+                borderColor: '#f1f1f1'
+            }
+        };
+
+        const chart = new ApexCharts(chartElement, options);
+        chart.render();
+    });
+</script>
+@endpush
 @endsection

@@ -3,647 +3,1174 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>E-Pusara</title>
+    <title>e-Pusara | Sistem Pengurusan Perkuburan</title>
 
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700,800&display=swap" rel="stylesheet">
+    {{-- Google Fonts --}}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    {{-- Tailwind CSS --}}
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    {{-- Font Awesome --}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#ecfdf8',
+                            100: '#d1fae9',
+                            200: '#a7f3d0',
+                            500: '#159a83',
+                            600: '#0f7c69',
+                            700: '#0d6558',
+                            800: '#114c44',
+                            900: '#0d332f'
+                        },
+                        sand: {
+                            50: '#fbfaf6',
+                            100: '#f3efe6',
+                            200: '#e6ddcc'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    },
+                    boxShadow: {
+                        soft: '0 18px 50px rgba(15, 23, 42, 0.07)',
+                        card: '0 16px 40px rgba(15, 23, 42, 0.08)',
+                        hero: '0 30px 80px rgba(13, 51, 47, 0.16)'
+                    }
+                }
+            }
         }
 
+        
+    </script>
+
+    <style>
         html {
             scroll-behavior: smooth;
         }
 
         body {
-            font-family: 'Figtree', sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
+            overflow-x: hidden;
         }
 
-        a {
-            text-decoration: none;
+        .fade-up {
+            animation: fadeUp .7s ease-out both;
         }
 
-        .container {
-            width: 90%;
-            max-width: 1200px;
-            margin: auto;
+        .fade-up-delay {
+            animation: fadeUp .7s .12s ease-out both;
         }
 
-        .navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-            z-index: 999;
-        }
-
-        .navbar-content {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 0;
-        }
-
-        .logo {
-            font-size: 28px;
-            font-weight: 800;
-            color: #0f766e;
-        }
-
-        .nav-buttons {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 12px 22px;
-            border-radius: 12px;
-            font-weight: 600;
-            transition: 0.3s ease;
-        }
-
-        .btn-login {
-            border: 1px solid #0f766e;
-            color: #0f766e;
-            background: transparent;
-        }
-
-        .btn-login:hover {
-            background: #0f766e;
-            color: white;
-        }
-
-        .btn-register {
-            background: #0f766e;
-            color: white;
-            border: 1px solid #0f766e;
-        }
-
-        .btn-register:hover {
-            background: #0d5f59;
-        }
-
-        .hero {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            background: linear-gradient(rgba(15, 118, 110, 0.82), rgba(15, 23, 42, 0.82)),
-                        url('{{ asset("assets/images/media/bg-img3.jpg") }}') center/cover no-repeat;
-            color: white;
-            padding-top: 90px;
-        }
-
-        .hero-grid {
-            display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 40px;
-            align-items: center;
-        }
-
-        .hero-badge {
-            display: inline-block;
-            background: rgba(255,255,255,0.15);
-            padding: 8px 16px;
-            border-radius: 999px;
-            font-size: 14px;
-            margin-bottom: 18px;
-        }
-
-        .hero h1 {
-            font-size: 52px;
-            line-height: 1.15;
-            font-weight: 800;
-            margin-bottom: 18px;
-        }
-
-        .hero p {
-            font-size: 18px;
-            line-height: 1.8;
-            color: #e2e8f0;
-            margin-bottom: 28px;
-        }
-
-        .hero-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 14px;
-        }
-
-        .btn-light {
-            background: white;
-            color: #0f766e;
-        }
-
-        .btn-light:hover {
-            background: #f1f5f9;
-        }
-
-        .btn-outline-light {
-            border: 1px solid white;
-            color: white;
-        }
-
-        .btn-outline-light:hover {
-            background: white;
-            color: #0f766e;
-        }
-
-        .btn-danger-soft {
-            background: #dc2626;
-            color: white;
-            border: 1px solid #dc2626;
-        }
-
-        .btn-danger-soft:hover {
-            background: #b91c1c;
-            color: white;
-        }
-
-        .hero-card {
-            background: rgba(255,255,255,0.10);
-            border: 1px solid rgba(255,255,255,0.16);
-            border-radius: 24px;
-            padding: 28px;
-            backdrop-filter: blur(10px);
-        }
-
-        .hero-card h3 {
-            margin-bottom: 18px;
-            font-size: 24px;
-        }
-
-        .hero-card ul {
-            list-style: none;
-        }
-
-        .hero-card ul li {
-            margin-bottom: 14px;
-            padding-left: 24px;
-            position: relative;
-            line-height: 1.7;
-            color: #f8fafc;
-        }
-
-        .hero-card ul li::before {
-            content: "✓";
-            position: absolute;
-            left: 0;
-            color: #fde68a;
-            font-weight: bold;
-        }
-
-        .section {
-            padding: 90px 0;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 50px;
-        }
-
-        .section-header h2 {
-            font-size: 38px;
-            font-weight: 800;
-            color: #0f172a;
-            margin-bottom: 12px;
-        }
-
-        .section-header p {
-            color: #64748b;
-            max-width: 760px;
-            margin: auto;
-            line-height: 1.8;
-        }
-
-        .features {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-        }
-
-        .card {
-            background: white;
-            border-radius: 22px;
-            padding: 28px;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-            transition: 0.3s ease;
-            height: 100%;
-        }
-
-        .card:hover {
-            transform: translateY(-6px);
-        }
-
-        .icon {
-            width: 58px;
-            height: 58px;
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #ccfbf1;
-            color: #0f766e;
-            font-weight: 800;
-            font-size: 22px;
-            margin-bottom: 16px;
-        }
-
-        .card h3 {
-            font-size: 22px;
-            margin-bottom: 10px;
-        }
-
-        .card p {
-            color: #64748b;
-            line-height: 1.8;
-        }
-
-        .bg-soft {
-            background: #f1f5f9;
-        }
-
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-        }
-
-        .info-box {
-            background: #ffffff;
-            border-radius: 22px;
-            padding: 28px;
-            box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
-        }
-
-        .info-box h3 {
-            font-size: 24px;
-            margin-bottom: 14px;
-            color: #0f172a;
-        }
-
-        .info-box p {
-            color: #64748b;
-            line-height: 1.8;
-            margin-bottom: 14px;
-        }
-
-        .info-box ul {
-            padding-left: 18px;
-            color: #475569;
-            line-height: 1.8;
-        }
-
-        .steps {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-
-        .step-card {
-            background: white;
-            border-radius: 20px;
-            padding: 24px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
-        }
-
-        .step-number {
-            width: 42px;
-            height: 42px;
-            border-radius: 50%;
-            background: #0f766e;
-            color: white;
-            font-weight: 800;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 14px;
-        }
-
-        .step-card h4 {
-            font-size: 18px;
-            margin-bottom: 8px;
-            color: #0f172a;
-        }
-
-        .step-card p {
-            color: #64748b;
-            line-height: 1.7;
-        }
-
-        .cta-box {
-            background: linear-gradient(135deg, #0f766e, #134e4a);
-            color: white;
-            padding: 55px 35px;
-            border-radius: 28px;
-            text-align: center;
-        }
-
-        .cta-box h2 {
-            font-size: 36px;
-            margin-bottom: 14px;
-        }
-
-        .cta-box p {
-            color: #e2e8f0;
-            margin-bottom: 24px;
-            line-height: 1.8;
-        }
-
-        .footer {
-            background: #0f172a;
-            color: #cbd5e1;
-            text-align: center;
-            padding: 28px 0;
-        }
-
-        @media (max-width: 992px) {
-            .hero-grid,
-            .features,
-            .info-grid,
-            .steps {
-                grid-template-columns: 1fr;
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
             }
 
-            .hero h1 {
-                font-size: 38px;
-            }
-
-            .navbar-content {
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .nav-buttons {
-                justify-content: center;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
+
+        .hero-overlay {
+            background:
+                linear-gradient(90deg, rgba(255,255,255,.98) 0%, rgba(255,255,255,.93) 42%, rgba(255,255,255,.40) 100%);
+        }
+
+        .photo-overlay {
+            background: linear-gradient(180deg, rgba(15,23,42,.02) 10%, rgba(15,23,42,.76) 100%);
+        }
+
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+
+        .scrollbar-hide {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
     </style>
 </head>
-<body>
 
-    <nav class="navbar">
-        <div class="container navbar-content">
-            <div class="logo">
-                <a href="{{ url('/') }}" style="display:flex; align-items:center; gap:14px; text-decoration:none;">
-                    <img src="{{ asset('assets/images/logo_rtb.jpg') }}" alt="Logo E-Pusara"
-                        style="height:65px; width:auto; display:block;">
-                    <span style="font-size:28px; font-weight:800; color:#0f766e;">E-Pusara</span>
-                </a>
-            </div>
+<body class="min-h-screen bg-sand-50 text-slate-800 font-sans antialiased">
 
-            @if (Route::has('login'))
-                <div class="nav-buttons">
-                    @auth
-                        <a href="{{ route('dashboard') }}" class="btn btn-register">Dashboard</a>
-                    @else
-                        <a href="{{ route('login') }}" class="btn btn-login">Log Masuk</a>
+    {{-- Bar makluman awam --}}
+    <div class="bg-brand-900 text-brand-100 px-4 py-2.5 text-xs md:text-sm">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <p class="flex items-center gap-2 text-center sm:text-left">
+                <i class="fa-solid fa-circle-info text-brand-200"></i>
+                Sistem pengurusan khairat kematian dan lokasi perkuburan untuk kemudahan komuniti.
+            </p>
 
-                        @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="btn btn-register">Daftar</a>
-                        @endif
-                    @endauth
+            <a href="{{ route('public.grave-search.index') }}"
+               class="font-semibold underline underline-offset-4 hover:text-white transition">
+                Cari lokasi pusara
+            </a>
+        </div>
+    </div>
+
+    {{-- Header / Navigation --}}
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-slate-100 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+
+            {{-- Logo --}}
+            <a href="{{ url('/') }}" class="flex items-center gap-3">
+                <img src="{{ asset('assets/images/logo_rtb.jpg') }}"
+                     alt="Logo e-Pusara"
+                     class="h-12 w-12 rounded-xl border border-slate-100 object-cover">
+
+                <div class="hidden sm:block">
+                    <p class="font-extrabold text-brand-800 leading-none text-xl">
+                        e-Pusara
+                    </p>
+
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-1">
+                        Sistem Pengurusan Perkuburan
+                    </p>
                 </div>
-            @endif
+            </a>
+
+            {{-- Navigation Links --}}
+            <div class="flex items-center gap-2 sm:gap-3">
+
+                <a href="#fungsi"
+                   class="hidden lg:inline-flex text-sm font-semibold text-slate-600 px-4 py-2 hover:text-brand-700 transition">
+                    Fungsi
+                </a>
+
+                <a href="{{ route('public.grave-search.index') }}"
+                   class="hidden md:inline-flex text-sm font-semibold text-slate-600 px-4 py-2 hover:text-brand-700 transition">
+                    Ziarah Kubur
+                </a>
+
+                @auth
+                    <a href="{{ route('dashboard') }}"
+                       class="inline-flex items-center gap-2 bg-brand-600 hover:bg-brand-700 text-white rounded-full px-4 sm:px-5 py-2.5 text-sm font-bold transition">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        <span class="hidden sm:inline">Dashboard</span>
+                    </a>
+                @else
+                    <a href="{{ route('login') }}"
+                       class="inline-flex text-sm font-bold text-brand-700 border border-brand-200 hover:bg-brand-50 rounded-full px-4 sm:px-5 py-2.5 transition">
+                        Log Masuk
+                    </a>
+
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}"
+                           class="hidden sm:inline-flex text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 rounded-full px-5 py-2.5 transition">
+                            Daftar
+                        </a>
+                    @endif
+                @endauth
+            </div>
         </div>
     </nav>
 
-    <section class="hero">
-        <div class="container hero-grid">
-            <div>
-                <span class="hero-badge">Sistem Pengurusan Khairat Kematian Digital</span>
-                <h1>E-Pusara: Platform Pengurusan Khairat, Ahli dan Laporan Kematian</h1>
-                <p>
-                    E-Pusara merupakan sistem yang dibangunkan untuk membantu pengurusan
-                    khairat kematian secara lebih moden, tersusun dan efisien. Sistem ini
-                    memudahkan urusan pendaftaran ahli, pengurusan tanggungan, semakan rekod
-                    bayaran, serta pelaporan kematian melalui satu platform berpusat.
-                </p>
+    {{-- Hero Section --}}
+    <section class="relative overflow-hidden bg-white border-b border-slate-100">
 
-                @guest
-                    <div class="hero-actions">
-                        <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-outline-light">WhatsApp Pentadbir</a>
-                        <a href="tel:0132186469" class="btn btn-outline-light">Call Pentadbir</a>
-                    </div>
-                @else
-                    <div class="hero-actions">
-                        <a href="{{ route('dashboard') }}" class="btn btn-light">Pergi ke Dashboard</a>
-                       {{--   <a href="{{ route('death-report.create') }}" class="btn btn-danger-soft">Lapor Kematian</a> --}}
-                        <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-outline-light">WhatsApp Pentadbir</a>
-                        <a href="tel:0132186469" class="btn btn-outline-light">Call Pentadbir</a>
-                    </div>
-                @endguest
-            </div>
+        {{-- Background image --}}
+        <div class="absolute inset-0">
+            <img src="{{ asset('assets/images/media/bg-img3.jpg') }}"
+                 alt="Persekitaran perkuburan e-Pusara"
+                 class="w-full h-full object-cover object-center">
+        </div>
 
-            <div class="hero-card">
-                <h3>Kemudahan Dalam Sistem</h3>
-                <ul>
-                    <li>Pendaftaran akaun pengguna baharu</li>
-                    <li>Log masuk mengikut akaun masing-masing</li>
-                    <li>Pengurusan maklumat ahli dan tanggungan</li>
-                    <li>Semakan dan rekod bayaran khairat</li>
-                    <li>Pelaporan kematian secara dalam talian</li>
-                    <li>Akses dashboard mengikut peranan pengguna</li>
-                </ul>
+        <div class="absolute inset-0 hero-overlay"></div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16 lg:py-20">
+            <div class="grid lg:grid-cols-12 gap-9 lg:gap-12 items-center">
+
+                {{-- Left Content --}}
+                <div class="lg:col-span-7 fade-up">
+
+                    <span class="inline-flex items-center gap-2 rounded-full bg-brand-50/95 border border-brand-100 text-brand-700 px-4 py-2 text-xs font-bold uppercase tracking-widest mb-5">
+                        <i class="fa-solid fa-moon"></i>
+                        Pengurusan Khairat Digital
+                    </span>
+
+                    <h1 class="font-serif font-bold text-slate-900 text-4xl sm:text-5xl lg:text-[3.55rem] leading-tight max-w-3xl">
+                        Urusan Khairat &amp; Pusara Lebih Tersusun
+                    </h1>
+
+                    <p class="text-slate-600 text-sm sm:text-base leading-relaxed max-w-xl mt-5">
+                        e-Pusara memudahkan pengurusan ahli, tanggungan, bayaran khairat,
+                        laporan kematian serta carian lokasi pusara dalam satu sistem yang
+                        mudah digunakan.
+                    </p>
+
+                    {{-- Main Actions --}}
+                    <div class="flex flex-col sm:flex-row gap-3 mt-8">
+
+                        @guest
+                            @if (Route::has('register'))
+                                <a href="{{ route('register') }}"
+                                   class="inline-flex items-center justify-center gap-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white px-7 py-4 text-sm font-bold transition shadow-lg shadow-brand-600/20">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                    Daftar Sebagai Ahli
+                                </a>
+                            @endif
+
+                            <a href="{{ route('public.grave-search.index') }}"
+                               class="inline-flex items-center justify-center gap-2 rounded-full bg-white border border-brand-200 hover:bg-brand-50 text-brand-700 px-7 py-4 text-sm font-bold transition">
+                                <i class="fa-solid fa-location-dot"></i>
+                                Ziarah Kubur
+                            </a>
+                        @else
+                            <a href="{{ route('dashboard') }}"
+                               class="inline-flex items-center justify-center gap-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white px-7 py-4 text-sm font-bold transition shadow-lg shadow-brand-600/20">
+                                <i class="fa-solid fa-gauge-high"></i>
+                                Pergi ke Dashboard
+                            </a>
+
+                            <a href="{{ route('public.grave-search.index') }}"
+                               class="inline-flex items-center justify-center gap-2 rounded-full bg-white border border-brand-200 hover:bg-brand-50 text-brand-700 px-7 py-4 text-sm font-bold transition">
+                                <i class="fa-solid fa-location-dot"></i>
+                                Ziarah Kubur
+                            </a>
+                        @endguest
+
+                    </div>
+
+                    {{-- Small Highlights --}}
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-9 max-w-2xl">
+
+                        <div class="rounded-2xl bg-white/90 border border-white p-4 shadow-sm">
+                            <i class="fa-solid fa-users text-brand-600 mb-2"></i>
+                            <p class="text-xs font-bold text-slate-800">Pengurusan Ahli</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Rekod tersusun</p>
+                        </div>
+
+                        <div class="rounded-2xl bg-white/90 border border-white p-4 shadow-sm">
+                            <i class="fa-solid fa-receipt text-brand-600 mb-2"></i>
+                            <p class="text-xs font-bold text-slate-800">Bayaran Khairat</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Semakan mudah</p>
+                        </div>
+
+                        <div class="rounded-2xl bg-white/90 border border-white p-4 shadow-sm col-span-2 sm:col-span-1">
+                            <i class="fa-solid fa-map-location-dot text-brand-600 mb-2"></i>
+                            <p class="text-xs font-bold text-slate-800">Lokasi Pusara</p>
+                            <p class="text-[11px] text-slate-500 mt-1">Untuk ziarah</p>
+                        </div>
+
+                    </div>
+                </div>
+
+                {{-- Right Feature Card --}}
+                <div class="lg:col-span-5 fade-up-delay">
+
+                    <div class="bg-white/95 backdrop-blur-md rounded-[30px] border border-white shadow-hero p-6 md:p-7">
+
+                        <div class="relative overflow-hidden rounded-3xl min-h-[215px] mb-6">
+                            <img src="{{ asset('assets/images/pusara/persekitaran-kubur.jpg') }}"
+                                 alt="Kawasan perkuburan e-Pusara"
+                                 class="absolute inset-0 w-full h-full object-cover">
+
+                            <div class="photo-overlay absolute inset-0 p-5 flex flex-col justify-end">
+                                <span class="inline-flex w-fit bg-brand-600 text-white rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider mb-3">
+                                    Modul Awam
+                                </span>
+
+                                <h2 class="font-serif font-bold text-xl text-white">
+                                    Carian Lokasi Pusara
+                                </h2>
+
+                                <p class="text-slate-200 text-xs mt-1">
+                                    Cari lokasi lot pusara tanpa perlu log masuk.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between gap-3 mb-5">
+                            <div>
+                                <p class="text-xs font-bold text-brand-700 uppercase tracking-widest">
+                                    Ziarah Kubur
+                                </p>
+
+                                <h3 class="font-bold text-slate-900 text-lg mt-1">
+                                    Mudah dicari, mudah diziarahi
+                                </h3>
+                            </div>
+
+                            <div class="h-12 w-12 shrink-0 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center">
+                                <i class="fa-solid fa-location-crosshairs text-xl"></i>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 mb-6">
+
+                            <div class="flex items-start gap-3 text-sm text-slate-600">
+                                <i class="fa-solid fa-circle-check text-brand-600 mt-1"></i>
+                                <span>Carian menggunakan nama si mati atau nombor lot.</span>
+                            </div>
+
+                            <div class="flex items-start gap-3 text-sm text-slate-600">
+                                <i class="fa-solid fa-circle-check text-brand-600 mt-1"></i>
+                                <span>Paparan lot dan peta bagi membantu tujuan ziarah.</span>
+                            </div>
+
+                            <div class="flex items-start gap-3 text-sm text-slate-600">
+                                <i class="fa-solid fa-circle-check text-brand-600 mt-1"></i>
+                                <span>Maklumat peribadi keluarga kekal dilindungi.</span>
+                            </div>
+
+                        </div>
+
+                        <a href="{{ route('public.grave-search.index') }}"
+                           class="w-full inline-flex items-center justify-center gap-2 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white py-4 px-5 text-sm font-bold transition">
+                            <i class="fa-solid fa-magnifying-glass-location"></i>
+                            Cari Lokasi Pusara
+                        </a>
+
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>
 
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2>Tentang E-Pusara</h2>
-                <p>
-                    E-Pusara dibangunkan bagi memperkenalkan sistem pengurusan khairat kematian
-                    yang lebih teratur dan mudah digunakan oleh komuniti. Sistem ini membantu
-                    mempercepatkan urusan berkaitan ahli, tanggungan, bayaran serta laporan
-                    kematian tanpa bergantung sepenuhnya kepada proses manual.
+    {{-- Quick Access --}}
+    <section id="fungsi" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+
+        <div class="max-w-3xl mx-auto text-center mb-9 md:mb-12">
+            <span class="inline-flex bg-brand-50 text-brand-700 font-bold text-xs tracking-[.18em] uppercase rounded-full px-4 py-2 mb-4">
+                Fungsi Utama
+            </span>
+
+            <h2 class="font-serif font-bold text-3xl md:text-4xl text-slate-900">
+                Semua Urusan Dalam Satu Sistem
+            </h2>
+
+            <p class="text-slate-500 text-sm md:text-base leading-relaxed mt-3">
+                e-Pusara membantu ahli, waris dan pentadbir mengurus urusan khairat kematian dengan lebih sistematik.
+            </p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+
+            <article class="bg-white border border-slate-100 rounded-3xl p-6 shadow-card hover:-translate-y-1 transition duration-300">
+                <div class="h-12 w-12 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center mb-5">
+                    <i class="fa-solid fa-id-card text-xl"></i>
+                </div>
+
+                <h3 class="font-bold text-lg text-slate-900">
+                    Keahlian
+                </h3>
+
+                <p class="text-sm text-slate-500 leading-relaxed mt-2">
+                    Pendaftaran serta pengurusan rekod ahli dan tanggungan.
+                </p>
+            </article>
+
+            <article class="bg-white border border-slate-100 rounded-3xl p-6 shadow-card hover:-translate-y-1 transition duration-300">
+                <div class="h-12 w-12 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center mb-5">
+                    <i class="fa-solid fa-wallet text-xl"></i>
+                </div>
+
+                <h3 class="font-bold text-lg text-slate-900">
+                    Bayaran Khairat
+                </h3>
+
+                <p class="text-sm text-slate-500 leading-relaxed mt-2">
+                    Semak bayaran dan rekod transaksi dengan lebih mudah.
+                </p>
+            </article>
+
+            <article class="bg-white border border-slate-100 rounded-3xl p-6 shadow-card hover:-translate-y-1 transition duration-300">
+                <div class="h-12 w-12 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center mb-5">
+                    <i class="fa-solid fa-file-circle-plus text-xl"></i>
+                </div>
+
+                <h3 class="font-bold text-lg text-slate-900">
+                    Laporan Kematian
+                </h3>
+
+                <p class="text-sm text-slate-500 leading-relaxed mt-2">
+                    Penghantaran laporan bagi membantu tindakan pentadbir.
+                </p>
+            </article>
+
+            <article class="bg-white border border-slate-100 rounded-3xl p-6 shadow-card hover:-translate-y-1 transition duration-300">
+                <div class="h-12 w-12 rounded-2xl bg-brand-50 text-brand-700 flex items-center justify-center mb-5">
+                    <i class="fa-solid fa-map-location-dot text-xl"></i>
+                </div>
+
+                <h3 class="font-bold text-lg text-slate-900">
+                    Ziarah Kubur
+                </h3>
+
+                <p class="text-sm text-slate-500 leading-relaxed mt-2">
+                    Carian lokasi pusara awam berserta panduan lot.
+                </p>
+            </article>
+
+        </div>
+    </section>
+
+    {{-- About / User Role Section --}}
+    <section class="bg-white border-y border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+
+            <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+
+                <div class="lg:col-span-5">
+                    <span class="inline-flex bg-brand-50 text-brand-700 font-bold text-xs tracking-[.18em] uppercase rounded-full px-4 py-2 mb-4">
+                        Mengenai e-Pusara
+                    </span>
+
+                    <h2 class="font-serif font-bold text-3xl md:text-4xl text-slate-900 leading-tight">
+                        Sistem Yang Memudahkan Komuniti
+                    </h2>
+
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed mt-4">
+                        e-Pusara dibangunkan bagi menggantikan urusan manual kepada pengurusan digital yang lebih teratur, pantas dan mudah dirujuk.
+                    </p>
+                </div>
+
+                <div class="lg:col-span-7">
+                    <div class="grid sm:grid-cols-3 gap-4">
+
+                        <div class="rounded-3xl bg-sand-50 border border-sand-100 p-5">
+                            <div class="h-10 w-10 rounded-xl bg-white text-brand-700 flex items-center justify-center shadow-sm mb-4">
+                                <i class="fa-solid fa-user"></i>
+                            </div>
+
+                            <h3 class="font-bold text-slate-900 text-sm">
+                                Ahli
+                            </h3>
+
+                            <p class="text-xs text-slate-500 leading-relaxed mt-2">
+                                Mengurus profil, tanggungan dan rekod bayaran khairat.
+                            </p>
+                        </div>
+
+                        <div class="rounded-3xl bg-sand-50 border border-sand-100 p-5">
+                            <div class="h-10 w-10 rounded-xl bg-white text-brand-700 flex items-center justify-center shadow-sm mb-4">
+                                <i class="fa-solid fa-user-gear"></i>
+                            </div>
+
+                            <h3 class="font-bold text-slate-900 text-sm">
+                                Pentadbir
+                            </h3>
+
+                            <p class="text-xs text-slate-500 leading-relaxed mt-2">
+                                Menyemak permohonan, bayaran dan laporan kematian.
+                            </p>
+                        </div>
+
+                        <div class="rounded-3xl bg-sand-50 border border-sand-100 p-5">
+                            <div class="h-10 w-10 rounded-xl bg-white text-brand-700 flex items-center justify-center shadow-sm mb-4">
+                                <i class="fa-solid fa-people-group"></i>
+                            </div>
+
+                            <h3 class="font-bold text-slate-900 text-sm">
+                                Orang Awam
+                            </h3>
+
+                            <p class="text-xs text-slate-500 leading-relaxed mt-2">
+                                Mencari lokasi pusara bagi tujuan ziarah.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    {{-- Paparan Sistem / Screenshot Gallery --}}
+    <section class="bg-white border-y border-slate-100 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+
+            {{-- Heading --}}
+            <div class="max-w-3xl mx-auto text-center mb-9 md:mb-12">
+                <span class="inline-flex bg-brand-50 text-brand-700 font-bold text-xs tracking-[.18em] uppercase rounded-full px-4 py-2 mb-4">
+                    Paparan Sistem
+                </span>
+
+                <h2 class="font-serif font-bold text-3xl md:text-4xl text-slate-900">
+                    Antara Muka e-Pusara
+                </h2>
+
+                <p class="text-slate-500 text-sm md:text-base leading-relaxed mt-3">
+                    Paparan sistem direka agar mudah digunakan melalui komputer dan telefon pintar
+                    bagi membantu urusan keahlian, bayaran khairat, laporan kematian serta carian pusara.
                 </p>
             </div>
 
-            <div class="info-grid">
-                <div class="info-box">
-                    <h3>Objektif Sistem</h3>
-                    <p>
-                        Memudahkan pihak pengguna dan pentadbir mengurus data khairat kematian
-                        dengan lebih sistematik dalam satu platform.
+            {{-- Tab Button --}}
+            <div class="flex justify-center mb-10">
+                <div class="inline-flex bg-sand-50 border border-sand-100 rounded-full p-1.5 shadow-sm">
+
+                    <button type="button"
+                            id="mobileTab"
+                            onclick="showSystemGallery('mobile')"
+                            class="gallery-tab inline-flex items-center gap-2 rounded-full bg-brand-600 text-white px-5 sm:px-7 py-3 text-sm font-bold transition">
+                        <i class="fa-solid fa-mobile-screen-button"></i>
+                        Paparan Mobile
+                    </button>
+
+                    <button type="button"
+                            id="laptopTab"
+                            onclick="showSystemGallery('laptop')"
+                            class="gallery-tab inline-flex items-center gap-2 rounded-full text-slate-500 hover:text-brand-700 px-5 sm:px-7 py-3 text-sm font-bold transition">
+                        <i class="fa-solid fa-laptop"></i>
+                        Paparan Laptop
+                    </button>
+
+                </div>
+            </div>
+
+            {{-- Mobile Gallery --}}
+            <div id="mobileGallery" class="gallery-panel">
+
+                <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+                    <div>
+                        <h3 class="font-bold text-2xl text-slate-900">
+                            Paparan Telefon Pintar
+                        </h3>
+
+                        <p class="text-sm md:text-base text-slate-500 mt-2">
+                            Antara muka responsif untuk kegunaan ahli dan pengunjung melalui telefon.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center gap-3">
+                        <span class="inline-flex items-center gap-2 bg-brand-50 text-brand-700 rounded-full px-4 py-2 text-xs font-bold">
+                            <i class="fa-regular fa-images"></i>
+                            5 Paparan
+                        </span>
+
+                        <button type="button"
+                                onclick="scrollMobileGallery(-1)"
+                                class="hidden md:flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 hover:bg-brand-600 hover:text-white hover:border-brand-600 transition">
+                            <i class="fa-solid fa-arrow-left"></i>
+                        </button>
+
+                        <button type="button"
+                                onclick="scrollMobileGallery(1)"
+                                class="hidden md:flex h-11 w-11 items-center justify-center rounded-full bg-brand-600 text-white hover:bg-brand-700 transition">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div id="mobileSlider"
+                    class="flex gap-5 md:gap-7 overflow-x-auto pb-6 snap-x snap-mandatory scrollbar-hide scroll-smooth">
+
+                    {{-- Mobile 1 --}}
+                    <article class="shrink-0 w-[82vw] sm:w-[340px] lg:w-[355px] snap-start group">
+                        <div class="relative overflow-hidden rounded-[28px] bg-white border border-slate-100 shadow-card group-hover:-translate-y-1 transition duration-300">
+                            <img src="{{ asset('assets/images/screenshots/mobile-1.jpeg') }}"
+                                alt="Paparan Log Masuk e-Pusara"
+                                class="w-full h-[570px] object-cover object-center">
+
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-transparent px-6 pt-20 pb-6">
+                                <span class="inline-flex bg-white/20 backdrop-blur text-white rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider mb-3">
+                                    Mobile
+                                </span>
+
+                                <h4 class="font-bold text-white text-lg">
+                                    Log Masuk Ahli
+                                </h4>
+
+                                <p class="text-xs text-white/75 mt-1">
+                                    Akses selamat untuk pengguna berdaftar.
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    {{-- Mobile 2 --}}
+                    <article class="shrink-0 w-[82vw] sm:w-[340px] lg:w-[355px] snap-start group">
+                        <div class="relative overflow-hidden rounded-[28px] bg-white border border-slate-100 shadow-card group-hover:-translate-y-1 transition duration-300">
+                            <img src="{{ asset('assets/images/screenshots/mobile-2.jpeg') }}"
+                                alt="Paparan Halaman Utama e-Pusara"
+                                class="w-full h-[570px] object-cover object-center">
+
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-transparent px-6 pt-20 pb-6">
+                                <span class="inline-flex bg-white/20 backdrop-blur text-white rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider mb-3">
+                                    Mobile
+                                </span>
+
+                                <h4 class="font-bold text-white text-lg">
+                                    Laman Utama
+                                </h4>
+
+                                <p class="text-xs text-white/75 mt-1">
+                                    Pengenalan sistem dan capaian fungsi utama.
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    {{-- Mobile 3 --}}
+                    <article class="shrink-0 w-[82vw] sm:w-[340px] lg:w-[355px] snap-start group">
+                        <div class="relative overflow-hidden rounded-[28px] bg-white border border-slate-100 shadow-card group-hover:-translate-y-1 transition duration-300">
+                            <img src="{{ asset('assets/images/screenshots/mobile-3.png') }}"
+                                alt="Paparan Bayaran Khairat e-Pusara"
+                                class="w-full h-[570px] object-cover object-center">
+
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-transparent px-6 pt-20 pb-6">
+                                <span class="inline-flex bg-white/20 backdrop-blur text-white rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider mb-3">
+                                    Mobile
+                                </span>
+
+                                <h4 class="font-bold text-white text-lg">
+                                    Bayaran Khairat
+                                </h4>
+
+                                <p class="text-xs text-white/75 mt-1">
+                                    Semakan status dan rekod bayaran ahli.
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    {{-- Mobile 4 --}}
+                    <article class="shrink-0 w-[82vw] sm:w-[340px] lg:w-[355px] snap-start group">
+                        <div class="relative overflow-hidden rounded-[28px] bg-white border border-slate-100 shadow-card group-hover:-translate-y-1 transition duration-300">
+                            <img src="{{ asset('assets/images/screenshots/mobile-4.png') }}"
+                                alt="Paparan Laporan Kematian e-Pusara"
+                                class="w-full h-[570px] object-cover object-center">
+
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-transparent px-6 pt-20 pb-6">
+                                <span class="inline-flex bg-white/20 backdrop-blur text-white rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider mb-3">
+                                    Mobile
+                                </span>
+
+                                <h4 class="font-bold text-white text-lg">
+                                    Laporan Kematian
+                                </h4>
+
+                                <p class="text-xs text-white/75 mt-1">
+                                    Penghantaran maklumat untuk tindakan pentadbir.
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    {{-- Mobile 5 --}}
+                    <article class="shrink-0 w-[82vw] sm:w-[340px] lg:w-[355px] snap-start group">
+                        <div class="relative overflow-hidden rounded-[28px] bg-white border border-slate-100 shadow-card group-hover:-translate-y-1 transition duration-300">
+                            <img src="{{ asset('assets/images/screenshots/mobile-5.png') }}"
+                                alt="Paparan Ziarah Kubur e-Pusara"
+                                class="w-full h-[570px] object-cover object-center">
+
+                            <div class="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-transparent px-6 pt-20 pb-6">
+                                <span class="inline-flex bg-white/20 backdrop-blur text-white rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider mb-3">
+                                    Mobile
+                                </span>
+
+                                <h4 class="font-bold text-white text-lg">
+                                    Ziarah Kubur
+                                </h4>
+
+                                <p class="text-xs text-white/75 mt-1">
+                                    Carian lokasi pusara bagi tujuan ziarah.
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                </div>
+            </div>
+
+            {{-- Laptop Gallery --}}
+            <div id="laptopGallery" class="gallery-panel hidden">
+
+                <div class="flex items-center justify-between gap-4 mb-7">
+                    <div>
+                        <h3 class="font-bold text-xl text-slate-900">
+                            Paparan Komputer
+                        </h3>
+
+                        <p class="text-sm text-slate-500 mt-1">
+                            Paparan desktop yang lebih luas untuk pengurusan sistem secara teratur.
+                        </p>
+                    </div>
+
+                    <span class="hidden sm:inline-flex items-center gap-2 bg-brand-50 text-brand-700 rounded-full px-4 py-2 text-xs font-bold">
+                        <i class="fa-solid fa-images"></i>
+                        5 Paparan
+                    </span>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-6">
+
+                    {{-- Laptop Featured --}}
+                    <article class="md:col-span-2 group">
+                        <div class="rounded-[28px] bg-sand-50 border border-sand-100 p-4 md:p-6 shadow-card group-hover:-translate-y-1 transition duration-300">
+                            <img src="{{ asset('assets/images/screenshots/laptop-1.jpeg') }}"
+                                alt="Paparan laptop Dashboard e-Pusara"
+                                class="w-full h-auto object-contain rounded-2xl">
+                        </div>
+
+                        <div class="mt-4">
+                            <h4 class="font-bold text-lg text-slate-900">
+                                Dashboard Pengurusan e-Pusara
+                            </h4>
+
+                            <p class="text-sm text-slate-500 mt-1">
+                                Paparan utama bagi melihat fungsi sistem dan rekod penting dengan lebih menyeluruh.
+                            </p>
+                        </div>
+                    </article>
+
+                    {{-- Laptop 2 --}}
+                    <article class="group">
+                        <div class="rounded-[24px] bg-sand-50 border border-sand-100 p-4 shadow-card group-hover:-translate-y-1 transition duration-300">
+                            <img src="{{ asset('assets/images/screenshots/laptop-2.jpeg') }}"
+                                alt="Paparan laptop Pengurusan Ahli e-Pusara"
+                                class="w-full h-auto object-contain rounded-xl">
+                        </div>
+
+                        <h4 class="font-bold text-slate-900 mt-4">
+                            Pengurusan Ahli
+                        </h4>
+
+                        <p class="text-xs text-slate-500 mt-1">
+                            Rekod ahli dan tanggungan secara tersusun.
+                        </p>
+                    </article>
+
+                    {{-- Laptop 3 --}}
+                    <article class="group">
+                        <div class="rounded-[24px] bg-sand-50 border border-sand-100 p-4 shadow-card group-hover:-translate-y-1 transition duration-300">
+                            <img src="{{ asset('assets/images/screenshots/laptop-3.jpeg') }}"
+                                alt="Paparan laptop Bayaran Khairat e-Pusara"
+                                class="w-full h-auto object-contain rounded-xl">
+                        </div>
+
+                        <h4 class="font-bold text-slate-900 mt-4">
+                            Bayaran Khairat
+                        </h4>
+
+                        <p class="text-xs text-slate-500 mt-1">
+                            Pemantauan bayaran dan resit transaksi.
+                        </p>
+                    </article>
+
+                    {{-- Laptop 4 --}}
+                    <article class="group">
+                        <div class="rounded-[24px] bg-sand-50 border border-sand-100 p-4 shadow-card group-hover:-translate-y-1 transition duration-300">
+                            <img src="{{ asset('assets/images/screenshots/laptop-4.jpeg') }}"
+                                alt="Paparan laptop Laporan Kematian e-Pusara"
+                                class="w-full h-auto object-contain rounded-xl">
+                        </div>
+
+                        <h4 class="font-bold text-slate-900 mt-4">
+                            Laporan Kematian
+                        </h4>
+
+                        <p class="text-xs text-slate-500 mt-1">
+                            Proses semakan dan tindakan pentadbir.
+                        </p>
+                    </article>
+
+                    {{-- Laptop 5 --}}
+                    <article class="group">
+                        <div class="rounded-[24px] bg-sand-50 border border-sand-100 p-4 shadow-card group-hover:-translate-y-1 transition duration-300">
+                            <img src="{{ asset('assets/images/screenshots/laptop-5.jpeg') }}"
+                                alt="Paparan laptop Peta Lokasi Pusara e-Pusara"
+                                class="w-full h-auto object-contain rounded-xl">
+                        </div>
+
+                        <h4 class="font-bold text-slate-900 mt-4">
+                            Lokasi Pusara
+                        </h4>
+
+                        <p class="text-xs text-slate-500 mt-1">
+                            Paparan peta dan panduan kedudukan pusara.
+                        </p>
+                    </article>
+
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+
+    {{-- Ziarah Highlight --}}
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+        <div class="relative overflow-hidden rounded-[34px] bg-brand-900 shadow-hero">
+
+            <div class="absolute inset-0 opacity-25">
+                <img src="{{ asset('assets/images/pusara/hero-ziarah.jpg') }}"
+                     alt="Kawasan perkuburan"
+                     class="w-full h-full object-cover">
+            </div>
+
+            <div class="absolute inset-0 bg-gradient-to-r from-brand-900 via-brand-900/95 to-brand-800/75"></div>
+
+            <div class="relative z-10 grid lg:grid-cols-12 gap-8 items-center p-7 md:p-12">
+
+                <div class="lg:col-span-7">
+                    <span class="inline-flex items-center gap-2 bg-white/10 border border-white/10 text-brand-100 rounded-full px-4 py-2 text-xs font-bold uppercase tracking-widest mb-5">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Modul Ziarah Kubur
+                    </span>
+
+                    <h2 class="font-serif text-white font-bold text-3xl md:text-4xl leading-tight">
+                        Cari Kedudukan Pusara Dengan Lebih Mudah
+                    </h2>
+
+                    <p class="text-brand-100/80 text-sm md:text-base leading-relaxed max-w-xl mt-4">
+                        Orang awam boleh mencari lokasi pusara menggunakan nama si mati atau nombor lot, kemudian melihat panduan lokasi untuk tujuan ziarah.
                     </p>
-                    <ul>
-                        <li>Menyimpan maklumat ahli dan tanggungan dengan lebih tersusun</li>
-                        <li>Memudahkan semakan rekod bayaran khairat</li>
-                        <li>Mempercepatkan proses laporan kematian</li>
-                        <li>Meningkatkan kecekapan pengurusan oleh pentadbir</li>
+
+                    <a href="{{ route('public.grave-search.index') }}"
+                       class="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-white hover:bg-brand-50 text-brand-800 px-7 py-4 text-sm font-bold transition">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                        Buka Carian Ziarah
+                    </a>
+                </div>
+
+                <div class="lg:col-span-5">
+                    <div class="rounded-3xl bg-white/10 backdrop-blur border border-white/10 p-5">
+
+                        <div class="bg-white rounded-2xl p-5">
+                            <div class="flex items-center justify-between mb-5">
+                                <div class="h-11 w-11 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center">
+                                    <i class="fa-solid fa-location-crosshairs"></i>
+                                </div>
+
+                                <span class="inline-flex bg-green-50 text-green-700 rounded-full px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider">
+                                    Lokasi Tersedia
+                                </span>
+                            </div>
+
+                            <h3 class="font-bold text-slate-900 text-lg">
+                                Contoh Paparan Pusara
+                            </h3>
+
+                            <p class="text-xs text-slate-500 mt-1 mb-5">
+                                Maklumat asas untuk kegunaan ziarah sahaja.
+                            </p>
+
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="rounded-xl bg-slate-50 border border-slate-100 p-3 text-center">
+                                    <p class="text-[10px] uppercase font-bold text-slate-400">
+                                        Zon
+                                    </p>
+                                    <p class="text-xs font-bold text-brand-700 mt-1">
+                                        Lelaki
+                                    </p>
+                                </div>
+
+                                <div class="rounded-xl bg-slate-50 border border-slate-100 p-3 text-center">
+                                    <p class="text-[10px] uppercase font-bold text-slate-400">
+                                        Lot
+                                    </p>
+                                    <p class="text-xs font-bold text-slate-800 mt-1">
+                                        L-012
+                                    </p>
+                                </div>
+
+                                <div class="rounded-xl bg-slate-50 border border-slate-100 p-3 text-center">
+                                    <p class="text-[10px] uppercase font-bold text-slate-400">
+                                        Baris
+                                    </p>
+                                    <p class="text-xs font-bold text-slate-800 mt-1">
+                                        04
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    {{-- Laporan Kematian / Emergency Help --}}
+    <section class="bg-white border-y border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+
+            <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
+
+                <div class="lg:col-span-6">
+                    <span class="inline-flex bg-amber-50 text-amber-700 font-bold text-xs tracking-[.18em] uppercase rounded-full px-4 py-2 mb-4">
+                        Bantuan Waris
+                    </span>
+
+                    <h2 class="font-serif font-bold text-3xl md:text-4xl text-slate-900">
+                        Perlu Melaporkan Kematian?
+                    </h2>
+
+                    <p class="text-slate-500 text-sm md:text-base leading-relaxed mt-4 max-w-xl">
+                        Waris atau pelapor boleh menghubungi pentadbir untuk tindakan lanjut berkaitan laporan kematian dan urusan pengurusan yang diperlukan.
+                    </p>
+
+                    <div class="flex flex-col sm:flex-row gap-3 mt-7">
+                        <a href="{{ route('whatsapp.lapor-kematian') }}"
+                           class="inline-flex items-center justify-center gap-2 rounded-full bg-green-600 hover:bg-green-700 text-white px-6 py-3.5 text-sm font-bold transition">
+                            <i class="fa-brands fa-whatsapp text-lg"></i>
+                            WhatsApp Pentadbir
+                        </a>
+
+                        <a href="tel:0132186469"
+                           class="inline-flex items-center justify-center gap-2 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3.5 text-sm font-bold transition">
+                            <i class="fa-solid fa-phone"></i>
+                            Hubungi Pentadbir
+                        </a>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-6">
+                    <div class="grid sm:grid-cols-3 gap-4">
+
+                        <div class="rounded-3xl border border-slate-100 bg-sand-50 p-5">
+                            <span class="h-9 w-9 rounded-xl bg-white shadow-sm text-brand-700 flex items-center justify-center text-sm font-bold mb-4">
+                                1
+                            </span>
+
+                            <h3 class="font-bold text-sm text-slate-900">
+                                Maklumkan
+                            </h3>
+
+                            <p class="text-xs text-slate-500 leading-relaxed mt-2">
+                                Hubungi pentadbir berkaitan kematian.
+                            </p>
+                        </div>
+
+                        <div class="rounded-3xl border border-slate-100 bg-sand-50 p-5">
+                            <span class="h-9 w-9 rounded-xl bg-white shadow-sm text-brand-700 flex items-center justify-center text-sm font-bold mb-4">
+                                2
+                            </span>
+
+                            <h3 class="font-bold text-sm text-slate-900">
+                                Semakan
+                            </h3>
+
+                            <p class="text-xs text-slate-500 leading-relaxed mt-2">
+                                Maklumat disemak oleh pentadbir.
+                            </p>
+                        </div>
+
+                        <div class="rounded-3xl border border-slate-100 bg-sand-50 p-5">
+                            <span class="h-9 w-9 rounded-xl bg-white shadow-sm text-brand-700 flex items-center justify-center text-sm font-bold mb-4">
+                                3
+                            </span>
+
+                            <h3 class="font-bold text-sm text-slate-900">
+                                Tindakan
+                            </h3>
+
+                            <p class="text-xs text-slate-500 leading-relaxed mt-2">
+                                Urusan seterusnya diproses.
+                            </p>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    {{-- Final CTA --}}
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20">
+        <div class="rounded-[32px] bg-brand-50 border border-brand-100 p-7 md:p-12 text-center">
+
+            <h2 class="font-serif font-bold text-3xl md:text-4xl text-slate-900">
+                Mulakan Dengan e-Pusara
+            </h2>
+
+            <p class="text-slate-500 text-sm md:text-base leading-relaxed max-w-2xl mx-auto mt-4">
+                Daftar sebagai ahli untuk mengurus rekod khairat, atau gunakan kemudahan carian pusara bagi tujuan ziarah.
+            </p>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-3 mt-8">
+
+                @guest
+                    @if (Route::has('register'))
+                        <a href="{{ route('register') }}"
+                           class="inline-flex items-center justify-center gap-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white px-7 py-4 text-sm font-bold transition">
+                            <i class="fa-solid fa-user-plus"></i>
+                            Daftar Sekarang
+                        </a>
+                    @endif
+
+                    <a href="{{ route('public.grave-search.index') }}"
+                       class="inline-flex items-center justify-center gap-2 rounded-full bg-white border border-brand-200 hover:bg-brand-100 text-brand-700 px-7 py-4 text-sm font-bold transition">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Cari Lokasi Pusara
+                    </a>
+                @else
+                    <a href="{{ route('dashboard') }}"
+                       class="inline-flex items-center justify-center gap-2 rounded-full bg-brand-600 hover:bg-brand-700 text-white px-7 py-4 text-sm font-bold transition">
+                        <i class="fa-solid fa-gauge-high"></i>
+                        Dashboard
+                    </a>
+
+                    <a href="{{ route('public.grave-search.index') }}"
+                       class="inline-flex items-center justify-center gap-2 rounded-full bg-white border border-brand-200 hover:bg-brand-100 text-brand-700 px-7 py-4 text-sm font-bold transition">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Ziarah Kubur
+                    </a>
+                @endguest
+
+            </div>
+        </div>
+    </section>
+
+    {{-- Footer --}}
+    <footer class="bg-brand-900 text-brand-100 border-t border-brand-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-7">
+
+            <div class="grid md:grid-cols-12 gap-9 pb-10">
+
+                {{-- Brand Summary --}}
+                <div class="md:col-span-5">
+                    <a href="{{ url('/') }}" class="inline-flex items-center gap-3">
+                        <img src="{{ asset('assets/images/logo_rtb.jpg') }}"
+                             alt="Logo e-Pusara"
+                             class="h-12 w-12 rounded-xl bg-white object-cover border border-white/20">
+
+                        <div>
+                            <p class="font-extrabold text-white text-xl leading-none">
+                                e-Pusara
+                            </p>
+
+                            <p class="text-[10px] text-brand-100/70 font-semibold uppercase tracking-wider mt-1">
+                                Sistem Pengurusan Perkuburan
+                            </p>
+                        </div>
+                    </a>
+
+                    <p class="text-sm text-brand-100/75 leading-relaxed max-w-md mt-5">
+                        Sistem pengurusan khairat kematian dan lokasi perkuburan bagi memudahkan urusan ahli, waris serta pengunjung.
+                    </p>
+                </div>
+
+                {{-- Quick Links --}}
+                <div class="md:col-span-4">
+                    <h4 class="font-bold text-white text-sm mb-4">
+                        Pautan Pantas
+                    </h4>
+
+                    <ul class="space-y-3 text-sm text-brand-100/75">
+                        <li>
+                            <a href="{{ url('/') }}"
+                               class="hover:text-white transition inline-flex items-center gap-2">
+                                <i class="fa-solid fa-angle-right text-brand-200 text-xs"></i>
+                                Laman Utama
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{{ route('public.grave-search.index') }}"
+                               class="hover:text-white transition inline-flex items-center gap-2">
+                                <i class="fa-solid fa-angle-right text-brand-200 text-xs"></i>
+                                Ziarah Kubur
+                            </a>
+                        </li>
+
+                        @guest
+                            <li>
+                                <a href="{{ route('login') }}"
+                                   class="hover:text-white transition inline-flex items-center gap-2">
+                                    <i class="fa-solid fa-angle-right text-brand-200 text-xs"></i>
+                                    Log Masuk
+                                </a>
+                            </li>
+                        @else
+                            <li>
+                                <a href="{{ route('dashboard') }}"
+                                   class="hover:text-white transition inline-flex items-center gap-2">
+                                    <i class="fa-solid fa-angle-right text-brand-200 text-xs"></i>
+                                    Dashboard
+                                </a>
+                            </li>
+                        @endguest
                     </ul>
                 </div>
 
-                <div class="info-box">
-                    <h3>Siapa Yang Guna Sistem Ini?</h3>
-                    <p>
-                        Sistem ini digunakan oleh dua peranan utama iaitu pengguna dan pentadbir.
+                {{-- Contact --}}
+                <div class="md:col-span-3">
+                    <h4 class="font-bold text-white text-sm mb-4">
+                        Bantuan &amp; Hubungan
+                    </h4>
+
+                    <p class="text-sm text-brand-100/75 leading-relaxed">
+                        Untuk laporan kematian atau pertanyaan berkaitan pengurusan khairat, sila hubungi pentadbir.
                     </p>
-                    <ul>
-                        <li><strong>Pengguna:</strong> daftar akaun, urus profil, tanggungan dan bayaran</li>
-                        <li><strong>Pentadbir:</strong> semak data ahli, sahkan bayaran dan urus laporan kematian</li>
-                        <li><strong>Waris/Pelapor:</strong> boleh bertindak lebih cepat melalui WhatsApp, panggilan atau laporan dalam sistem</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
 
-    <section class="section bg-soft">
-        <div class="container">
-            <div class="section-header">
-                <h2>Fungsi Utama Sistem</h2>
+                    <a href="{{ route('whatsapp.lapor-kematian') }}"
+                       class="inline-flex items-center gap-2 mt-4 rounded-full bg-white/10 hover:bg-white/15 px-4 py-2.5 text-xs font-bold text-brand-100 transition">
+                        <i class="fa-brands fa-whatsapp"></i>
+                        WhatsApp Pentadbir
+                    </a>
+                </div>
+
+            </div>
+
+            <div class="pt-6 border-t border-brand-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-brand-100/60">
                 <p>
-                    Sistem ini memudahkan pengguna dan pentadbir untuk mengurus maklumat
-                    khairat kematian secara lebih cekap dan teratur.
-                </p>
-            </div>
-
-            <div class="features">
-                <div class="card">
-                    <div class="icon">1</div>
-                    <h3>Daftar Akaun</h3>
-                    <p>Pengguna baharu boleh membuat pendaftaran sebelum menggunakan sistem.</p>
-                </div>
-
-                <div class="card">
-                    <div class="icon">2</div>
-                    <h3>Urus Profil & Tanggungan</h3>
-                    <p>Maklumat ahli dan tanggungan boleh disimpan, dikemaskini dan disemak dengan mudah.</p>
-                </div>
-
-                <div class="card">
-                    <div class="icon">3</div>
-                    <h3>Rekod Bayaran Khairat</h3>
-                    <p>Pengguna boleh melihat status dan rekod bayaran khairat dengan lebih teratur.</p>
-                </div>
-
-                <div class="card">
-                    <div class="icon">4</div>
-                    <h3>Laporan Kematian</h3>
-                    <p>Laporan kematian boleh dihantar melalui sistem bagi memudahkan tindakan lanjut oleh pentadbir.</p>
-                </div>
-
-                <div class="card">
-                    <div class="icon">5</div>
-                    <h3>Hubungi Pentadbir</h3>
-                    <p>Pengguna atau waris boleh terus menghubungi pentadbir melalui WhatsApp atau panggilan telefon.</p>
-                </div>
-
-                <div class="card">
-                    <div class="icon">6</div>
-                    <h3>Dashboard Ikut Peranan</h3>
-                    <p>User dan admin akan dibawa ke dashboard berbeza mengikut peranan masing-masing.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section">
-        <div class="container">
-            <div class="section-header">
-                <h2>Proses Ringkas Laporan Kematian</h2>
-                <p>
-                    Bahagian ini membantu pelawat memahami bagaimana sistem digunakan
-                    apabila berlaku kematian ahli atau tanggungan.
-                </p>
-            </div>
-
-            <div class="steps">
-                <div class="step-card">
-                    <div class="step-number">1</div>
-                    <h4>Maklumkan Kematian</h4>
-                    <p>Waris atau pelapor boleh menghubungi pentadbir dengan segera melalui WhatsApp, panggilan atau sistem.</p>
-                </div>
-
-                <div class="step-card">
-                    <div class="step-number">2</div>
-                    <h4>Isi Borang Laporan</h4>
-                    <p>Maklumat kematian boleh diisi melalui borang laporan untuk rekod rasmi dalam sistem.</p>
-                </div>
-
-                <div class="step-card">
-                    <div class="step-number">3</div>
-                    <h4>Semakan Pentadbir</h4>
-                    <p>Pentadbir akan menyemak maklumat yang dihantar sebelum tindakan lanjut dibuat.</p>
-                </div>
-
-                <div class="step-card">
-                    <div class="step-number">4</div>
-                    <h4>Tindakan Susulan</h4>
-                    <p>Maklumat yang telah disahkan akan membantu proses pengurusan seterusnya dengan lebih cepat dan tersusun.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section bg-soft">
-        <div class="container">
-            <div class="section-header">
-                <h2>Kenapa Pilih E-Pusara?</h2>
-                <p>
-                    E-Pusara direka untuk menjadikan urusan keahlian dan pengurusan data
-                    lebih moden, cepat dan mudah diakses.
-                </p>
-            </div>
-
-            <div class="features">
-                <div class="card">
-                    <h3>Mesra Pengguna</h3>
-                    <p>Antaramuka yang ringkas dan mudah difahami oleh pengguna biasa.</p>
-                </div>
-
-                <div class="card">
-                    <h3>Data Lebih Tersusun</h3>
-                    <p>Maklumat ahli, tanggungan, bayaran dan laporan kematian disimpan dengan lebih sistematik.</p>
-                </div>
-
-                <div class="card">
-                    <h3>Tindakan Lebih Cepat</h3>
-                    <p>Pelaporan dan semakan boleh dilakukan lebih pantas berbanding kaedah manual.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section">
-        <div class="container">
-            <div class="cta-box">
-                <h2>Mula Gunakan E-Pusara</h2>
-                <p>
-                    Daftar akaun untuk mengurus maklumat keahlian dan bayaran, atau gunakan
-                    butang laporan kematian sekiranya ingin membuat makluman kepada pentadbir.
+                    &copy; {{ date('Y') }} e-Pusara. Hak cipta terpelihara.
                 </p>
 
-                @guest
-                    <a href="{{ route('register') }}" class="btn btn-light" style="margin-right:10px;">Daftar</a>
-                    <a href="{{ route('login') }}" class="btn btn-outline-light" style="margin-right:10px;">Log Masuk</a>
-                    <a href="{{ route('whatsapp.lapor-kematian') }}" class="btn btn-outline-light">WhatsApp Pentadbir</a>
-                @else
-                    <a href="{{ route('dashboard') }}" class="btn btn-light" style="margin-right:10px;">Dashboard</a>
-                 {{--   <a href="{{ route('death-report.create') }}" class="btn btn-outline-light">Lapor Kematian</a> --}}  
-                @endguest
+                <p>
+                    Sistem Pengurusan Khairat Kematian &amp; Perkuburan
+                </p>
             </div>
-        </div>
-    </section>
-
-    <footer class="footer">
-        <div class="container">
-            © {{ date('Y') }} E-Pusara. Hak cipta terpelihara.
         </div>
     </footer>
+
+    <script>
+        function showSystemGallery(type) {
+            const mobileGallery = document.getElementById('mobileGallery');
+            const laptopGallery = document.getElementById('laptopGallery');
+            const mobileTab = document.getElementById('mobileTab');
+            const laptopTab = document.getElementById('laptopTab');
+
+            if (type === 'mobile') {
+                mobileGallery.classList.remove('hidden');
+                laptopGallery.classList.add('hidden');
+
+                mobileTab.classList.add('bg-brand-600', 'text-white');
+                mobileTab.classList.remove('text-slate-500');
+
+                laptopTab.classList.remove('bg-brand-600', 'text-white');
+                laptopTab.classList.add('text-slate-500');
+            } else {
+                laptopGallery.classList.remove('hidden');
+                mobileGallery.classList.add('hidden');
+
+                laptopTab.classList.add('bg-brand-600', 'text-white');
+                laptopTab.classList.remove('text-slate-500');
+
+                mobileTab.classList.remove('bg-brand-600', 'text-white');
+                mobileTab.classList.add('text-slate-500');
+            }
+        }
+
+        function scrollMobileGallery(direction) {
+            const slider = document.getElementById('mobileSlider');
+
+            slider.scrollBy({
+                left: direction * 382,
+                behavior: 'smooth'
+            });
+        }
+
+    </script>
 
 </body>
 </html>

@@ -16,11 +16,12 @@ class AdminKhairatFeeController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Query Untuk Rekod Yang Dipaparkan
+        | Query Rekod / Summary
         |--------------------------------------------------------------------------
-        | Query ini ikut filter carian, tahun, bulan dan status.
+        | Bahagian ini ikut filter admin pilih:
+        | tahun, bulan, search, status, jenis yuran dan kaedah bayaran.
         */
-        $query = Payment::with('user');
+        $query = Payment::with(['user.profile']);
 
         $this->applyFilters($query, $request, $currentYear, $currentMonth);
 
@@ -28,20 +29,22 @@ class AdminKhairatFeeController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Query Untuk Laporan Tahun Semasa
+        | Query Graf
         |--------------------------------------------------------------------------
-        | Digunakan untuk kira summary, bulan, jenis yuran, tunggakan.
+        | Graf kekal tunjuk trend 12 bulan untuk tahun dipilih.
+        | Jadi kalau admin pilih bulan Mei, summary ikut Mei,
+        | tetapi graf masih tunjuk trend Jan - Dis tahun tersebut.
         */
-        $yearQuery = Payment::with('user');
-        $this->applyYearFilter($yearQuery, $currentYear);
+        $chartQuery = Payment::with(['user.profile']);
 
-        $yearPayments = $yearQuery->get();
+        $this->applyYearFilter($chartQuery, $currentYear);
+
+        $chartPayments = $chartQuery->get();
 
         /*
         |--------------------------------------------------------------------------
         | Rekod Transaksi
         |--------------------------------------------------------------------------
-        | Variable ini digunakan oleh tab "Rekod Transaksi".
         */
         $groupedFees = $payments->map(function ($payment) {
             $user = $payment->user;
@@ -65,6 +68,7 @@ class AdminKhairatFeeController extends Controller
 
                 'receipt_no' => $payment->reference_no ?? $payment->receipt_no ?? '-',
                 'reference_no' => $payment->reference_no ?? '-',
+
                 'payment_reference' => $payment->billplz_bill_id
                     ?? $payment->payment_reference
                     ?? $payment->reference_no
@@ -83,38 +87,40 @@ class AdminKhairatFeeController extends Controller
 
         /*
         |--------------------------------------------------------------------------
-        | Summary Count
+        | Summary Count - Ikut Filter
         |--------------------------------------------------------------------------
+        | Kalau pilih Mei, jumlah kutipan akan kira Mei sahaja.
         */
-        $paidYearPayments = $yearPayments->where('status', 'paid');
+        $summaryPayments = $payments;
+        $paidSummaryPayments = $summaryPayments->where('status', 'paid');
 
-        $totalAmount = $paidYearPayments->sum('amount');
-        $totalCount = $yearPayments->pluck('user_id')->filter()->unique()->count();
+        $totalAmount = $paidSummaryPayments->sum('amount');
+        $totalCount = $summaryPayments->pluck('user_id')->filter()->unique()->count();
 
-        $paidCount = $yearPayments->where('status', 'paid')->count();
-        $pendingCount = $yearPayments->where('status', 'pending')->count();
-        $failedCount = $yearPayments->where('status', 'failed')->count();
+        $paidCount = $summaryPayments->where('status', 'paid')->count();
+        $pendingCount = $summaryPayments->where('status', 'pending')->count();
+        $failedCount = $summaryPayments->where('status', 'failed')->count();
 
         /*
         |--------------------------------------------------------------------------
-        | Kutipan Bulanan
+        | Kutipan Bulanan - Untuk Graf 12 Bulan
         |--------------------------------------------------------------------------
         */
-        $months = $this->buildMonthlyReport($yearPayments);
+        $months = $this->buildMonthlyReport($chartPayments);
 
         /*
         |--------------------------------------------------------------------------
-        | Pecahan Jenis Yuran
+        | Pecahan Jenis Yuran - Ikut Filter
         |--------------------------------------------------------------------------
         */
-        $feeTypes = $this->buildFeeTypeReport($yearPayments);
+        $feeTypes = $this->buildFeeTypeReport($summaryPayments);
 
         /*
         |--------------------------------------------------------------------------
-        | Ahli Belum Bayar / Pending / Failed
+        | Ahli Belum Bayar - Ikut Filter
         |--------------------------------------------------------------------------
         */
-        $unpaidMembers = $this->buildUnpaidMembers($yearPayments);
+        $unpaidMembers = $this->buildUnpaidMembers($summaryPayments);
 
         return view('admin.khairat.fees.index', compact(
             'groupedFees',
@@ -138,7 +144,8 @@ class AdminKhairatFeeController extends Controller
         if ($month) {
             $query->where(function ($q) use ($month) {
                 $q->whereMonth('paid_at', $month)
-                    ->orWhere('paid_month', $month);
+                    ->orWhere('paid_month', $month)
+                    ->orWhereMonth('created_at', $month);
             });
         }
 
@@ -147,7 +154,12 @@ class AdminKhairatFeeController extends Controller
 
             $query->where(function ($q) use ($search) {
                 $q->whereHas('user', function ($userQuery) use ($search) {
-                    $userQuery->where('name', 'like', '%' . $search . '%');
+                    $userQuery->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%')
+                        ->orWhereHas('profile', function ($profileQuery) use ($search) {
+                            $profileQuery->where('no_kp', 'like', '%' . $search . '%')
+                                ->orWhere('no_tel', 'like', '%' . $search . '%');
+                        });
                 })
                 ->orWhere('reference_no', 'like', '%' . $search . '%')
                 ->orWhere('payment_plan', 'like', '%' . $search . '%')
@@ -179,7 +191,7 @@ class AdminKhairatFeeController extends Controller
             }
 
             if (in_array($request->fee_type, ['annual', 'yearly'])) {
-                $query->where('payment_plan', 'yearly')
+                $query->whereIn('payment_plan', ['yearly', 'annual'])
                     ->where(function ($q) {
                         $q->whereNull('payment_type')
                             ->orWhere('payment_type', '!=', 'registration');
@@ -425,8 +437,120 @@ class AdminKhairatFeeController extends Controller
 
     public function show($payment)
     {
-        $payment = Payment::with('user')->findOrFail($payment);
+        $payment = Payment::with(['user.profile'])->findOrFail($payment);
 
         return view('admin.khairat.fees.show', compact('payment'));
     }
+
+    public function exportExcel(Request $request)
+    {
+        $currentYear = (int) $request->input('year', now()->year);
+        $currentMonth = $request->filled('month') ? (int) $request->month : null;
+
+        $query = Payment::with(['user.profile']);
+
+        $this->applyFilters($query, $request, $currentYear, $currentMonth);
+
+        $payments = $query->latest()->get();
+
+        $fileName = 'laporan-yuran-' . $currentYear;
+
+        if ($currentMonth) {
+            $fileName .= '-bulan-' . str_pad($currentMonth, 2, '0', STR_PAD_LEFT);
+        }
+
+        $fileName .= '.csv';
+
+        $headers = [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"$fileName\"",
+        ];
+
+        return response()->stream(function () use ($payments) {
+            $file = fopen('php://output', 'w');
+
+            // Bagi Excel baca UTF-8 dengan betul
+            fprintf($file, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            fputcsv($file, [
+                'No',
+                'Nama Ahli',
+                'No KP',
+                'Jenis Yuran',
+                'Pelan Bayaran',
+                'Amaun',
+                'Status',
+                'No Resit / Rujukan',
+                'Billplz Bill ID',
+                'Kaedah Bayaran',
+                'Tahun Keahlian',
+                'Bulan Bayaran',
+                'Tarikh Bayaran',
+                'Tarikh Rekod',
+            ]);
+
+            foreach ($payments as $index => $payment) {
+                $user = $payment->user;
+
+                fputcsv($file, [
+                    $index + 1,
+                    $user?->name ?? '-',
+                    $user?->no_kp ?? data_get($user, 'profile.no_kp') ?? '-',
+                    $this->getFeeType($payment),
+                    $payment->payment_plan ?? '-',
+                    number_format($payment->amount ?? 0, 2, '.', ''),
+                    strtoupper($payment->status ?? '-'),
+                    $payment->reference_no ?? $payment->receipt_no ?? '-',
+                    $payment->billplz_bill_id ?? '-',
+                    $payment->payment_method ?? ($payment->billplz_bill_id ? 'Billplz' : 'Manual'),
+                    $payment->membership_year ?? '-',
+                    $payment->paid_month ?? '-',
+                    $payment->paid_at ? \Carbon\Carbon::parse($payment->paid_at)->format('d/m/Y H:i') : '-',
+                    $payment->created_at ? \Carbon\Carbon::parse($payment->created_at)->format('d/m/Y H:i') : '-',
+                ]);
+            }
+
+            fclose($file);
+        }, 200, $headers);
+    }
+
+    public function previewPdf(Request $request)
+    {
+        $currentYear = (int) $request->input('year', now()->year);
+        $currentMonth = $request->filled('month') ? (int) $request->month : null;
+
+        $query = Payment::with(['user.profile']);
+
+        $this->applyFilters($query, $request, $currentYear, $currentMonth);
+
+        $payments = $query->latest()->get();
+
+        $paidPayments = $payments->where('status', 'paid');
+
+        $totalAmount = $paidPayments->sum('amount');
+        $paidCount = $payments->where('status', 'paid')->count();
+        $pendingCount = $payments->where('status', 'pending')->count();
+        $failedCount = $payments->where('status', 'failed')->count();
+        $totalMembers = $payments->pluck('user_id')->filter()->unique()->count();
+
+        $feeTypes = $this->buildFeeTypeReport($payments);
+
+        return view('admin.khairat.fees.pdf-preview', compact(
+            'payments',
+            'currentYear',
+            'currentMonth',
+            'totalAmount',
+            'paidCount',
+            'pendingCount',
+            'failedCount',
+            'totalMembers',
+            'feeTypes'
+        ));
+    }
+
+    public function getFeeTypeForView($payment): string
+    {
+        return $this->getFeeType($payment);
+    }
+    
 }

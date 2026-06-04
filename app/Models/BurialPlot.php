@@ -35,7 +35,7 @@ class BurialPlot extends Model
     {
         return match ($this->zone) {
             'L' => 'Zon Lelaki',
-            'P' => 'Zon Perempuan',
+            'P', 'W' => 'Zon Perempuan',
             'K' => 'Zon Kanak-kanak',
             default => 'Tidak Diketahui',
         };

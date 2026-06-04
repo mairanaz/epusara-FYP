@@ -445,6 +445,21 @@ class PaymentController extends Controller
         $cycleEndDate = Carbon::parse($summary['cycle_end_date']);
         $yearlyPeriod = $summary['yearly_period'];
 
+        if ($plan === 'monthly' && $action === 'monthly_custom_amount') {
+            $request->validate([
+                'custom_amount' => [
+                    'required',
+                    'numeric',
+                    'min:' . self::MONTHLY_FEE,
+                ],
+            ], [
+                'custom_amount.required' => 'Sila masukkan jumlah yang ingin dibayar.',
+                'custom_amount.numeric' => 'Jumlah bayaran mestilah dalam bentuk nombor.',
+                'custom_amount.min' => 'Jumlah minimum yang boleh dibayar ialah RM10.00.',
+            ]);
+        }
+
+
         try {
             /*
             |--------------------------------------------------------------------------
@@ -589,6 +604,150 @@ class PaymentController extends Controller
                                 'notes' => 'Yuran bulanan',
                             ],
                         ],
+                    ]);
+
+                    return redirect()->route('payment.billplz', $payment->id);
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Bayar Beberapa Bulan
+                |--------------------------------------------------------------------------
+                */
+                if ($action === 'monthly_custom_amount') {
+
+                    if (($summary['registration_balance'] ?? 0) > 0) {
+                        return redirect()
+                            ->route('user.payments.index')
+                            ->with('error', 'Sila jelaskan yuran pendaftaran terlebih dahulu.');
+                    }
+
+                    
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Tukarkan amaun kepada sen untuk semakan yang lebih tepat
+                    |--------------------------------------------------------------------------
+                    | Contoh:
+                    | RM20.00 = 2000 sen
+                    | RM10.00 = 1000 sen
+                    */
+                    $customAmount = (float) $request->custom_amount;
+                    $customAmountInCents = (int) round($customAmount * 100);
+                    $monthlyFeeInCents = (int) round(self::MONTHLY_FEE * 100);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Amaun mesti gandaan RM10
+                    |--------------------------------------------------------------------------
+                    */
+                    if ($customAmountInCents % $monthlyFeeInCents !== 0) {
+                        return redirect()
+                            ->back()
+                            ->withInput()
+                            ->with('error', 'Sila masukkan jumlah seperti RM10, RM20, RM30 atau seterusnya.');
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Dapatkan bulan yang masih belum dibayar
+                    |--------------------------------------------------------------------------
+                    */
+                    $remainingPeriods = $summary['remaining_cycle_periods'] ?? [];
+                    $remainingAmount = (float) ($summary['remaining_cycle_amount'] ?? 0);
+
+                    if (count($remainingPeriods) <= 0) {
+                        return redirect()
+                            ->route('user.payments.index')
+                            ->with('error', 'Semua bayaran bulanan untuk kitaran semasa telah dijelaskan.');
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Amaun tidak boleh melebihi semua baki yang belum dibayar
+                    |--------------------------------------------------------------------------
+                    */
+                    if ($customAmount > $remainingAmount) {
+                        return redirect()
+                            ->back()
+                            ->withInput()
+                            ->with('error', 'Jumlah yang dimasukkan melebihi baki yang belum dibayar.');
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Kira bilangan bulan berdasarkan amaun
+                    |--------------------------------------------------------------------------
+                    | Contoh:
+                    | RM20 / RM10 = 2 bulan
+                    | RM30 / RM10 = 3 bulan
+                    */
+                    $numberOfMonths = intdiv($customAmountInCents, $monthlyFeeInCents);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Ambil bulan terawal yang masih belum dibayar
+                    |--------------------------------------------------------------------------
+                    | Contoh RM20:
+                    | June 2026 dan July 2026
+                    */
+                    $periods = array_slice($remainingPeriods, 0, $numberOfMonths);
+
+                    if (count($periods) !== $numberOfMonths) {
+                        return redirect()
+                            ->back()
+                            ->withInput()
+                            ->with('error', 'Bayaran ini melebihi bilangan bulan yang masih belum dibayar.');
+                    }
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Sediakan rekod pecahan bayaran mengikut bulan
+                    |--------------------------------------------------------------------------
+                    */
+                    $items = collect($periods)->map(function ($period) use ($cycleStartDate, $cycleEndDate) {
+                        $billingMonth = Carbon::createFromDate(
+                            $period['year'],
+                            $period['month'],
+                            1
+                        )->startOfMonth();
+
+                        return [
+                            'payment_type' => 'monthly',
+                            'amount' => self::MONTHLY_FEE,
+                            'payment_period' => $period['period'],
+                            'membership_year' => $period['year'],
+                            'paid_month' => $period['month'],
+                            'billing_month' => $billingMonth->toDateString(),
+                            'cycle_start' => $cycleStartDate->toDateString(),
+                            'cycle_end' => $cycleEndDate->toDateString(),
+                            'notes' => 'Bayaran ikut jumlah',
+                        ];
+                    })->toArray();
+
+                    $firstPeriod = $periods[0]['period'];
+                    $lastPeriod = $periods[count($periods) - 1]['period'];
+
+                    [$firstYear, $firstMonth] = $this->extractYearMonth($firstPeriod);
+
+                    /*
+                    |--------------------------------------------------------------------------
+                    | Cipta bayaran utama untuk dihantar ke Billplz
+                    |--------------------------------------------------------------------------
+                    | payment_type menggunakan "monthly" supaya tidak perlu tambah
+                    | jenis baharu dalam database.
+                    |--------------------------------------------------------------------------
+                    */
+                    $payment = $this->createPaymentWithItems([
+                        'user_id' => $user->id,
+                        'payment_plan' => 'monthly',
+                        'payment_type' => 'monthly',
+                        'amount' => $customAmount,
+                        'payment_period' => $firstPeriod . '_to_' . $lastPeriod,
+                        'membership_year' => $firstYear,
+                        'paid_month' => $firstMonth,
+                        'notes' => 'Bayaran ikut jumlah sebanyak RM' . number_format($customAmount, 2),
+                        'items' => $items,
                     ]);
 
                     return redirect()->route('payment.billplz', $payment->id);
@@ -783,7 +942,13 @@ class PaymentController extends Controller
                 | Bayaran Tahunan Biasa
                 |--------------------------------------------------------------------------
                 */
-                if ($action === 'annual_payment') {
+               if ($action === 'annual_payment') {
+
+                    if (($summary['registration_balance'] ?? 0) > 0) {
+                        return redirect()
+                            ->route('user.payments.index')
+                            ->with('error', 'Sila jelaskan yuran pendaftaran terlebih dahulu.');
+                    }
 
                     if (($summary['annual_balance'] ?? 0) <= 0) {
                         return redirect()

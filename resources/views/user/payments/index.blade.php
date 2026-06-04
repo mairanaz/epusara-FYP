@@ -4,7 +4,7 @@
 <div class="container-fluid">
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4">
-        <div>
+        <div id="tour-fee-header">
             <h4 class="mb-1">Maklumat Bayaran</h4>
             <p class="text-muted mb-0">
                 Semak pelan yuran, status bayaran, baki semasa dan rekod bayaran anda.
@@ -194,7 +194,8 @@
     }
 @endphp
 
-    <div class="alert alert-{{ $noticeType }} d-flex align-items-start justify-content-between gap-3 shadow-sm py-3">
+    <div class="alert alert-{{ $noticeType }} d-flex align-items-start justify-content-between gap-3 shadow-sm py-3"
+     id="tour-fee-status-notice">
         <div class="d-flex align-items-start gap-3">
             <div class="fs-4">
                 @if($noticeType === 'success')
@@ -215,7 +216,7 @@
         </div>
     </div>
 
-    <div class="row g-3 mb-3">
+    <div class="row g-3 mb-3" id="tour-fee-summary">
         <div class="col-md-4">
             <div class="card custom-card border-0 shadow-sm h-100">
                 <div class="card-body py-3">
@@ -249,7 +250,7 @@
 
     <div class="row g-3 mb-3">
     <div class="col-lg-5">
-        <div class="card custom-card border-0 shadow-sm h-100">
+        <div class="card custom-card border-0 shadow-sm h-100" id="tour-fee-plan">
             <div class="card-header">
                 <h6 class="card-title mb-0">Maklumat Pelan Yuran</h6>
             </div>
@@ -326,7 +327,7 @@
     </div>
 
     <div class="col-lg-7">
-        <div class="card custom-card border-0 shadow-sm mb-3">
+        <div class="card custom-card border-0 shadow-sm mb-3" id="tour-fee-action">
             <div class="card-header">
                 <h6 class="card-title mb-0">Tindakan</h6>
             </div>
@@ -364,7 +365,7 @@
         </div>
 
         @if($plan === 'monthly')
-            <div class="card custom-card border-0 shadow-sm">
+            <div class="card custom-card border-0 shadow-sm" id="tour-fee-progress">
                 <div class="card-body py-3">
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <h6 class="mb-0">Kemajuan Bayaran Bulanan</h6>
@@ -388,7 +389,7 @@
 </div>
 
     @if($plan === 'monthly')
-        <div class="card custom-card border-0 shadow-sm mb-3">
+        <div class="card custom-card border-0 shadow-sm mb-3" id="tour-fee-schedule">
             <div class="card-header">
             <h6 class="card-title mb-0">
                 Jadual Kitaran Bayaran Semasa
@@ -441,7 +442,7 @@
     </div>
     @endif
 
-    <div class="card custom-card border-0 shadow-sm mt-4">
+    <div class="card custom-card border-0 shadow-sm mt-4" id="tour-fee-history">
         <div class="card-header">
             <h6 class="card-title mb-0">Sejarah Bayaran</h6>
         </div>
@@ -518,7 +519,7 @@
                                 };
                             @endphp
 
-                            <tr>
+                            <tr @if($index === 0) id="tour-first-payment-record" @endif>
                                 <td>{{ $index + 1 }}</td>
 
                                 <td>
@@ -604,3 +605,161 @@
 
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const tourButton = document.getElementById('btnPageTour');
+
+        if (!tourButton) {
+            return;
+        }
+
+        tourButton.addEventListener('click', function () {
+            if (!window.driver || !window.driver.js) {
+                console.error('Driver.js tidak berjaya dimuatkan.');
+                return;
+            }
+
+            const driver = window.driver.js.driver;
+
+            const allSteps = [
+                {
+                    element: '#tour-fee-header',
+                    popover: {
+                        title: 'Maklumat Bayaran',
+                        description: 'Halaman ini digunakan untuk menyemak pelan yuran khairat, status bayaran, baki semasa dan rekod pembayaran anda.',
+                        side: 'bottom',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-fee-status-notice',
+                    popover: {
+                        title: 'Status Bayaran Semasa',
+                        description: 'Makluman ini menunjukkan keadaan bayaran anda sama ada belum dimulakan, belum lengkap atau telah selesai dibayar.',
+                        side: 'bottom',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-fee-summary',
+                    popover: {
+                        title: 'Ringkasan Bayaran',
+                        description: 'Semak jenis pelan keahlian, jumlah yang perlu dibayar sekarang dan baki keseluruhan yang masih belum dijelaskan.',
+                        side: 'bottom',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-fee-plan',
+                    popover: {
+                        title: 'Maklumat Pelan Yuran',
+                        description: 'Bahagian ini menerangkan pelan yang dipilih, yuran pendaftaran, kadar bayaran dan status pembayaran anda.',
+                        side: 'right',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-fee-action',
+                    popover: {
+                        title: 'Tindakan Pembayaran',
+                        description: 'Jika masih terdapat baki bayaran, klik butang Teruskan Bayaran untuk membuat transaksi. Jika bayaran lengkap, status selesai akan dipaparkan di sini.',
+                        side: 'left',
+                        align: 'start'
+                    }
+                },
+                {
+                    element: '#tour-fee-progress',
+                    popover: {
+                        title: 'Kemajuan Bayaran Bulanan',
+                        description: 'Bagi pelan bulanan, bar kemajuan ini menunjukkan bilangan bulan yang telah dibayar daripada keseluruhan kitaran 12 bulan.',
+                        side: 'left',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-fee-schedule',
+                    popover: {
+                        title: 'Jadual Kitaran Bayaran',
+                        description: 'Semak status setiap bulan dalam kitaran semasa. Status menunjukkan bulan yang sudah dibayar, perlu dibayar sekarang atau masih belum dibayar.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-fee-history',
+                    popover: {
+                        title: 'Sejarah Bayaran',
+                        description: 'Semua transaksi bayaran anda direkodkan di sini bersama tarikh, tempoh bayaran, jumlah, nombor resit dan status transaksi.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                },
+                {
+                    element: '#tour-first-payment-record',
+                    popover: {
+                        title: 'Status Transaksi dan Resit',
+                        description: 'Lihat status transaksi anda pada rekod ini. Bagi bayaran yang berjaya, anda boleh melihat resit sebagai bukti pembayaran.',
+                        side: 'top',
+                        align: 'center'
+                    }
+                }
+            ];
+
+            /*
+            |--------------------------------------------------------------------------
+            | Paparkan step yang tersedia sahaja
+            |--------------------------------------------------------------------------
+            | Pelan tahunan tidak mempunyai bahagian kemajuan dan jadual bulanan.
+            | Pengguna tanpa sejarah bayaran juga tidak mempunyai rekod pertama.
+            */
+            const availableSteps = allSteps.filter(function (step) {
+                return document.querySelector(step.element);
+            });
+
+            if (availableSteps.length === 0) {
+                console.warn('Tiada elemen tour ditemui pada halaman ini.');
+                return;
+            }
+
+           let feeTour;
+
+feeTour = driver({
+    animate: true,
+    smoothScroll: true,
+    popoverClass: 'epusara-tour-popover',
+
+    allowClose: true,
+    overlayColor: '#0f172a',
+    overlayOpacity: 0.58,
+    stagePadding: 10,
+    stageRadius: 10,
+    popoverOffset: 14,
+    disableActiveInteraction: true,
+
+    showProgress: false,
+
+    nextBtnText: 'Seterusnya →',
+    prevBtnText: '← Sebelumnya',
+    doneBtnText: 'Selesai',
+
+    onPopoverRender: function () {
+        const currentIndex = feeTour.getActiveIndex() ?? 0;
+        window.updateEpusaraTourPopover(
+            feeTour,
+            currentIndex,
+            availableSteps.length
+        );
+    },
+
+    steps: availableSteps
+});
+
+feeTour.drive();
+
+            feeTour.drive();
+        });
+    });
+</script>
+@endpush

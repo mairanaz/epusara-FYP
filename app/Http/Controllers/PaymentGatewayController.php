@@ -104,17 +104,44 @@ class PaymentGatewayController extends Controller
                 $paid = filter_var($bill['paid'] ?? false, FILTER_VALIDATE_BOOLEAN);
                 $state = $bill['state'] ?? null;
 
+                $expectedAmountInSen = (int) round($payment->amount * 100);
+                $billAmountInSen = (int) ($bill['amount'] ?? 0);
+
+                if ($expectedAmountInSen !== $billAmountInSen) {
+                    Log::error('Billplz return amount mismatch', [
+                        'payment_id' => $payment->id,
+                        'expected_amount' => $expectedAmountInSen,
+                        'bill_amount' => $billAmountInSen,
+                    ]);
+
+                    return redirect()->route('user.payments.index')
+                        ->with('error', 'Jumlah bayaran tidak sepadan. Sila hubungi pentadbir.');
+                }
+
+                /*
+                |--------------------------------------------------------------------------
+                | Jangan ubah payment yang sudah paid kembali kepada pending
+                |--------------------------------------------------------------------------
+                */
+                if ($payment->status === 'paid' && !$paid) {
+                    return redirect()->route('user.payments.index')
+                        ->with('success', 'Bayaran berjaya direkodkan.');
+                }
+
                 $updateData = [
                     'status' => $paid ? 'paid' : 'pending',
-                    'paid_at' => $paid ? ($payment->paid_at ?? now()) : null,
                     'payment_method' => 'Billplz',
                     'billplz_paid' => $paid,
                     'billplz_state' => $state,
                     'billplz_data' => $bill,
                 ];
 
+                if ($paid) {
+                    $updateData['paid_at'] = $payment->paid_at ?? now();
+                }
+
                 if ($paid && !$payment->receipt_no) {
-                    $updateData['receipt_no'] = 'RCP-' . now()->format('YmdHis');
+                    $updateData['receipt_no'] = 'RCP-' . $payment->id . '-' . now()->format('YmdHis');
                 }
 
                 $payment->update($updateData);
@@ -155,6 +182,21 @@ class PaymentGatewayController extends Controller
     {
         Log::info('Billplz callback received', $request->all());
 
+        $callbackData = $request->all();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sahkan request benar-benar datang daripada Billplz
+        |--------------------------------------------------------------------------
+        */
+        if (!$this->isValidBillplzSignature($callbackData)) {
+            Log::warning('Invalid Billplz callback signature', [
+                'callback_data' => $callbackData,
+            ]);
+
+            return response('Invalid signature', 403);
+        }
+
         $billId = $request->input('id');
 
         if (!$billId) {
@@ -167,24 +209,91 @@ class PaymentGatewayController extends Controller
             return response('Payment not found', 404);
         }
 
+        /*
+        |--------------------------------------------------------------------------
+        | Semak jumlah callback sama dengan jumlah payment dalam sistem
+        |--------------------------------------------------------------------------
+        */
+        $expectedAmountInSen = (int) round($payment->amount * 100);
+        $receivedAmountInSen = (int) $request->input('amount', 0);
+
+        if ($expectedAmountInSen !== $receivedAmountInSen) {
+            Log::error('Billplz callback amount mismatch', [
+                'payment_id' => $payment->id,
+                'expected_amount' => $expectedAmountInSen,
+                'received_amount' => $receivedAmountInSen,
+            ]);
+
+            return response('Invalid payment amount', 422);
+        }
+
         $paid = filter_var($request->input('paid'), FILTER_VALIDATE_BOOLEAN);
         $state = $request->input('state');
 
+        /*
+        |--------------------------------------------------------------------------
+        | Jika sudah berjaya dibayar, jangan turunkan semula status kepada pending
+        |--------------------------------------------------------------------------
+        | Callback dan redirect boleh tiba dalam urutan berbeza.
+        |--------------------------------------------------------------------------
+        */
+        if ($payment->status === 'paid' && !$paid) {
+            return response('OK', 200);
+        }
+
         $updateData = [
             'status' => $paid ? 'paid' : 'pending',
-            'paid_at' => $paid ? now() : null,
             'payment_method' => 'Billplz',
             'billplz_paid' => $paid,
             'billplz_state' => $state,
-            'billplz_data' => $request->all(),
+            'billplz_data' => $callbackData,
         ];
 
-        if ($paid && !$payment->receipt_no) {
-            $updateData['receipt_no'] = 'RCP-' . now()->format('YmdHis');
+        if ($paid) {
+            $updateData['paid_at'] = $payment->paid_at ?? now();
+
+            if (!$payment->receipt_no) {
+                $updateData['receipt_no'] = 'RCP-' . $payment->id . '-' . now()->format('YmdHis');
+            }
         }
 
         $payment->update($updateData);
 
         return response('OK', 200);
     }
+
+
+    private function isValidBillplzSignature(array $data): bool
+{
+    $receivedSignature = $data['x_signature'] ?? null;
+    $xSignatureKey = config('services.billplz.x_signature');
+
+    if (!$receivedSignature || !$xSignatureKey) {
+        return false;
+    }
+
+    unset($data['x_signature']);
+
+    /*
+    |--------------------------------------------------------------------------
+    | Billplz memerlukan setiap key dan value digabungkan,
+    | disusun secara ascending tanpa mengira huruf besar/kecil,
+    | kemudian disambung menggunakan simbol |
+    |--------------------------------------------------------------------------
+    */
+    uksort($data, 'strcasecmp');
+
+    $sourceStrings = [];
+
+    foreach ($data as $key => $value) {
+        $sourceStrings[] = $key . $value;
+    }
+
+    $source = implode('|', $sourceStrings);
+
+    $calculatedSignature = hash_hmac('sha256', $source, $xSignatureKey);
+
+    return hash_equals($calculatedSignature, $receivedSignature);
+}
+
 }
