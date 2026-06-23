@@ -1,5 +1,5 @@
-<aside class="app-sidebar sticky" id="sidebar-user" data-sidebar-role="user">
-    <div class="main-sidebar-header d-flex align-items-center justify-content-center">
+<aside class="app-sidebar sticky epusara-user-sidebar" id="sidebar-user" data-sidebar-role="user">
+    <div class="main-sidebar-header epusara-sidebar-logo d-flex align-items-center justify-content-center">
         @php
             $user = auth()->user();
             $profile = $user->profile ?? null;
@@ -15,18 +15,22 @@
         @endphp
 
         <a href="{{ $homeRoute }}" class="header-logo d-flex align-items-center gap-2 text-decoration-none">
-            <img src="{{ asset('assets/images/logo_rtb-removebg-preview.png') }}" alt="Logo RTB"
-                 style="height: 50px; width: auto; object-fit: contain;">
-            <span style="font-size: 22px; font-weight: 800; color: #ffffff;">E-Pusara</span>
+            <img src="{{ asset('assets/images/logo_rtb-removebg-preview.png') }}"
+                 alt="Logo RTB"
+                 class="epusara-sidebar-logo-img">
+            <span class="epusara-sidebar-brand">E-Pusara</span>
         </a>
     </div>
 
     <div class="main-sidebar" id="sidebar-scroll">
         <nav class="main-menu-container nav nav-pills flex-column sub-open">
-            <ul class="main-menu">
+            <ul class="main-menu epusara-sidebar-menu">
 
                 @if($user->account_type === null)
-                    <li class="slide__category"><span class="category-name">Pengguna Baharu</span></li>
+
+                    <li class="slide__category">
+                        <span class="category-name">Pengguna Baharu</span>
+                    </li>
 
                     <li class="slide">
                         <a href="{{ route('user.dashboard') }}"
@@ -45,7 +49,10 @@
                     </li>
 
                 @elseif($user->account_type === 'tanggungan')
-                    <li class="slide__category"><span class="category-name">Tanggungan</span></li>
+
+                    <li class="slide__category">
+                        <span class="category-name">Tanggungan</span>
+                    </li>
 
                     <li class="slide">
                         <a href="{{ route('dependent.dashboard') }}"
@@ -55,11 +62,9 @@
                         </a>
                     </li>
 
-                    {{-- MAKLUMAT AKAUN --}}
                     <li class="slide__category">
                         <span class="category-name">Maklumat Akaun</span>
                     </li>
-
 
                     <li class="slide">
                         <a href="{{ route('user.profile.show') }}"
@@ -77,27 +82,25 @@
                         </a>
                     </li>
 
-                    {{-- PENGURUSAN KEMATIAN --}}
                     <li class="slide__category">
                         <span class="category-name">Pengurusan Kematian</span>
                     </li>
 
                     <li class="slide">
                         <a href="{{ route('death-reports.index') }}"
-                        class="side-menu__item {{ request()->routeIs('death-reports.index') || request()->routeIs('death-reports.show') ? 'active' : '' }}">
+                           class="side-menu__item {{ request()->routeIs('death-reports.index') || request()->routeIs('death-reports.show') ? 'active' : '' }}">
                             <i class="bx bx-file side-menu__icon"></i>
                             <span class="side-menu__label">Laporan Kematian</span>
                         </a>
                     </li>
 
-                    {{-- TEMPAHAN / KUBUR --}}
                     <li class="slide__category">
                         <span class="category-name">Tempahan / Kubur</span>
                     </li>
 
                     <li class="slide">
                         <a href="{{ route('user.grave-locations.index') }}"
-                        class="side-menu__item {{ request()->routeIs('user.grave-locations.*') ? 'active' : '' }}">
+                           class="side-menu__item {{ request()->routeIs('user.grave-locations.*') ? 'active' : '' }}">
                             <i class="bx bx-map side-menu__icon"></i>
                             <span class="side-menu__label">Lokasi Kubur</span>
                         </a>
@@ -105,16 +108,17 @@
 
                     <li class="slide">
                         <a href="{{ route('grave-orders.index') }}"
-                        class="side-menu__item {{ request()->routeIs('grave-orders.*') ? 'active' : '' }}">
+                           class="side-menu__item {{ request()->routeIs('grave-orders.*') ? 'active' : '' }}">
                             <i class="bx bx-package side-menu__icon"></i>
                             <span class="side-menu__label">Tempahan Kepukan</span>
                         </a>
                     </li>
 
-                
-
                 @elseif($user->account_type === 'utama')
-                    <li class="slide__category"><span class="category-name">Ahli</span></li>
+
+                    <li class="slide__category">
+                        <span class="category-name">Ahli</span>
+                    </li>
 
                     <li class="slide">
                         <a href="{{ route('user.dashboard') }}"
@@ -124,7 +128,6 @@
                         </a>
                     </li>
 
-                    {{-- MAKLUMAT AKAUN --}}
                     <li class="slide__category">
                         <span class="category-name">Maklumat Akaun</span>
                     </li>
@@ -135,7 +138,7 @@
                             <i class="bx bx-user side-menu__icon"></i>
                             <span class="side-menu__label">Profil</span>
                         </a>
-                    </li>  
+                    </li>
 
                     @if(in_array($profileStatus, ['approved', 'active']))
                         <li class="slide">
@@ -147,7 +150,6 @@
                         </li>
                     @endif
 
-                    {{-- MAKLUMAT KELUARGA --}}
                     <li class="slide__category">
                         <span class="category-name">Maklumat Keluarga</span>
                     </li>
@@ -160,27 +162,25 @@
                         </a>
                     </li>
 
-                    {{-- PENGURUSAN KEMATIAN --}}
                     <li class="slide__category">
                         <span class="category-name">Pengurusan Kematian</span>
                     </li>
 
                     <li class="slide">
                         <a href="{{ route('death-reports.index') }}"
-                        class="side-menu__item {{ request()->routeIs('death-reports.index') || request()->routeIs('death-reports.show') ? 'active' : '' }}">
+                           class="side-menu__item {{ request()->routeIs('death-reports.index') || request()->routeIs('death-reports.show') ? 'active' : '' }}">
                             <i class="bx bx-file side-menu__icon"></i>
                             <span class="side-menu__label">Laporan Kematian</span>
                         </a>
                     </li>
 
-                    {{-- TEMPAHAN / KUBUR --}}
                     <li class="slide__category">
                         <span class="category-name">Tempahan / Kubur</span>
                     </li>
 
                     <li class="slide">
                         <a href="{{ route('user.grave-locations.index') }}"
-                        class="side-menu__item {{ request()->routeIs('user.grave-locations.*') ? 'active' : '' }}">
+                           class="side-menu__item {{ request()->routeIs('user.grave-locations.*') ? 'active' : '' }}">
                             <i class="bx bx-map side-menu__icon"></i>
                             <span class="side-menu__label">Lokasi Kubur</span>
                         </a>
@@ -188,7 +188,7 @@
 
                     <li class="slide">
                         <a href="{{ route('grave-orders.index') }}"
-                        class="side-menu__item {{ request()->routeIs('grave-orders.*') ? 'active' : '' }}">
+                           class="side-menu__item {{ request()->routeIs('grave-orders.*') ? 'active' : '' }}">
                             <i class="bx bx-package side-menu__icon"></i>
                             <span class="side-menu__label">Tempahan Kepukan</span>
                         </a>

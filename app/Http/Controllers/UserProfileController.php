@@ -8,6 +8,7 @@ use App\Models\Dependent;
 use App\Models\DeathReport;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use App\Services\SuccessorFinalizationService;
 
 class UserProfileController extends Controller
 {
@@ -62,9 +63,20 @@ class UserProfileController extends Controller
 
         session(['user_profile.step1' => $validated]);
 
-        $matchedDependent = Dependent::where('no_kp', $validated['no_kp'])->first();
+        $cleanNoKp = preg_replace('/[^0-9]/', '', $validated['no_kp']);
+
+        $matchedDependent = Dependent::whereRaw("REPLACE(no_kp, '-', '') = ?", [$cleanNoKp])
+            ->first();
+
+        $isPendingSuccessor = false;
 
         if ($matchedDependent) {
+            $isPendingSuccessor = UserProfile::where('replacement_dependent_id', $matchedDependent->id)
+                ->where('replacement_status', 'pending_registration')
+                ->exists();
+        }
+
+        if ($matchedDependent && !$isPendingSuccessor) {
             session([
                 'user_profile.is_dependent' => true,
                 'user_profile.linked_dependent_id' => $matchedDependent->id,
@@ -76,6 +88,17 @@ class UserProfileController extends Controller
             ]);
         }
 
+        if ($matchedDependent && $isPendingSuccessor) {
+            session([
+                'user_profile.is_successor_registration' => true,
+                'user_profile.successor_dependent_id' => $matchedDependent->id,
+            ]);
+        } else {
+            session()->forget([
+                'user_profile.is_successor_registration',
+                'user_profile.successor_dependent_id',
+            ]);
+        }
         return redirect()->route('user.profile.create.step2');
     }
 
@@ -111,6 +134,27 @@ class UserProfileController extends Controller
 
         session(['user_profile.step2' => $validated]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | FLOW PENGGANTI AHLI UTAMA
+        |--------------------------------------------------------------------------
+        | Jika No. KP yang dimasukkan ialah calon pengganti yang telah disahkan
+        | oleh admin, sistem terus lengkapkan profil dan finalize penggantian.
+        | Calon tidak perlu pergi Step 3 Waris dan Step 4 Bayaran Yuran.
+        |--------------------------------------------------------------------------
+        */
+        if (session('user_profile.is_successor_registration') === true) {
+            return $this->storeSuccessorProfileAfterStep2(
+                $request,
+                app(SuccessorFinalizationService::class)
+            );
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | FLOW TANGGUNGAN BIASA
+        |--------------------------------------------------------------------------
+        */
         if ($this->isDependentFlow()) {
             $step1 = session('user_profile.step1', []);
             $step2 = session('user_profile.step2', []);
@@ -121,10 +165,6 @@ class UserProfileController extends Controller
             $data['tarikh_permohonan'] = now()->toDateString();
             $data['status_permohonan'] = 'pending';
             $data['catatan_permohonan'] = 'Akaun didaftarkan sebagai tanggungan.';
-            $data['nama_waris'] = null;
-            $data['hubungan_waris'] = null;
-            $data['no_tel_waris'] = null;
-            $data['alamat_waris'] = null;
             $data['payment_plan'] = null;
 
             $profile = UserProfile::create($data);
@@ -134,65 +174,60 @@ class UserProfileController extends Controller
             session()->forget('user_profile');
 
             return redirect()->route('user.profile.show')
-                ->with('success', 'Maklumat profil tanggungan berjaya disimpan.');
+                ->with('success', 'Berjaya masukkan maklumat profil.');
         }
-
-        return redirect()->route('user.profile.create.step3');
-    }
-
-   public function createStep3()
-    {
-        if (auth()->user()->profile) {
-            return redirect()->route('user.profile.show');
-        }
-
-        if (!session()->has('user_profile.step1')) {
-            return redirect()->route('user.profile.create.step1')
-                ->with('error', 'Sila lengkapkan Maklumat Asas terlebih dahulu.');
-        }
-
-        if (!session()->has('user_profile.step2')) {
-            return redirect()->route('user.profile.create.step2')
-                ->with('error', 'Sila lengkapkan Maklumat Perhubungan terlebih dahulu.');
-        }
-
-        if ($this->isDependentFlow()) {
-            return redirect()->route('user.profile.show')
-                ->with('info', 'Akaun anda dikenal pasti sebagai tanggungan. Langkah seterusnya tidak diperlukan.');
-        }
-
-        return view('user.profile.step3');
-    }
-
-    public function postStep3(Request $request)
-    {
-        if (auth()->user()->profile) {
-            return redirect()->route('user.profile.show');
-        }
-
-        if ($this->isDependentFlow()) {
-            return redirect()->route('user.profile.show')
-                ->with('error', 'Akaun tanggungan tidak perlu melengkapkan langkah ini.');
-        }
-
-        if (!session()->has('user_profile.step1')) {
-            return redirect()->route('user.profile.create.step1')
-                ->with('error', 'Sila lengkapkan Maklumat Asas terlebih dahulu.');
-        }
-
-        if (!session()->has('user_profile.step2')) {
-            return redirect()->route('user.profile.create.step2')
-                ->with('error', 'Sila lengkapkan Maklumat Perhubungan terlebih dahulu.');
-        }
-
-        $validated = $request->validate(
-            $this->step3Rules(),
-            $this->messages()
-        );
-
-        session(['user_profile.step3' => $validated]);
 
         return redirect()->route('user.profile.create.step4');
+    }
+
+    private function storeSuccessorProfileAfterStep2(Request $request, SuccessorFinalizationService $successorService)
+    {
+        $user = auth()->user();
+
+        if ($user->profile) {
+            return redirect()->route('user.profile.show');
+        }
+
+        $step1 = session('user_profile.step1', []);
+        $step2 = session('user_profile.step2', []);
+
+        if (empty($step1) || empty($step2)) {
+            return redirect()
+                ->route('user.profile.create.step1')
+                ->with('error', 'Maklumat profil tidak lengkap. Sila isi semula maklumat diri.');
+        }
+
+        $data = array_merge($step1, $step2);
+
+        $data['user_id'] = $user->id;
+        $data['tarikh_permohonan'] = now()->toDateString();
+        $data['status_permohonan'] = 'approved';
+        $data['status_kehidupan'] = 'aktif';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Pengganti tidak perlu isi waris dan tidak perlu bayar yuran baru.
+        | Yuran akan disambung daripada rekod Ahli Utama lama.
+        |--------------------------------------------------------------------------
+        */
+        $data['payment_plan'] = null;
+        $data['catatan_permohonan'] = 'Akaun disahkan sebagai Ahli Utama Baharu menggantikan Ahli Utama lama yang telah meninggal dunia.';
+
+        $profile = UserProfile::create($data);
+
+        $wasFinalizedAsSuccessor = $successorService->finalizeIfMatched($user, $profile);
+
+        session()->forget('user_profile');
+
+        if ($wasFinalizedAsSuccessor) {
+            return redirect()
+                ->route('dashboard')
+                ->with('success', 'Akaun anda telah disahkan sebagai Ahli Utama Baharu. Rekod keluarga dan yuran telah dipindahkan ke akaun anda.');
+        }
+
+        return redirect()
+            ->route('user.profile.show')
+            ->with('success', 'Maklumat profil berjaya disimpan.');
     }
 
     public function createStep4()
@@ -216,18 +251,14 @@ class UserProfileController extends Controller
                 ->with('error', 'Sila lengkapkan Maklumat Perhubungan terlebih dahulu.');
         }
 
-        if (!session()->has('user_profile.step3')) {
-            return redirect()->route('user.profile.create.step3')
-                ->with('error', 'Sila lengkapkan Maklumat Waris terlebih dahulu.');
-        }
-
         return view('user.profile.step4');
     }
 
-    public function storeFinal(Request $request)
+    public function storeFinal(Request $request, SuccessorFinalizationService $successorService)
     {
         if (auth()->user()->profile) {
-            return redirect()->route('user.profile.show');
+            return redirect()->route('user.profile.show')
+                ->with('success', 'Berjaya masukkan maklumat profil.');
         }
 
         if (!session()->has('user_profile.step1')) {
@@ -240,11 +271,6 @@ class UserProfileController extends Controller
                 ->with('error', 'Sila lengkapkan Maklumat Perhubungan terlebih dahulu.');
         }
 
-        if (!session()->has('user_profile.step3')) {
-            return redirect()->route('user.profile.create.step3')
-               ->with('error', 'Sila lengkapkan Maklumat Waris terlebih dahulu.');
-        }
-
         $validated = $request->validate(
             $this->step4Rules(),
             $this->messages()
@@ -254,10 +280,9 @@ class UserProfileController extends Controller
 
         $step1 = session('user_profile.step1', []);
         $step2 = session('user_profile.step2', []);
-        $step3 = session('user_profile.step3', []);
         $step4 = session('user_profile.step4', []);
 
-        $data = array_merge($step1, $step2, $step3, $step4);
+        $data = array_merge($step1, $step2, $step4);
 
         $data['user_id'] = auth()->id();
         $data['tarikh_permohonan'] = now()->toDateString();
@@ -266,12 +291,19 @@ class UserProfileController extends Controller
 
         $profile = UserProfile::create($data);
 
+        $wasFinalizedAsSuccessor = $successorService->finalizeIfMatched(auth()->user(), $profile);
+
         session()->forget('user_profile');
+
+        if ($wasFinalizedAsSuccessor) {
+            return redirect()->route('user.profile.show')
+                ->with('success', 'Maklumat profil berjaya disimpan. Akaun anda telah disahkan sebagai Ahli Utama Baharu dan rekod keluarga telah dipindahkan.');
+        }
 
         $this->syncAccountTypeByNoKp($profile->no_kp);
 
         return redirect()->route('user.profile.show')
-            ->with('success', 'Maklumat profil berjaya disimpan.');
+            ->with('success', 'Berjaya masukkan maklumat profil.');
     }
 
     // =========================
@@ -349,7 +381,6 @@ class UserProfileController extends Controller
             'tarikh_lahir' => ['required', 'date', 'before:today'],
             'jantina' => ['required', Rule::in(['lelaki', 'perempuan'])],
             'agama' => ['required', Rule::in(['Islam'])],
-            'warganegara' => ['required', Rule::in(['Malaysia', 'Penduduk Tetap'])],
         ];
     }
 
@@ -357,31 +388,12 @@ class UserProfileController extends Controller
     {
         return [
             'alamat_rumah' => ['required', 'string', 'max:1000'],
-            'no_tel_rumah' => ['nullable', 'regex:/^(0\d{1,2}-?\d{6,8})$/'],
             'no_tel_bimbit' => ['required', 'regex:/^(01[0-9]-?\d{7,8})$/'],
             'tinggal_dalam_kariah' => ['required', 'in:1'],
             'tempoh_menetap' => ['required', 'string', 'max:100'],
             'pekerjaan' => 'nullable|string|max:255',
             'nama_majikan' => 'nullable|string|max:255',
             'alamat_kerja' => 'nullable|string|max:255',
-        ];
-    }
-
-    protected function step3Rules(): array
-    {
-        return [
-            'nama_waris' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z@\'\.\-\/\s]+$/u'],
-            'hubungan_waris' => ['required', Rule::in([
-                'Suami',
-                'Isteri',
-                'Anak',
-                'Ibu',
-                'Bapa',
-                'Ibu Mertua',
-                'Bapa Mertua'
-            ])],
-            'no_tel_waris' => ['required', 'regex:/^(01[0-9]-?\d{7,8})$/'],
-            'alamat_waris' => ['required', 'string', 'max:1000'],
         ];
     }
 
@@ -405,10 +417,8 @@ class UserProfileController extends Controller
             'tarikh_lahir' => ['required', 'date', 'before:today'],
             'jantina' => ['required', Rule::in(['lelaki', 'perempuan'])],
             'agama' => ['required', Rule::in(['Islam'])],
-            'warganegara' => ['required', Rule::in(['Malaysia', 'Penduduk Tetap'])],
 
             'alamat_rumah' => ['required', 'string', 'max:1000'],
-            'no_tel_rumah' => ['nullable', 'regex:/^(0\d{1,2}-?\d{6,8})$/'],
             'no_tel_bimbit' => ['required', 'regex:/^(01[0-9]-?\d{7,8})$/'],
             'tinggal_dalam_kariah' => ['required', 'in:1'],
             'tempoh_menetap' => ['required', 'string', 'max:100'],
@@ -437,10 +447,8 @@ class UserProfileController extends Controller
             'tarikh_lahir' => ['required', 'date', 'before:today'],
             'jantina' => ['required', Rule::in(['lelaki', 'perempuan'])],
             'agama' => ['required', Rule::in(['Islam'])],
-            'warganegara' => ['required', Rule::in(['Malaysia', 'Penduduk Tetap'])],
 
             'alamat_rumah' => ['required', 'string', 'max:1000'],
-            'no_tel_rumah' => ['nullable', 'regex:/^(0\d{1,2}-?\d{6,8})$/'],
             'no_tel_bimbit' => ['required', 'regex:/^(01[0-9]-?\d{7,8})$/'],
             'tinggal_dalam_kariah' => ['required', 'in:1'],
             'tempoh_menetap' => ['required', 'string', 'max:100'],
@@ -449,18 +457,6 @@ class UserProfileController extends Controller
             'nama_majikan' => ['nullable', 'string', 'max:255'],
             'alamat_kerja' => ['nullable', 'string', 'max:1000'],
 
-            'nama_waris' => ['required', 'string', 'max:255', 'regex:/^[A-Za-z@\'\.\-\/\s]+$/u'],
-            'hubungan_waris' => ['required', Rule::in([
-                'Suami',
-                'Isteri',
-                'Anak',
-                'Ibu',
-                'Bapa',
-                'Ibu Mertua',
-                'Bapa Mertua'
-            ])],
-            'no_tel_waris' => ['required', 'regex:/^(01[0-9]-?\d{7,8})$/'],
-            'alamat_waris' => ['required', 'string', 'max:1000'],
 
             'payment_plan' => $paymentPlanRule,
             'akuan' => ['required', 'accepted'],
@@ -486,12 +482,6 @@ class UserProfileController extends Controller
             'agama.required' => 'Agama wajib dipilih.',
             'agama.in' => 'Keahlian hanya terbuka kepada pemohon beragama Islam.',
 
-            'warganegara.required' => 'Status warganegara wajib dipilih.',
-            'warganegara.in' => 'Hanya warganegara Malaysia atau Penduduk Tetap yang sah dibenarkan.',
-
-            'alamat_rumah.required' => 'Alamat rumah wajib diisi.',
-
-            'no_tel_rumah.regex' => 'Format no. telefon rumah tidak sah. Contoh: 03-12345678',
             'no_tel_bimbit.required' => 'No. telefon bimbit wajib diisi.',
             'no_tel_bimbit.regex' => 'Format no. telefon bimbit tidak sah. Contoh: 0123456789',
 
@@ -499,17 +489,6 @@ class UserProfileController extends Controller
             'tinggal_dalam_kariah.in' => 'Permohonan hanya terbuka kepada pemastautin dalam kariah Masjid RTB Bukit Changgang.',
 
             'tempoh_menetap.required' => 'Tempoh menetap wajib diisi.',
-
-            'nama_waris.required' => 'Nama waris wajib diisi.',
-            'nama_waris.regex' => 'Nama waris hanya boleh mengandungi huruf, ruang, apostrophe, titik, sempang atau slash.',
-
-            'hubungan_waris.required' => 'Hubungan waris wajib dipilih.',
-            'hubungan_waris.in' => 'Hubungan waris yang dipilih tidak sah.',
-
-            'no_tel_waris.required' => 'No. telefon waris wajib diisi.',
-            'no_tel_waris.regex' => 'Format no. telefon waris tidak sah. Contoh: 0123456789',
-
-            'alamat_waris.required' => 'Alamat waris wajib diisi.',
 
             'payment_plan.required' => 'Pelan pembayaran wajib dipilih.',
             'payment_plan.in' => 'Pelan pembayaran yang dipilih tidak sah.',
@@ -543,8 +522,36 @@ class UserProfileController extends Controller
     {
         $user = auth()->user();
 
-        $matchedDependent = Dependent::where('no_kp', $noKp)->first();
-        $matchedProfile = UserProfile::where('no_kp', $noKp)->first();
+        $cleanNoKp = preg_replace('/[^0-9]/', '', $noKp);
+
+        $matchedDependent = Dependent::whereRaw("REPLACE(no_kp, '-', '') = ?", [$cleanNoKp])
+            ->first();
+
+        $matchedProfile = UserProfile::whereRaw("REPLACE(no_kp, '-', '') = ?", [$cleanNoKp])
+            ->where('user_id', $user->id)
+            ->first();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jika No KP ini ialah calon pengganti yang pending/completed,
+        | jangan jadikan dia tanggungan biasa.
+        |--------------------------------------------------------------------------
+        */
+        if ($matchedDependent) {
+            $successorProfile = UserProfile::where('replacement_dependent_id', $matchedDependent->id)
+                ->whereIn('replacement_status', ['pending_registration', 'completed'])
+                ->first();
+
+            if ($successorProfile) {
+                $user->update([
+                    'account_type' => 'utama',
+                    'linked_profile_id' => $matchedProfile?->id,
+                    'linked_dependent_id' => $matchedDependent->id,
+                ]);
+
+                return;
+            }
+        }
 
         if ($matchedDependent) {
             $user->update([

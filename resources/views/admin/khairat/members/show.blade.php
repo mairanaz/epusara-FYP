@@ -417,6 +417,7 @@
                                         <th>Jumlah</th>
                                         <th>Kaedah Bayaran</th>
                                         <th>Status</th>
+                                        <th>Catatan</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -464,6 +465,24 @@
                                                     </span>
                                                 @endif
                                             </td>
+
+                                            <td>
+                                                @if(!empty($payment->transferred_from_user_id))
+                                                    <span class="badge bg-warning-subtle text-warning border">
+                                                        Rekod Dipindahkan
+                                                    </span>
+
+                                                    <div class="small text-muted mt-1">
+                                                        Asal:
+                                                        {{ $payment->transferredFromUser->profile->nama
+                                                            ?? $payment->transferredFromUser->name
+                                                            ?? 'Ahli Utama Lama' }}
+                                                    </div>
+                                                @else
+                                                    <span class="text-muted">-</span>
+                                                @endif
+                                            </td>
+
                                         </tr>
                                     @endforeach
                                 </tbody>

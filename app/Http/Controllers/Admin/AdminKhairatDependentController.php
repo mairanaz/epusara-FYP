@@ -12,36 +12,58 @@ class AdminKhairatDependentController extends Controller
     {
         /*
         |--------------------------------------------------------------------------
-        | Statistik Tetap - Tanggungan Aktif Sahaja
+        | Statistik Semua Tanggungan
         |--------------------------------------------------------------------------
-        | Akid yang sudah tidak_layak tidak dikira sebagai tanggungan aktif.
+        | Admin boleh nampak jumlah tanggungan, masih hidup dan meninggal dunia.
         */
-        $statQuery = Dependent::query()
-            ->where('status_tanggungan', 'aktif');
+        $deathStatuses = [
+            'meninggal',
+            'meninggal_dunia',
+            'meninggal dunia',
+            'mati',
+            'deceased',
+            'dead',
+        ];
+
+        $approvedDeathReportStatuses = [
+            'disahkan',
+            'approved',
+            'selesai',
+        ];
+
+        $statQuery = Dependent::query();
 
         $totalCount = (clone $statQuery)->count();
 
-        $anakCount = (clone $statQuery)
-            ->where('pertalian', 'anak')
+        $meninggalCount = (clone $statQuery)
+            ->where(function ($query) use ($deathStatuses, $approvedDeathReportStatuses) {
+                $query->whereIn('status_tanggungan', $deathStatuses)
+                    ->orWhereIn('status_kehidupan', $deathStatuses)
+                    ->orWhereHas('deathReports', function ($deathQuery) use ($approvedDeathReportStatuses) {
+                        $deathQuery->whereIn('status', $approvedDeathReportStatuses);
+                    });
+            })
             ->count();
 
-        $pasanganCount = (clone $statQuery)
-            ->whereIn('pertalian', ['isteri', 'suami'])
-            ->count();
-
-        $lainCount = (clone $statQuery)
-            ->whereNotIn('pertalian', ['anak', 'isteri', 'suami'])
-            ->count();
+        $hidupCount = $totalCount - $meninggalCount;
 
         /*
         |--------------------------------------------------------------------------
-        | Senarai Tanggungan + Carian / Filter
+        | Senarai Tanggungan + Status Hidup / Meninggal Dunia
         |--------------------------------------------------------------------------
-        | Papar tanggungan aktif sahaja.
         */
         $query = Dependent::with(['user', 'user.profile'])
-            ->where('status_tanggungan', 'aktif');
+            ->withExists([
+                'deathReports as has_death_report' => function ($deathQuery) use ($approvedDeathReportStatuses) {
+                    $deathQuery->whereIn('status', $approvedDeathReportStatuses);
+                }
+            ]);
 
+        /*
+        |--------------------------------------------------------------------------
+        | Carian
+        |--------------------------------------------------------------------------
+        */
         if ($request->filled('search')) {
             $search = trim($request->search);
 
@@ -55,13 +77,36 @@ class AdminKhairatDependentController extends Controller
             });
         }
 
-        if ($request->filled('pertalian')) {
-            if ($request->pertalian === 'pasangan') {
-                $query->whereIn('pertalian', ['isteri', 'suami']);
-            } elseif ($request->pertalian === 'lain-lain') {
-                $query->whereNotIn('pertalian', ['anak', 'isteri', 'suami']);
-            } else {
-                $query->where('pertalian', $request->pertalian);
+        /*
+        |--------------------------------------------------------------------------
+        | Filter Status Tanggungan
+        |--------------------------------------------------------------------------
+        | hidup      = tanggungan masih hidup
+        | meninggal  = tanggungan telah meninggal dunia
+        */
+        if ($request->filled('status')) {
+            if ($request->status === 'meninggal') {
+                $query->where(function ($q) use ($deathStatuses, $approvedDeathReportStatuses) {
+                    $q->whereIn('status_tanggungan', $deathStatuses)
+                        ->orWhereIn('status_kehidupan', $deathStatuses)
+                        ->orWhereHas('deathReports', function ($deathQuery) use ($approvedDeathReportStatuses) {
+                            $deathQuery->whereIn('status', $approvedDeathReportStatuses);
+                        });
+                });
+            }
+
+            if ($request->status === 'hidup') {
+                $query->where(function ($q) use ($deathStatuses) {
+                    $q->whereNull('status_tanggungan')
+                        ->orWhereNotIn('status_tanggungan', $deathStatuses);
+                })
+                ->where(function ($q) use ($deathStatuses) {
+                    $q->whereNull('status_kehidupan')
+                        ->orWhereNotIn('status_kehidupan', $deathStatuses);
+                })
+                ->whereDoesntHave('deathReports', function ($deathQuery) use ($approvedDeathReportStatuses) {
+                    $deathQuery->whereIn('status', $approvedDeathReportStatuses);
+                });
             }
         }
 
@@ -73,9 +118,8 @@ class AdminKhairatDependentController extends Controller
         return view('admin.khairat.dependents.index', compact(
             'dependents',
             'totalCount',
-            'anakCount',
-            'pasanganCount',
-            'lainCount'
+            'hidupCount',
+            'meninggalCount'
         ));
     }
 }

@@ -156,6 +156,41 @@
     .application-page .applicant-type-text.upgrade-text {
         color: #059669;
     }
+
+    .application-page .pagination {
+    margin-bottom: 0;
+}
+
+.application-page .pagination svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.application-page .pagination .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    padding: 0 12px;
+}
+
+.application-page .pagination .page-item.active .page-link {
+    color: #fff;
+}
+
+.application-page nav svg,
+.application-page .pagination svg {
+    width: 14px !important;
+    height: 14px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+}
+
+.application-page .card-footer {
+    padding-top: 12px !important;
+}
 </style>
 
 @php

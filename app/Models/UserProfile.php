@@ -16,25 +16,24 @@ class UserProfile extends Model
         'tarikh_lahir',
         'jantina',
         'agama',
-        'warganegara',
         'alamat_rumah',
-        'no_tel_rumah',
         'no_tel_bimbit',
         'tinggal_dalam_kariah',
         'tempoh_menetap',
         'pekerjaan',
         'nama_majikan',
         'alamat_kerja',
-        'nama_waris',
-        'hubungan_waris',
-        'no_tel_waris',
-        'alamat_waris',
         'tarikh_permohonan',
         'status_permohonan',
         'catatan_permohonan',
         'payment_plan',
         'status_kehidupan',
         'tarikh_kematian',
+        'replaced_by_user_id',
+        'replaced_at',
+        'replacement_reason',
+        'replacement_dependent_id',
+        'replacement_status',
     ];
 
     protected $casts = [
@@ -42,10 +41,21 @@ class UserProfile extends Model
         'tarikh_permohonan' => 'date',
         'tarikh_kematian' => 'date',
         'tinggal_dalam_kariah' => 'boolean',
+        'replaced_at' => 'datetime',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+     /*
+    |--------------------------------------------------------------------------
+    | User anak yang menggantikan Ahli Utama lama
+    |--------------------------------------------------------------------------
+    */
+    public function replacedByUser()
+    {
+        return $this->belongsTo(User::class, 'replaced_by_user_id');
     }
 }

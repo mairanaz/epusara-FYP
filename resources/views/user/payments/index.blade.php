@@ -73,6 +73,13 @@
 
     $membershipSessionLabel = $membershipStartLabel . ' - ' . $membershipEndLabel;
 
+    // Status keahlian hanya menggunakan dua nilai: Aktif / Tidak Aktif.
+    $membershipStatus = $summary['membership_status'] ?? 'Tidak Aktif';
+    $membershipStatusClass = $summary['membership_status_class'] ?? 'danger';
+    $validUntilLabel = $summary['valid_until_label'] ?? '-';
+    $membershipNextDueLabel = $summary['next_due_label'] ?? '-';
+    $inactiveFromLabel = $summary['inactive_from_label'] ?? '-';
+
     $registrationBalance = max(0, $registrationFee - $registrationPaid);
 
     $totalOutstanding = $plan === 'monthly'
@@ -217,16 +224,31 @@
     </div>
 
     <div class="row g-3 mb-3" id="tour-fee-summary">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card custom-card border-0 shadow-sm h-100">
                 <div class="card-body py-3">
-                    <div class="text-muted small mb-1">Pelan Keahlian</div>
-                    <div class="fw-bold">{{ $planLabel }}</div>
+                    <div class="text-muted small mb-1">Status Keahlian</div>
+                    <span class="badge bg-{{ $membershipStatusClass }}">
+                        {{ $membershipStatus }}
+                    </span>
+                    <div class="small text-muted mt-2">
+                        Sah sehingga: {{ $validUntilLabel }}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
+            <div class="card custom-card border-0 shadow-sm h-100">
+                <div class="card-body py-3">
+                    <div class="text-muted small mb-1">Pelan Keahlian</div>
+                    <div class="fw-bold">{{ $planLabel }}</div>
+                    <small class="text-muted">Bayaran seterusnya: {{ $membershipNextDueLabel }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
             <div class="card custom-card border-0 shadow-sm h-100">
                 <div class="card-body py-3">
                     <div class="text-muted small mb-1">Perlu Dibayar Sekarang</div>
@@ -236,7 +258,7 @@
             </div>
         </div>
 
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="card custom-card border-0 shadow-sm h-100">
                 <div class="card-body py-3">
                     <div class="text-muted small mb-1">Jumlah Baki</div>
@@ -298,6 +320,22 @@
                                 </tr>
                             @endif
 
+                            <tr>
+                                <th class="bg-light">Status Keahlian</th>
+                                <td>
+                                    <span class="badge bg-{{ $membershipStatusClass }}">
+                                        {{ $membershipStatus }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Sah Sehingga</th>
+                                <td class="fw-semibold">{{ $validUntilLabel }}</td>
+                            </tr>
+                            <tr>
+                                <th class="bg-light">Bayaran Seterusnya</th>
+                                <td>{{ $membershipNextDueLabel }}</td>
+                            </tr>
                             <tr>
                                 <th class="bg-light">Status Bayaran</th>
                                 <td>
@@ -456,6 +494,7 @@
                             <th>Jenis Bayaran</th>
                             <th>Tempoh</th>
                             <th>Jumlah</th>
+                            <th>Sah Sehingga</th>
                             <th>No. Resit</th>
                             <th>Status</th>
                             <th>Tindakan</th>
@@ -517,6 +556,72 @@
                                     'cancelled' => 'Dibatalkan',
                                     default => ucfirst($payment->status),
                                 };
+
+                                /*
+                                |--------------------------------------------------------------------------
+                                | Sekat transaksi pending bagi tempoh yang sudah dibayar
+                                |--------------------------------------------------------------------------
+                                | Jika semua bulan dalam transaksi pending telah wujud dalam transaksi paid,
+                                | rekod itu hanya dipaparkan sebagai dibatalkan dan tidak boleh dibayar lagi.
+                                */
+                                $paidMonthlyPeriods = $payments
+                                    ->where('status', 'paid')
+                                    ->flatMap(function ($paidPayment) {
+                                        return $paidPayment->items
+                                            ->where('payment_type', 'monthly')
+                                            ->pluck('payment_period');
+                                    })
+                                    ->filter()
+                                    ->unique()
+                                    ->values();
+
+                                $currentMonthlyPeriods = $payment->items
+                                    ->where('payment_type', 'monthly')
+                                    ->pluck('payment_period')
+                                    ->filter()
+                                    ->unique()
+                                    ->values();
+
+                                $hasAlreadyPaidPeriod = $payment->status === 'pending'
+                                    && $currentMonthlyPeriods->isNotEmpty()
+                                    && $currentMonthlyPeriods->diff($paidMonthlyPeriods)->isEmpty();
+
+                                if ($hasAlreadyPaidPeriod) {
+                                    $statusClass = 'secondary';
+                                    $statusLabel = 'Dibatalkan';
+                                }
+
+                                $transactionValidUntilLabel = '-';
+
+                                if ($payment->status === 'paid') {
+                                    if ($payment->payment_plan === 'monthly') {
+                                        $lastMonthlyItem = $payment->items
+                                            ->where('payment_type', 'monthly')
+                                            ->sortByDesc('payment_period')
+                                            ->first();
+
+                                        if ($lastMonthlyItem && $lastMonthlyItem->payment_period) {
+                                            try {
+                                                $transactionValidUntilLabel = \Carbon\Carbon::createFromFormat(
+                                                    'Y-m',
+                                                    $lastMonthlyItem->payment_period
+                                                )->translatedFormat('F Y');
+                                            } catch (\Throwable $e) {
+                                                $transactionValidUntilLabel = $lastMonthlyItem->payment_period;
+                                            }
+                                        }
+                                    } elseif ($payment->payment_plan === 'yearly') {
+                                        $yearlyItem = $payment->items
+                                            ->where('payment_type', 'yearly')
+                                            ->sortByDesc('cycle_end')
+                                            ->first();
+
+                                        if ($yearlyItem && $yearlyItem->cycle_end) {
+                                            $transactionValidUntilLabel = \Carbon\Carbon::parse($yearlyItem->cycle_end)
+                                                ->translatedFormat('F Y');
+                                        }
+                                    }
+                                }
                             @endphp
 
                             <tr @if($index === 0) id="tour-first-payment-record" @endif>
@@ -566,6 +671,8 @@
                                 </td>
                                 <td>RM{{ number_format($payment->amount, 2) }}</td>
 
+                                <td class="fw-semibold">{{ $transactionValidUntilLabel }}</td>
+
                                 <td>{{ $payment->receipt_no ?? '-' }}</td>
 
                                 <td>
@@ -575,10 +682,16 @@
                                 </td>
 
                                 <td>
-                                    @if($payment->status === 'pending')
+                                    @if($payment->status === 'pending' && !$hasAlreadyPaidPeriod)
                                         <a href="{{ route('payment.billplz', $payment->id) }}" class="btn btn-sm btn-info mb-1">
                                             <i class="bx bx-credit-card me-1"></i> Bayar Billplz
                                         </a>
+                                    @endif
+
+                                    @if($hasAlreadyPaidPeriod)
+                                        <div class="small text-muted mb-1">
+                                            Tempoh ini telah dibayar.
+                                        </div>
                                     @endif
 
                                     @if($payment->status === 'paid')
@@ -594,7 +707,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="8" class="text-center text-muted">Tiada rekod bayaran.</td>
+                                <td colspan="9" class="text-center text-muted">Tiada rekod bayaran.</td>
                             </tr>
                         @endforelse
                     </tbody>
@@ -757,8 +870,6 @@ feeTour = driver({
 });
 
 feeTour.drive();
-
-            feeTour.drive();
         });
     });
 </script>

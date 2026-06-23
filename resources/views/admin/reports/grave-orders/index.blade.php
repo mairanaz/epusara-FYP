@@ -2,44 +2,45 @@
 
 @section('content')
 <style>
-    .death-page .hero-card {
+    .grave-report-page .hero-card {
         border: 0;
-        border-radius: 20px;
-        background: linear-gradient(135deg, #dde7f2, #eef4f9);
+        border-radius: 22px;
+        background: linear-gradient(135deg, #e8f0f8, #f6f9fc);
         color: #1f2937;
         overflow: hidden;
         position: relative;
     }
 
-    .death-page .hero-card::after {
+    .grave-report-page .hero-card::after {
         content: "";
         position: absolute;
-        top: -35px;
-        right: -35px;
-        width: 170px;
-        height: 170px;
-        background: rgba(255,255,255,0.22);
+        top: -45px;
+        right: -45px;
+        width: 190px;
+        height: 190px;
+        background: rgba(255,255,255,0.55);
         border-radius: 50%;
     }
 
-    .death-page .stats-card,
-    .death-page .filter-card,
-    .death-page .table-card,
-    .death-page .chart-card {
+    .grave-report-page .stats-card,
+    .grave-report-page .filter-card,
+    .grave-report-page .table-card,
+    .grave-report-page .chart-card,
+    .grave-report-page .analysis-card {
         border: 0;
         border-radius: 18px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
     }
 
-    .death-page .stats-card {
+    .grave-report-page .stats-card {
         transition: 0.25s ease;
     }
 
-    .death-page .stats-card:hover {
+    .grave-report-page .stats-card:hover {
         transform: translateY(-4px);
     }
 
-    .death-page .stats-icon {
+    .grave-report-page .stats-icon {
         width: 52px;
         height: 52px;
         border-radius: 14px;
@@ -50,47 +51,91 @@
         flex-shrink: 0;
     }
 
-    .death-page .summary-label {
+    .grave-report-page .summary-label {
         font-size: 13px;
         color: #6b7280;
         margin-bottom: 6px;
     }
 
-    .death-page .summary-value {
+    .grave-report-page .summary-value {
         font-size: 24px;
         font-weight: 800;
         color: #111827;
         line-height: 1;
     }
 
-    .death-page .search-box .form-control,
-    .death-page .search-box .form-select {
+    .grave-report-page .hero-subtitle {
+        color: #6b7280;
+    }
+
+    .grave-report-page .search-box .form-control,
+    .grave-report-page .search-box .form-select {
+        border-radius: 12px;
+        min-height: 46px;
+        border-color: #dbe4ee;
+    }
+
+    .grave-report-page .btn {
         border-radius: 12px;
         min-height: 46px;
     }
 
-    .death-page .btn {
-        border-radius: 12px;
-        min-height: 46px;
+    .grave-report-page .table-report {
+        border: 1px solid #c8d6e5;
     }
 
-    .death-page .table thead th {
-        background: #f8fafc;
-        border-bottom: 1px solid #e9ecef;
-        font-weight: 700;
-        color: #344054;
+    .grave-report-page .table-report thead th {
+        background: #f1f5f9;
+        border: 1px solid #c8d6e5;
+        font-weight: 800;
+        color: #14224a;
+        vertical-align: middle;
         white-space: nowrap;
+        padding: 15px 14px;
     }
 
-    .death-page .table tbody tr {
-        transition: 0.2s ease;
+    .grave-report-page .table-report tbody td {
+        border: 1px solid #c8d6e5;
+        vertical-align: middle;
+        padding: 15px 14px;
+        color: #111827;
     }
 
-    .death-page .table tbody tr:hover {
-        background-color: #f7fbfe;
+    .grave-report-page .table-report tbody tr:hover {
+        background-color: #f8fbff;
     }
 
-    .death-page .person-avatar {
+    .grave-report-page .total-row td {
+        background: #f1f5f9;
+        font-weight: 800;
+        border-top: 2px solid #94a3b8;
+    }
+
+    .grave-report-page .report-note {
+        background: #f8fafc;
+        border-radius: 14px;
+        padding: 14px 16px;
+        color: #667085;
+        font-size: 13px;
+    }
+
+    .grave-report-page .report-badge {
+        background: #eef6ff;
+        color: #2563eb;
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .grave-report-page .chart-box {
+        min-height: 320px;
+    }
+
+    .grave-report-page .person-avatar {
         width: 42px;
         height: 42px;
         border-radius: 50%;
@@ -103,18 +148,18 @@
         flex-shrink: 0;
     }
 
-    .death-page .person-name {
+    .grave-report-page .person-name {
         font-weight: 700;
         color: #1f2937;
         margin-bottom: 2px;
     }
 
-    .death-page .person-meta {
+    .grave-report-page .person-meta {
         font-size: 13px;
         color: #6b7280;
     }
 
-    .death-page .status-badge {
+    .grave-report-page .status-badge {
         display: inline-block;
         padding: 8px 12px;
         border-radius: 999px;
@@ -123,71 +168,41 @@
         white-space: nowrap;
     }
 
-    .death-page .action-btn {
-        width: 38px;
-        height: 38px;
-        padding: 0;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 10px;
-    }
-
-    .death-page .empty-state {
+    .grave-report-page .empty-state {
         padding: 40px 20px;
         text-align: center;
         color: #6b7280;
     }
 
-    .death-page .hero-subtitle {
-        color: #6b7280;
+    .grave-report-page .percentage-card {
+        border: 1px solid #e5edf5;
+        border-radius: 16px;
+        background: #ffffff;
+        height: 100%;
     }
 
-    .death-page .total-row td {
-        background: #f8fafc;
-        font-weight: 800;
-    }
-
-    .death-page .amount-text {
+    .grave-report-page .percentage-value {
+        font-size: 30px;
         font-weight: 800;
         color: #111827;
-        white-space: nowrap;
     }
 
-    .death-page .report-note {
-        background: #f8fafc;
-        border-radius: 14px;
-        padding: 14px 16px;
-        color: #667085;
-        font-size: 13px;
-    }
-
-    .death-page .report-badge {
-        background: #eef6ff;
-        color: #2563eb;
-        padding: 8px 12px;
+    .grave-report-page .progress {
+        height: 9px;
         border-radius: 999px;
-        font-size: 13px;
-        font-weight: 700;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
+        background-color: #eef2f7;
     }
 
-    .death-page .table-responsive {
-        border-radius: 14px;
-    }
-
-    .death-page .chart-box {
-        min-height: 320px;
+    .grave-report-page .progress-bar {
+        border-radius: 999px;
     }
 
     @media (max-width: 576px) {
-        .death-page .summary-value {
+        .grave-report-page .summary-value {
             font-size: 20px;
         }
 
-        .death-page .stats-icon {
+        .grave-report-page .stats-icon {
             width: 46px;
             height: 46px;
             font-size: 20px;
@@ -207,6 +222,10 @@
         ],
         'cancelled' => [
             'label' => 'Dibatalkan',
+            'class' => 'secondary',
+        ],
+        'rejected' => [
+            'label' => 'Ditolak',
             'class' => 'danger',
         ],
     ];
@@ -227,16 +246,9 @@
     ];
 
     $selectedMonthName = $month ? ($monthOptions[(int) $month] ?? '-') : 'Semua Bulan';
-
-    $selectedStatusName = match ($status) {
-        'pending' => 'Menunggu Kelulusan',
-        'approved' => 'Diluluskan',
-        'cancelled' => 'Dibatalkan',
-        default => 'Semua Status',
-    };
 @endphp
 
-<div class="container-fluid death-page">
+<div class="container-fluid grave-report-page">
 
     {{-- Hero Header --}}
     <div class="card hero-card shadow-sm mb-4">
@@ -244,16 +256,16 @@
             <div class="d-flex flex-column flex-lg-row align-items-lg-center justify-content-between gap-3">
                 <div>
                     <p class="mb-2 small hero-subtitle">Panel Pentadbir / Laporan Sistem</p>
-                    <h1 class="fw-bold mb-2">Laporan Tempahan Kepukan</h1>
+                    <h1 class="fw-bold mb-2">Laporan Kepukan</h1>
                     <p class="mb-0 hero-subtitle">
-                        Paparan laporan tempahan kepukan mengikut tahun, bulan dan status untuk tujuan semakan serta audit.
+                        Paparan statistik tempahan kepuk dan nisan berdasarkan tahun, bulan, status, jenis tempahan dan lokasi kubur.
                     </p>
                 </div>
 
                 <div class="text-lg-end">
                     <div class="report-badge mb-2">
                         <i class="bx bx-bar-chart-alt-2"></i>
-                        Audit Report
+                        Statistik Laporan
                     </div>
                     <div class="small text-muted">Tahun Laporan</div>
                     <div class="fs-3 fw-bold text-dark">{{ $year }}</div>
@@ -262,13 +274,71 @@
         </div>
     </div>
 
+    {{-- Tetapan Laporan --}}
+    <div class="card filter-card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-3">
+                <div>
+                    <h5 class="mb-1 fw-bold">Tetapan Laporan</h5>
+                    <p class="text-muted mb-0">
+                        Pilih tahun atau bulan untuk melihat analisis laporan kepukan.
+                    </p>
+                </div>
+
+                <div class="report-badge">
+                    <i class="bx bx-calendar"></i>
+                    {{ $selectedMonthName }} {{ $year }}
+                </div>
+            </div>
+
+            <form method="GET" action="{{ route('admin.reports.grave-orders.index') }}" class="search-box">
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label fw-semibold">Tahun</label>
+                        <select name="year" class="form-select">
+                            @foreach($years as $availableYear)
+                                <option value="{{ $availableYear }}" {{ (int) $year === (int) $availableYear ? 'selected' : '' }}>
+                                    {{ $availableYear }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-lg-4 col-md-6">
+                        <label class="form-label fw-semibold">Bulan</label>
+                        <select name="month" class="form-select">
+                            <option value="">Semua Bulan</option>
+                            @foreach($monthOptions as $monthNo => $monthName)
+                                <option value="{{ $monthNo }}" {{ (string) $month === (string) $monthNo ? 'selected' : '' }}>
+                                    {{ $monthName }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-lg-4 col-md-12">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-info btn-wave text-white w-100">
+                                <i class="bx bx-filter-alt me-1"></i> Papar Laporan
+                            </button>
+
+                            <a href="{{ route('admin.reports.grave-orders.index') }}" class="btn btn-outline-info w-100">
+                                Reset
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
     {{-- Summary Cards --}}
     <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Jumlah Tempahan</div>
+                        <div class="summary-label">Jumlah Permohonan</div>
                         <div class="summary-value">{{ $summary['total'] ?? 0 }}</div>
                     </div>
                     <div class="stats-icon bg-primary-subtle text-primary">
@@ -278,11 +348,11 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Menunggu Kelulusan</div>
+                        <div class="summary-label">Menunggu</div>
                         <div class="summary-value">{{ $summary['pending'] ?? 0 }}</div>
                     </div>
                     <div class="stats-icon bg-warning-subtle text-warning">
@@ -292,7 +362,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
@@ -306,7 +376,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
@@ -319,105 +389,152 @@
                 </div>
             </div>
         </div>
-    </div>
 
-    {{-- Filter --}}
-    <div class="card filter-card mb-4">
-        <div class="card-body p-4">
-            <div class="mb-3">
-                <h5 class="mb-1 fw-bold">Jana Laporan</h5>
-                <p class="text-muted mb-0">
-                    Pilih tahun, bulan dan status untuk menjana laporan tempahan kepukan.
-                </p>
-            </div>
-
-            <form method="GET" action="{{ route('admin.reports.grave-orders.index') }}" class="search-box">
-                <div class="row g-3 align-items-end">
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label fw-semibold">Tahun</label>
-                        <select name="year" class="form-select">
-                            @foreach($years as $availableYear)
-                                <option value="{{ $availableYear }}" {{ (int) $year === (int) $availableYear ? 'selected' : '' }}>
-                                    {{ $availableYear }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label fw-semibold">Bulan</label>
-                        <select name="month" class="form-select">
-                            <option value="">Semua Bulan</option>
-                            @foreach($monthOptions as $monthNo => $monthName)
-                                <option value="{{ $monthNo }}" {{ (string) $month === (string) $monthNo ? 'selected' : '' }}>
-                                    {{ $monthName }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div class="col-lg-3 col-md-6">
-                        <label class="form-label fw-semibold">Status</label>
-                        <select name="status" class="form-select">
-                            <option value="">Semua Status</option>
-                            <option value="pending" {{ $status === 'pending' ? 'selected' : '' }}>Menunggu Kelulusan</option>
-                            <option value="approved" {{ $status === 'approved' ? 'selected' : '' }}>Diluluskan</option>
-                            <option value="cancelled" {{ $status === 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
-                        </select>
-                    </div>
-
-                    <div class="col-lg-3 col-md-6">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-info btn-wave w-100">
-                                <i class="bx bx-search me-1"></i> Jana
-                            </button>
-
-                            <a href="{{ route('admin.reports.grave-orders.index') }}" class="btn btn-outline-info w-100">
-                                Reset
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
-            <div class="report-note mt-4">
-                <strong>Tapisan semasa:</strong>
-                Tahun {{ $year }},
-                {{ $selectedMonthName }},
-                {{ $selectedStatusName }}.
-            </div>
-        </div>
-    </div>
-
-    {{-- Financial Summary --}}
-    <div class="row g-3 mb-4">
-        <div class="col-xl-6 col-md-6">
+        <div class="col-xl-2 col-md-4 col-sm-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Jumlah Bayaran</div>
-                        <div class="summary-value fs-4">
-                            RM {{ number_format($summary['amount'] ?? 0, 2) }}
-                        </div>
-                    </div>
-                    <div class="stats-icon bg-secondary-subtle text-secondary">
-                        <i class="bx bx-money"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-6 col-md-6">
-            <div class="card stats-card h-100">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="summary-label">Jumlah Rekod Dipaparkan</div>
-                        <div class="summary-value fs-4">{{ $orders->count() }}</div>
+                        <div class="summary-label">Tempahan Kepuk</div>
+                        <div class="summary-value">{{ $summary['kepuk'] ?? 0 }}</div>
                     </div>
                     <div class="stats-icon bg-info-subtle text-info">
-                        <i class="bx bx-list-ul"></i>
+                        <i class="bx bx-building-house"></i>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="col-xl-2 col-md-4 col-sm-6">
+            <div class="card stats-card h-100">
+                <div class="card-body d-flex align-items-center justify-content-between">
+                    <div>
+                        <div class="summary-label">Tempahan Nisan</div>
+                        <div class="summary-value">{{ $summary['nisan'] ?? 0 }}</div>
+                    </div>
+                    <div class="stats-icon bg-secondary-subtle text-secondary">
+                        <i class="bx bx-detail"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Analisis Peratus Status --}}
+    <div class="card analysis-card mb-4">
+        <div class="card-body p-4">
+            <div class="d-flex flex-column flex-lg-row justify-content-between gap-3 mb-4">
+                <div>
+                    <h5 class="mb-1 fw-bold">Analisis Peratus Status Tempahan</h5>
+                    <p class="text-muted mb-0">
+                        Pecahan peratus status tempahan kepukan berdasarkan jumlah permohonan semasa.
+                    </p>
+                </div>
+
+                <div class="report-badge">
+                    <i class="bx bx-calculator"></i>
+                    Bukti Pengiraan
+                </div>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-xl-4 col-md-6">
+                    <div class="percentage-card p-4">
+                        <div class="summary-label">Menunggu Kelulusan</div>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div>
+                                <div class="summary-value">{{ $summary['pending'] ?? 0 }}</div>
+                                <div class="person-meta">tempahan</div>
+                            </div>
+                            <div class="percentage-value text-warning">
+                                {{ $statusPercentages['pending'] ?? 0 }}%
+                            </div>
+                        </div>
+
+                        <div class="progress mt-3">
+                            <div class="progress-bar bg-warning"
+                                 style="width: {{ $statusPercentages['pending'] ?? 0 }}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-md-6">
+                    <div class="percentage-card p-4">
+                        <div class="summary-label">Diluluskan</div>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div>
+                                <div class="summary-value">{{ $summary['approved'] ?? 0 }}</div>
+                                <div class="person-meta">tempahan</div>
+                            </div>
+                            <div class="percentage-value text-success">
+                                {{ $statusPercentages['approved'] ?? 0 }}%
+                            </div>
+                        </div>
+
+                        <div class="progress mt-3">
+                            <div class="progress-bar bg-success"
+                                 style="width: {{ $statusPercentages['approved'] ?? 0 }}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-xl-4 col-md-6">
+                    <div class="percentage-card p-4">
+                        <div class="summary-label">Dibatalkan / Ditolak</div>
+                        <div class="d-flex justify-content-between align-items-end">
+                            <div>
+                                <div class="summary-value">{{ $summary['cancelled'] ?? 0 }}</div>
+                                <div class="person-meta">tempahan</div>
+                            </div>
+                            <div class="percentage-value text-danger">
+                                {{ $statusPercentages['cancelled'] ?? 0 }}%
+                            </div>
+                        </div>
+
+                        <div class="progress mt-3">
+                            <div class="progress-bar bg-danger"
+                                 style="width: {{ $statusPercentages['cancelled'] ?? 0 }}%">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-note mb-3">
+                <strong>Formula:</strong>
+                Peratus Status = (Jumlah Status / Jumlah Permohonan) × 100
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-report align-middle text-center mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Status Tempahan</th>
+                            <th>Bilangan</th>
+                            <th>Formula Pengiraan</th>
+                            <th>Peratus</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach($calculationProof as $item)
+                            <tr>
+                                <td class="text-start fw-semibold">{{ $item['status'] }}</td>
+                                <td>{{ $item['count'] }}</td>
+                                <td>{{ $item['formula'] }}</td>
+                                <td class="fw-bold">{{ $item['percentage'] }}%</td>
+                            </tr>
+                        @endforeach
+
+                        <tr class="total-row">
+                            <td class="text-start">Jumlah</td>
+                            <td>{{ $summary['total'] ?? 0 }}</td>
+                            <td>-</td>
+                            <td>{{ ($summary['total'] ?? 0) > 0 ? '100%' : '0%' }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -427,9 +544,9 @@
         <div class="col-xl-8">
             <div class="card chart-card h-100">
                 <div class="card-body p-4">
-                    <h5 class="mb-1 fw-bold">Graf Tempahan Mengikut Bulan</h5>
+                    <h5 class="mb-1 fw-bold">Graf Permohonan Mengikut Bulan</h5>
                     <p class="text-muted mb-3">
-                        Jumlah tempahan kepukan bagi setiap bulan dalam tahun {{ $year }}.
+                        Jumlah permohonan kepukan bagi setiap bulan dalam tahun {{ $year }}.
                     </p>
                     <div id="monthlyOrderChart" class="chart-box"></div>
                 </div>
@@ -441,7 +558,7 @@
                 <div class="card-body p-4">
                     <h5 class="mb-1 fw-bold">Pecahan Status Tempahan</h5>
                     <p class="text-muted mb-3">
-                        Pecahan status berdasarkan tapisan semasa.
+                        Pecahan status berdasarkan tetapan laporan semasa.
                     </p>
                     <div id="statusOrderChart" class="chart-box"></div>
                 </div>
@@ -449,82 +566,190 @@
         </div>
     </div>
 
-    {{-- Monthly Summary --}}
+    {{-- Ringkasan Tempahan Mengikut Status --}}
     <div class="card table-card mb-4">
-        <div class="card-body p-0">
-            <div class="px-4 pt-4 pb-2">
-                <h5 class="mb-1 fw-bold">Ringkasan Bulanan Tahun {{ $year }}</h5>
-                <p class="text-muted mb-0">
-                    Jumlah tempahan, status dan jumlah bayaran mengikut bulan.
-                </p>
-            </div>
+        <div class="card-body p-4">
+            <h5 class="mb-1 fw-bold">Ringkasan Tempahan Kepukan Mengikut Status</h5>
+            <p class="text-muted mb-3">
+                Ringkasan jumlah tempahan berdasarkan jenis tempahan dan status kelulusan.
+            </p>
 
-            <div class="table-responsive px-3 pb-3">
-                <table class="table align-middle mb-0">
+            <div class="table-responsive">
+                <table class="table table-report align-middle text-center mb-0">
                     <thead>
                         <tr>
-                            <th>Bulan</th>
-                            <th class="text-center">Jumlah Tempahan</th>
-                            <th class="text-center">Menunggu</th>
-                            <th class="text-center">Diluluskan</th>
-                            <th class="text-center">Dibatalkan</th>
-                            <th class="text-end">Jumlah Bayaran</th>
+                            <th class="text-start">Jenis Tempahan</th>
+                            <th>Menunggu Kelulusan</th>
+                            <th>Diluluskan</th>
+                            <th>Dibatalkan / Ditolak</th>
+                            <th>Jumlah Tempahan</th>
                         </tr>
                     </thead>
+
                     <tbody>
-                        @foreach($monthlySummary as $monthItem)
+                        @forelse($orderTypeSummary as $item)
                             <tr>
-                                <td class="fw-bold">{{ $monthItem['month_name'] }}</td>
-                                <td class="text-center">{{ $monthItem['total'] }}</td>
-                                <td class="text-center">{{ $monthItem['pending'] }}</td>
-                                <td class="text-center">{{ $monthItem['approved'] }}</td>
-                                <td class="text-center">{{ $monthItem['cancelled'] }}</td>
-                                <td class="text-end amount-text">
-                                    RM {{ number_format($monthItem['amount'], 2) }}
+                                <td class="text-start fw-semibold">{{ $item->type_label }}</td>
+                                <td>{{ $item->pending_total }}</td>
+                                <td>{{ $item->approved_total }}</td>
+                                <td>{{ $item->cancelled_total }}</td>
+                                <td class="fw-bold">{{ $item->grand_total }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        <i class="bx bx-folder-open fs-1 mb-2 d-block"></i>
+                                        Tiada rekod tempahan kepukan dijumpai untuk tetapan ini.
+                                    </div>
                                 </td>
                             </tr>
-                        @endforeach
+                        @endforelse
 
-                        <tr class="total-row">
-                            <td>TOTAL</td>
-                            <td class="text-center">{{ $monthlySummary->sum('total') }}</td>
-                            <td class="text-center">{{ $monthlySummary->sum('pending') }}</td>
-                            <td class="text-center">{{ $monthlySummary->sum('approved') }}</td>
-                            <td class="text-center">{{ $monthlySummary->sum('cancelled') }}</td>
-                            <td class="text-end amount-text">
-                                RM {{ number_format($monthlySummary->sum('amount'), 2) }}
-                            </td>
-                        </tr>
+                        @if($orderTypeSummary->count() > 0)
+                            <tr class="total-row">
+                                <td class="text-start">Jumlah</td>
+                                <td>{{ $orderTypeSummary->sum('pending_total') }}</td>
+                                <td>{{ $orderTypeSummary->sum('approved_total') }}</td>
+                                <td>{{ $orderTypeSummary->sum('cancelled_total') }}</td>
+                                <td>{{ $orderTypeSummary->sum('grand_total') }}</td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
-    {{-- Detail Table --}}
-    <div class="card table-card">
-        <div class="card-body p-0">
-            <div class="px-4 pt-4 pb-2">
-                <h5 class="mb-1 fw-bold">Senarai Detail Tempahan</h5>
-                <p class="text-muted mb-0">
-                    Jumlah paparan: <span class="fw-semibold">{{ $orders->count() }}</span> tempahan
-                </p>
+    {{-- Ringkasan Zon --}}
+    <div class="card table-card mb-4">
+        <div class="card-body p-4">
+            <h5 class="mb-1 fw-bold">Ringkasan Tempahan Mengikut Zon / Lokasi</h5>
+            <p class="text-muted mb-3">
+                Ringkasan jumlah tempahan kepukan mengikut zon atau lokasi kubur.
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-report align-middle text-center mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Zon / Lokasi</th>
+                            <th>Menunggu</th>
+                            <th>Diluluskan</th>
+                            <th>Dibatalkan / Ditolak</th>
+                            <th>Jumlah Tempahan</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @forelse($zoneSummary as $zone)
+                            <tr>
+                                <td class="text-start fw-semibold">{{ $zone->zone_label }}</td>
+                                <td>{{ $zone->pending }}</td>
+                                <td>{{ $zone->approved }}</td>
+                                <td>{{ $zone->cancelled }}</td>
+                                <td class="fw-bold">{{ $zone->total }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5">
+                                    <div class="empty-state">
+                                        Tiada rekod zon / lokasi untuk tetapan ini.
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+
+                        @if($zoneSummary->count() > 0)
+                            <tr class="total-row">
+                                <td class="text-start">Jumlah</td>
+                                <td>{{ $zoneSummary->sum('pending') }}</td>
+                                <td>{{ $zoneSummary->sum('approved') }}</td>
+                                <td>{{ $zoneSummary->sum('cancelled') }}</td>
+                                <td>{{ $zoneSummary->sum('total') }}</td>
+                            </tr>
+                        @endif
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {{-- Ringkasan Bulanan --}}
+    <div class="card table-card mb-4">
+        <div class="card-body p-4">
+            <h5 class="mb-1 fw-bold">Ringkasan Bulanan Tahun {{ $year }}</h5>
+            <p class="text-muted mb-3">
+                Jumlah permohonan kepukan mengikut bulan dan status.
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-report align-middle text-center mb-0">
+                    <thead>
+                        <tr>
+                            <th class="text-start">Bulan</th>
+                            <th>Jumlah Permohonan</th>
+                            <th>Menunggu</th>
+                            <th>Diluluskan</th>
+                            <th>Dibatalkan / Ditolak</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        @foreach($monthlySummary as $monthItem)
+                            <tr>
+                                <td class="text-start fw-semibold">{{ $monthItem['month_name'] }}</td>
+                                <td class="fw-bold">{{ $monthItem['total'] }}</td>
+                                <td>{{ $monthItem['pending'] }}</td>
+                                <td>{{ $monthItem['approved'] }}</td>
+                                <td>{{ $monthItem['cancelled'] }}</td>
+                            </tr>
+                        @endforeach
+
+                        <tr class="total-row">
+                            <td class="text-start">Jumlah</td>
+                            <td>{{ $monthlySummary->sum('total') }}</td>
+                            <td>{{ $monthlySummary->sum('pending') }}</td>
+                            <td>{{ $monthlySummary->sum('approved') }}</td>
+                            <td>{{ $monthlySummary->sum('cancelled') }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
 
-            <div class="table-responsive px-3 pb-3">
-                <table class="table align-middle mb-0">
+            <div class="report-note mt-4">
+                <strong>Nota:</strong>
+                Jadual ini tidak memaparkan bayaran kerana tempahan kepukan hanya melibatkan permohonan dan pengesahan admin.
+            </div>
+        </div>
+    </div>
+
+    {{-- Detail Table --}}
+    <div class="card table-card">
+        <div class="card-body p-4">
+            <h5 class="mb-1 fw-bold">Senarai Detail Tempahan Kepukan</h5>
+            <p class="text-muted mb-3">
+                Jumlah rekod laporan:
+                <span class="fw-semibold">
+                    {{ method_exists($orders, 'total') ? $orders->total() : $orders->count() }}
+                </span>
+                tempahan
+            </p>
+
+            <div class="table-responsive">
+                <table class="table table-report align-middle mb-0">
                     <thead>
                         <tr>
                             <th width="6%">#</th>
                             <th>No Tempahan</th>
                             <th>Pemohon / Waris</th>
                             <th>Si Mati</th>
-                            <th>Plot / Lokasi</th>
-                            <th>Jenis Kepukan</th>
-                            <th>Jumlah</th>
+                            <th>Lot / Lokasi</th>
+                            <th>Jenis Tempahan</th>
                             <th>Status</th>
-                            <th>Tarikh Tempahan</th>
-                            <th>Resit / Catatan</th>
+                            <th>Tarikh Mohon</th>
+                            <th>Tarikh Lulus</th>
+                            <th>Catatan Admin</th>
                         </tr>
                     </thead>
 
@@ -536,12 +761,14 @@
                                     'class' => 'secondary',
                                 ];
 
-                                $pemohonNama = $order->user->profile->nama
+                                $pemohonNama = $order->deathReport->nama_pelapor
+                                    ?? $order->user->profile->nama
                                     ?? $order->user->name
                                     ?? '-';
 
-                                $pemohonKp = $order->user->profile->no_kp ?? '-';
-                                $pemohonTel = $order->user->profile->no_tel_bimbit ?? '-';
+                                $pemohonTel = $order->deathReport->no_tel_pelapor
+                                    ?? $order->user->profile->no_tel_bimbit
+                                    ?? '-';
 
                                 $namaSiMati = $order->deathReport->nama_si_mati ?? '-';
                                 $noKpSiMati = $order->deathReport->no_kp_si_mati ?? '-';
@@ -551,7 +778,7 @@
 
                             <tr>
                                 <td class="fw-semibold text-muted">
-                                    {{ $index + 1 }}
+                                    {{ method_exists($orders, 'firstItem') ? $orders->firstItem() + $index : $index + 1 }}
                                 </td>
 
                                 <td>
@@ -565,7 +792,6 @@
 
                                 <td>
                                     <div class="fw-semibold">{{ $pemohonNama }}</div>
-                                    <div class="person-meta">No. KP: {{ $pemohonKp }}</div>
                                     <div class="person-meta">Tel: {{ $pemohonTel }}</div>
                                 </td>
 
@@ -575,6 +801,7 @@
                                         <div>
                                             <div class="person-name">{{ $namaSiMati }}</div>
                                             <div class="person-meta">No. KP: {{ $noKpSiMati }}</div>
+
                                             @if($order->deathReport && $order->deathReport->tarikh_meninggal)
                                                 <div class="person-meta">
                                                     Tarikh meninggal:
@@ -587,27 +814,33 @@
 
                                 <td>
                                     @if($order->burialPlot)
-                                        <div class="fw-semibold">{{ $order->burialPlot->plot_code }}</div>
-                                        <div class="person-meta">{{ $order->burialPlot->zone_label }}</div>
+                                        <div class="fw-semibold">
+                                            {{ $order->burialPlot->plot_code ?? '-' }}
+                                        </div>
+
                                         <div class="person-meta">
-                                            Baris {{ $order->burialPlot->row_number }},
-                                            Lot {{ $order->burialPlot->lot_number }}
+                                            {{
+                                                $order->burialPlot->zone_label
+                                                ?? $order->burialPlot->zone
+                                                ?? $order->burialPlot->section
+                                                ?? $order->burialPlot->blok
+                                                ?? '-'
+                                            }}
+                                        </div>
+
+                                        <div class="person-meta">
+                                            Baris {{ $order->burialPlot->row_number ?? '-' }},
+                                            Lot {{ $order->burialPlot->lot_number ?? '-' }}
                                         </div>
                                     @else
-                                        <span class="text-muted">-</span>
+                                        <span class="text-muted">Tidak ditetapkan</span>
                                     @endif
                                 </td>
 
                                 <td>
                                     <div class="fw-semibold">{{ $order->order_label ?? '-' }}</div>
                                     <div class="person-meta">Kategori: {{ $order->category ?? '-' }}</div>
-                                    <div class="person-meta">Jenis: {{ $order->order_type ?? '-' }}</div>
-                                </td>
-
-                                <td>
-                                    <span class="amount-text">
-                                        RM {{ number_format($order->amount ?? 0, 2) }}
-                                    </span>
+                                    <div class="person-meta">Kod: {{ $order->order_type ?? '-' }}</div>
                                 </td>
 
                                 <td>
@@ -623,19 +856,24 @@
                                     <div class="person-meta">
                                         {{ optional($order->created_at)->format('h:i A') ?? '-' }}
                                     </div>
+                                </td>
+
+                                <td>
                                     @if($order->approved_at)
-                                        <div class="person-meta">
-                                            Lulus: {{ optional($order->approved_at)->format('d/m/Y') }}
+                                        <div class="fw-semibold">
+                                            {{ optional($order->approved_at)->format('d/m/Y') }}
                                         </div>
+                                        <div class="person-meta">
+                                            {{ optional($order->approved_at)->format('h:i A') }}
+                                        </div>
+                                    @else
+                                        <span class="text-muted">-</span>
                                     @endif
                                 </td>
 
                                 <td>
                                     <div class="person-meta">
-                                        Resit: {{ $order->receipt_no ?? '-' }}
-                                    </div>
-                                    <div class="person-meta">
-                                        Catatan: {{ $order->admin_note ?? '-' }}
+                                        {{ $order->admin_note ?? '-' }}
                                     </div>
                                 </td>
                             </tr>
@@ -644,7 +882,7 @@
                                 <td colspan="10">
                                     <div class="empty-state">
                                         <i class="bx bx-folder-open fs-1 mb-2 d-block"></i>
-                                        Tiada rekod tempahan kepukan dijumpai untuk tapisan ini.
+                                        Tiada rekod tempahan kepukan dijumpai untuk tetapan ini.
                                     </div>
                                 </td>
                             </tr>
@@ -653,12 +891,15 @@
                 </table>
             </div>
 
-            <div class="px-4 pb-4">
-                <div class="report-note">
-                    <strong>Nota audit:</strong>
-                    Laporan ini memaparkan maklumat tempahan, pemohon, si mati, plot kubur, jenis kepukan,
-                    jumlah bayaran, status, tarikh tempahan, nombor resit dan catatan admin.
+            @if(method_exists($orders, 'hasPages') && $orders->hasPages())
+                <div class="mt-4">
+                    {{ $orders->links() }}
                 </div>
+            @endif
+
+            <div class="report-note mt-4">
+                <strong>Nota audit:</strong>
+                Laporan ini memaparkan maklumat permohonan kepukan, waris, si mati, lot kubur, jenis tempahan, status dan tarikh pengesahan admin.
             </div>
         </div>
     </div>
@@ -687,7 +928,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             },
             series: [{
-                name: 'Jumlah Tempahan',
+                name: 'Jumlah Permohonan',
                 data: monthlyTotals
             }],
             xaxis: {

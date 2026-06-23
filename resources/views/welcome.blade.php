@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>e-Pusara | Sistem Pengurusan Perkuburan</title>
+    <title>ePusara | Sistem Pengurusan Perkuburan RTB Bukit Changgang</title>
 
     {{-- Google Fonts --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -110,7 +110,7 @@
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
             <p class="flex items-center gap-2 text-center sm:text-left">
                 <i class="fa-solid fa-circle-info text-brand-200"></i>
-                Sistem pengurusan khairat kematian dan lokasi perkuburan untuk kemudahan komuniti.
+                Sistem pengurusan khairat kematian dan lokasi perkuburan khusus untuk komuniti RTB Bukit Changgang.
             </p>
 
             <a href="{{ route('public.grave-search.index') }}"
@@ -132,11 +132,11 @@
 
                 <div class="hidden sm:block">
                     <p class="font-extrabold text-brand-800 leading-none text-xl">
-                        e-Pusara
+                        ePusara
                     </p>
 
                     <p class="text-[10px] text-slate-400 font-semibold uppercase tracking-wider mt-1">
-                        Sistem Pengurusan Perkuburan
+                        Sistem Pengurusan Perkuburan RTB Bukit Changgang
                     </p>
                 </div>
             </a>
@@ -183,7 +183,7 @@
         {{-- Background image --}}
         <div class="absolute inset-0">
             <img src="{{ asset('assets/images/media/bg-img3.jpg') }}"
-                 alt="Persekitaran perkuburan e-Pusara"
+                 alt="Persekitaran perkuburan RTB Bukit Changgang"
                  class="w-full h-full object-cover object-center">
         </div>
 
@@ -197,17 +197,17 @@
 
                     <span class="inline-flex items-center gap-2 rounded-full bg-brand-50/95 border border-brand-100 text-brand-700 px-4 py-2 text-xs font-bold uppercase tracking-widest mb-5">
                         <i class="fa-solid fa-moon"></i>
-                        Pengurusan Khairat Digital
+                        Pengurusan Khairat Digital RTB Bukit Changgang
                     </span>
 
                     <h1 class="font-serif font-bold text-slate-900 text-4xl sm:text-5xl lg:text-[3.55rem] leading-tight max-w-3xl">
-                        Urusan Khairat &amp; Pusara Lebih Tersusun
+                        Pengurusan Khairat &amp; Pusara RTB Bukit Changgang Lebih Tersusun
                     </h1>
 
                     <p class="text-slate-600 text-sm sm:text-base leading-relaxed max-w-xl mt-5">
-                        e-Pusara memudahkan pengurusan ahli, tanggungan, bayaran khairat,
-                        laporan kematian serta carian lokasi pusara dalam satu sistem yang
-                        mudah digunakan.
+                        ePusara memudahkan pengurusan ahli, tanggungan, bayaran khairat,
+                        laporan kematian serta carian lokasi pusara bagi kawasan RTB Bukit Changgang
+                        dalam satu sistem yang mudah digunakan.
                     </p>
 
                     {{-- Main Actions --}}
@@ -274,7 +274,7 @@
 
                         <div class="relative overflow-hidden rounded-3xl min-h-[215px] mb-6">
                             <img src="{{ asset('assets/images/pusara/persekitaran-kubur.jpg') }}"
-                                 alt="Kawasan perkuburan e-Pusara"
+                                 alt="Kawasan perkuburan RTB Bukit Changgang"
                                  class="absolute inset-0 w-full h-full object-cover">
 
                             <div class="photo-overlay absolute inset-0 p-5 flex flex-col justify-end">
@@ -287,7 +287,7 @@
                                 </h2>
 
                                 <p class="text-slate-200 text-xs mt-1">
-                                    Cari lokasi lot pusara tanpa perlu log masuk.
+                                    Cari lokasi lot pusara di kawasan RTB Bukit Changgang tanpa perlu log masuk.
                                 </p>
                             </div>
                         </div>
@@ -312,12 +312,12 @@
 
                             <div class="flex items-start gap-3 text-sm text-slate-600">
                                 <i class="fa-solid fa-circle-check text-brand-600 mt-1"></i>
-                                <span>Carian menggunakan nama si mati atau nombor lot.</span>
+                                <span>Carian menggunakan nama si mati atau nombor lot pusara di RTB Bukit Changgang.</span>
                             </div>
 
                             <div class="flex items-start gap-3 text-sm text-slate-600">
                                 <i class="fa-solid fa-circle-check text-brand-600 mt-1"></i>
-                                <span>Paparan lot dan peta bagi membantu tujuan ziarah.</span>
+                                <span>Paparan lot dan peta bagi membantu tujuan ziarah di kawasan RTB Bukit Changgang.</span>
                             </div>
 
                             <div class="flex items-start gap-3 text-sm text-slate-600">
@@ -353,7 +353,7 @@
             </h2>
 
             <p class="text-slate-500 text-sm md:text-base leading-relaxed mt-3">
-                e-Pusara membantu ahli, waris dan pentadbir mengurus urusan khairat kematian dengan lebih sistematik.
+                ePusara membantu ahli, waris dan pentadbir RTB Bukit Changgang mengurus urusan khairat kematian dengan lebih sistematik.
             </p>
         </div>
 
@@ -411,7 +411,7 @@
                 </h3>
 
                 <p class="text-sm text-slate-500 leading-relaxed mt-2">
-                    Carian lokasi pusara awam berserta panduan lot.
+                    Carian lokasi pusara di RTB Bukit Changgang berserta panduan lot.
                 </p>
             </article>
 
@@ -426,15 +426,15 @@
 
                 <div class="lg:col-span-5">
                     <span class="inline-flex bg-brand-50 text-brand-700 font-bold text-xs tracking-[.18em] uppercase rounded-full px-4 py-2 mb-4">
-                        Mengenai e-Pusara
+                        Mengenai ePusara
                     </span>
 
                     <h2 class="font-serif font-bold text-3xl md:text-4xl text-slate-900 leading-tight">
-                        Sistem Yang Memudahkan Komuniti
+                        Sistem Yang Memudahkan Komuniti RTB Bukit Changgang
                     </h2>
 
                     <p class="text-slate-500 text-sm md:text-base leading-relaxed mt-4">
-                        e-Pusara dibangunkan bagi menggantikan urusan manual kepada pengurusan digital yang lebih teratur, pantas dan mudah dirujuk.
+                        ePusara dibangunkan bagi membantu urusan khairat kematian dan perkuburan di RTB Bukit Changgang secara lebih teratur, pantas dan mudah dirujuk.
                     </p>
                 </div>
 
@@ -475,11 +475,11 @@
                             </div>
 
                             <h3 class="font-bold text-slate-900 text-sm">
-                                Orang Awam
+                                Pengunjung
                             </h3>
 
                             <p class="text-xs text-slate-500 leading-relaxed mt-2">
-                                Mencari lokasi pusara bagi tujuan ziarah.
+                                Mencari lokasi pusara di RTB Bukit Changgang bagi tujuan ziarah.
                             </p>
                         </div>
 
@@ -501,12 +501,12 @@
                 </span>
 
                 <h2 class="font-serif font-bold text-3xl md:text-4xl text-slate-900">
-                    Antara Muka e-Pusara
+                    Antara Muka ePusara RTB Bukit Changgang
                 </h2>
 
                 <p class="text-slate-500 text-sm md:text-base leading-relaxed mt-3">
                     Paparan sistem direka agar mudah digunakan melalui komputer dan telefon pintar
-                    bagi membantu urusan keahlian, bayaran khairat, laporan kematian serta carian pusara.
+                    bagi membantu urusan keahlian, bayaran khairat, laporan kematian serta carian pusara RTB Bukit Changgang.
                 </p>
             </div>
 
@@ -543,7 +543,7 @@
                         </h3>
 
                         <p class="text-sm md:text-base text-slate-500 mt-2">
-                            Antara muka responsif untuk kegunaan ahli dan pengunjung melalui telefon.
+                            Antara muka responsif untuk kegunaan ahli dan pengunjung RTB Bukit Changgang melalui telefon.
                         </p>
                     </div>
 
@@ -694,11 +694,11 @@
                 <div class="flex items-center justify-between gap-4 mb-7">
                     <div>
                         <h3 class="font-bold text-xl text-slate-900">
-                            Paparan Komputer
+                            Paparan Komputer / Laptop
                         </h3>
 
                         <p class="text-sm text-slate-500 mt-1">
-                            Paparan desktop yang lebih luas untuk pengurusan sistem secara teratur.
+                            Paparan desktop yang lebih luas untuk pengurusan sistem RTB Bukit Changgang secara teratur.
                         </p>
                     </div>
 
@@ -720,7 +720,7 @@
 
                         <div class="mt-4">
                             <h4 class="font-bold text-lg text-slate-900">
-                                Dashboard Pengurusan e-Pusara
+                                Dashboard Pengurusan ePusara RTB Bukit Changgang
                             </h4>
 
                             <p class="text-sm text-slate-500 mt-1">
@@ -825,11 +825,11 @@
                     </span>
 
                     <h2 class="font-serif text-white font-bold text-3xl md:text-4xl leading-tight">
-                        Cari Kedudukan Pusara Dengan Lebih Mudah
+                        Cari Kedudukan Pusara RTB Bukit Changgang Dengan Lebih Mudah
                     </h2>
 
                     <p class="text-brand-100/80 text-sm md:text-base leading-relaxed max-w-xl mt-4">
-                        Orang awam boleh mencari lokasi pusara menggunakan nama si mati atau nombor lot, kemudian melihat panduan lokasi untuk tujuan ziarah.
+                        Pengunjung boleh mencari lokasi pusara di RTB Bukit Changgang menggunakan nama si mati atau nombor lot, kemudian melihat panduan lokasi untuk tujuan ziarah.
                     </p>
 
                     <a href="{{ route('public.grave-search.index') }}"
@@ -858,7 +858,7 @@
                             </h3>
 
                             <p class="text-xs text-slate-500 mt-1 mb-5">
-                                Maklumat asas untuk kegunaan ziarah sahaja.
+                                Maklumat asas pusara untuk kegunaan ziarah sahaja.
                             </p>
 
                             <div class="grid grid-cols-3 gap-2">
@@ -914,7 +914,7 @@
                     </h2>
 
                     <p class="text-slate-500 text-sm md:text-base leading-relaxed mt-4 max-w-xl">
-                        Waris atau pelapor boleh menghubungi pentadbir untuk tindakan lanjut berkaitan laporan kematian dan urusan pengurusan yang diperlukan.
+                        Waris atau pelapor bagi kawasan RTB Bukit Changgang boleh menghubungi pentadbir untuk tindakan lanjut berkaitan laporan kematian dan urusan pengurusan yang diperlukan.
                     </p>
 
                     <div class="flex flex-col sm:flex-row gap-3 mt-7">
@@ -945,7 +945,7 @@
                             </h3>
 
                             <p class="text-xs text-slate-500 leading-relaxed mt-2">
-                                Hubungi pentadbir berkaitan kematian.
+                                Hubungi pentadbir RTB Bukit Changgang berkaitan kematian.
                             </p>
                         </div>
 
@@ -989,11 +989,11 @@
         <div class="rounded-[32px] bg-brand-50 border border-brand-100 p-7 md:p-12 text-center">
 
             <h2 class="font-serif font-bold text-3xl md:text-4xl text-slate-900">
-                Mulakan Dengan e-Pusara
+                Mulakan Dengan ePusara RTB Bukit Changgang
             </h2>
 
             <p class="text-slate-500 text-sm md:text-base leading-relaxed max-w-2xl mx-auto mt-4">
-                Daftar sebagai ahli untuk mengurus rekod khairat, atau gunakan kemudahan carian pusara bagi tujuan ziarah.
+                Daftar sebagai ahli RTB Bukit Changgang untuk mengurus rekod khairat, atau gunakan kemudahan carian pusara bagi tujuan ziarah.
             </p>
 
             <div class="flex flex-col sm:flex-row justify-center gap-3 mt-8">
@@ -1045,17 +1045,17 @@
 
                         <div>
                             <p class="font-extrabold text-white text-xl leading-none">
-                                e-Pusara
+                                ePusara
                             </p>
 
                             <p class="text-[10px] text-brand-100/70 font-semibold uppercase tracking-wider mt-1">
-                                Sistem Pengurusan Perkuburan
+                                Sistem Pengurusan Perkuburan RTB Bukit Changgang
                             </p>
                         </div>
                     </a>
 
                     <p class="text-sm text-brand-100/75 leading-relaxed max-w-md mt-5">
-                        Sistem pengurusan khairat kematian dan lokasi perkuburan bagi memudahkan urusan ahli, waris serta pengunjung.
+                        Sistem pengurusan khairat kematian dan lokasi perkuburan bagi memudahkan urusan ahli, waris serta pengunjung di RTB Bukit Changgang.
                     </p>
                 </div>
 
@@ -1109,7 +1109,7 @@
                     </h4>
 
                     <p class="text-sm text-brand-100/75 leading-relaxed">
-                        Untuk laporan kematian atau pertanyaan berkaitan pengurusan khairat, sila hubungi pentadbir.
+                        Untuk laporan kematian atau pertanyaan berkaitan pengurusan khairat RTB Bukit Changgang, sila hubungi pentadbir.
                     </p>
 
                     <a href="{{ route('whatsapp.lapor-kematian') }}"
@@ -1123,11 +1123,11 @@
 
             <div class="pt-6 border-t border-brand-800 flex flex-col sm:flex-row justify-between items-center gap-3 text-xs text-brand-100/60">
                 <p>
-                    &copy; {{ date('Y') }} e-Pusara. Hak cipta terpelihara.
+                    &copy; {{ date('Y') }} ePusara. Hak cipta terpelihara.
                 </p>
 
                 <p>
-                    Sistem Pengurusan Khairat Kematian &amp; Perkuburan
+                    Sistem Pengurusan Khairat Kematian &amp; Perkuburan RTB Bukit Changgang
                 </p>
             </div>
         </div>

@@ -10,106 +10,194 @@ use Illuminate\Support\Facades\Storage;
 class AdminBurialRecordController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = DeathReport::with([
-                'user',
-                'dependent',
-                'burialPlot',
-                'assignedBurialPlot',
-                'graveOrders',
-            ])
-            ->where(function ($q) {
-                $q->whereNotNull('burial_plot_id')
-                  ->orWhereHas('assignedBurialPlot');
-            });
-
-        if ($request->filled('search')) {
-            $search = $request->search;
-
-            $query->where(function ($q) use ($search) {
-                $q->where('nama_si_mati', 'like', "%{$search}%")
-                    ->orWhere('no_kp_si_mati', 'like', "%{$search}%")
-                    ->orWhere('burial_plot_code', 'like', "%{$search}%")
-                    ->orWhere('burial_lot_no', 'like', "%{$search}%")
-                    ->orWhereHas('burialPlot', function ($plotQuery) use ($search) {
-                        $plotQuery->where('plot_code', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('assignedBurialPlot', function ($plotQuery) use ($search) {
-                        $plotQuery->where('plot_code', 'like', "%{$search}%");
-                    })
-                    ->orWhereHas('graveOrders', function ($orderQuery) use ($search) {
-                        $orderQuery->where('order_label', 'like', "%{$search}%")
-                            ->orWhere('order_type', 'like', "%{$search}%");
-                    });
-            });
-        }
-
-        if ($request->filled('zone')) {
-            $zone = $request->zone;
-
-            $query->where(function ($q) use ($zone) {
-                $q->whereHas('burialPlot', function ($plotQuery) use ($zone) {
-                    $plotQuery->where('zone', $zone);
-                })
-                ->orWhereHas('assignedBurialPlot', function ($plotQuery) use ($zone) {
-                    $plotQuery->where('zone', $zone);
-                });
-            });
-        }
-
-        if ($request->filled('image_status')) {
-            if ($request->image_status === 'ada') {
-                $query->where(function ($q) {
-                    $q->whereHas('burialPlot', function ($plotQuery) {
-                        $plotQuery->whereNotNull('grave_image');
-                    })
-                    ->orWhereHas('assignedBurialPlot', function ($plotQuery) {
-                        $plotQuery->whereNotNull('grave_image');
-                    });
-                });
-            }
-
-            if ($request->image_status === 'tiada') {
-                $query->where(function ($q) {
-                    $q->whereHas('burialPlot', function ($plotQuery) {
-                        $plotQuery->whereNull('grave_image');
-                    })
-                    ->orWhereHas('assignedBurialPlot', function ($plotQuery) {
-                        $plotQuery->whereNull('grave_image');
-                    });
-                });
-            }
-        }
-
-        $burialRecords = $query
-            ->latest()
-            ->paginate(10);
-
-        $burialRecords->appends($request->query());
-
-        /*
-        |--------------------------------------------------------------------------
-        | Tetapkan status kepuk untuk paparan Rekod Kubur
-        |--------------------------------------------------------------------------
-        | Priority:
-        | 1. approved
-        | 2. pending
-        | 3. cancelled
-        | 4. belum_tempah
-        */
-        $burialRecords->getCollection()->transform(function ($record) {
-            $selectedOrder = $this->getSelectedGraveOrder($record);
-
-            $record->selected_grave_order = $selectedOrder;
-            $record->kepuk_status = $selectedOrder?->status ?? 'belum_tempah';
-            $record->kepuk_status_label = $this->getKepukStatusLabel($record->kepuk_status);
-            $record->kepuk_status_badge = $this->getKepukStatusBadge($record->kepuk_status);
-
-            return $record;
+{
+    /*
+    |--------------------------------------------------------------------------
+    | Base Query Rekod Kubur
+    |--------------------------------------------------------------------------
+    | Ini query asas untuk semua rekod kubur yang sudah ada lot.
+    */
+    $baseQuery = DeathReport::with([
+            'user',
+            'dependent',
+            'burialPlot',
+            'assignedBurialPlot',
+            'graveOrders',
+        ])
+        ->where(function ($q) {
+            $q->whereNotNull('burial_plot_id')
+              ->orWhereHas('assignedBurialPlot');
         });
 
-        return view('admin.burial-records.index', compact('burialRecords'));
+    /*
+    |--------------------------------------------------------------------------
+    | Statistik Tetap - Tidak berubah bila search / filter
+    |--------------------------------------------------------------------------
+    */
+    $totalBurialRecords = (clone $baseQuery)->count();
+
+    $kepukStatusCounts = [
+        'belum_tempah' => (clone $baseQuery)
+            ->whereDoesntHave('graveOrders')
+            ->count(),
+
+        'pending' => (clone $baseQuery)
+            ->whereDoesntHave('graveOrders', function ($q) {
+                $q->where('status', 'approved');
+            })
+            ->whereHas('graveOrders', function ($q) {
+                $q->where('status', 'pending');
+            })
+            ->count(),
+
+        'approved' => (clone $baseQuery)
+            ->whereHas('graveOrders', function ($q) {
+                $q->where('status', 'approved');
+            })
+            ->count(),
+
+        'cancelled' => (clone $baseQuery)
+            ->whereDoesntHave('graveOrders', function ($q) {
+                $q->whereIn('status', ['approved', 'pending']);
+            })
+            ->whereHas('graveOrders', function ($q) {
+                $q->where('status', 'cancelled');
+            })
+            ->count(),
+    ];
+
+    /*
+    |--------------------------------------------------------------------------
+    | Query Jadual - Ini sahaja berubah ikut search / filter
+    |--------------------------------------------------------------------------
+    */
+    $query = clone $baseQuery;
+
+    if ($request->filled('search')) {
+        $search = $request->search;
+
+        $query->where(function ($q) use ($search) {
+            $q->where('nama_si_mati', 'like', "%{$search}%")
+                ->orWhere('no_kp_si_mati', 'like', "%{$search}%")
+                ->orWhere('burial_plot_code', 'like', "%{$search}%")
+                ->orWhere('burial_lot_no', 'like', "%{$search}%")
+                ->orWhereHas('burialPlot', function ($plotQuery) use ($search) {
+                    $plotQuery->where('plot_code', 'like', "%{$search}%");
+                })
+                ->orWhereHas('assignedBurialPlot', function ($plotQuery) use ($search) {
+                    $plotQuery->where('plot_code', 'like', "%{$search}%");
+                })
+                ->orWhereHas('graveOrders', function ($orderQuery) use ($search) {
+                    $orderQuery->where('order_label', 'like', "%{$search}%")
+                        ->orWhere('order_type', 'like', "%{$search}%");
+                });
+        });
     }
+
+    if ($request->filled('zone')) {
+        $zone = $request->zone;
+
+        $query->where(function ($q) use ($zone) {
+            $q->whereHas('burialPlot', function ($plotQuery) use ($zone) {
+                $plotQuery->where('zone', $zone);
+            })
+            ->orWhereHas('assignedBurialPlot', function ($plotQuery) use ($zone) {
+                $plotQuery->where('zone', $zone);
+            });
+        });
+    }
+
+    if ($request->filled('kepuk_status')) {
+        $kepukStatus = $request->kepuk_status;
+
+        if ($kepukStatus === 'belum_tempah') {
+            $query->whereDoesntHave('graveOrders');
+        }
+
+        if ($kepukStatus === 'approved') {
+            $query->whereHas('graveOrders', function ($orderQuery) {
+                $orderQuery->where('status', 'approved');
+            });
+        }
+
+        if ($kepukStatus === 'pending') {
+            $query->whereDoesntHave('graveOrders', function ($orderQuery) {
+                $orderQuery->where('status', 'approved');
+            })
+            ->whereHas('graveOrders', function ($orderQuery) {
+                $orderQuery->where('status', 'pending');
+            });
+        }
+
+        if ($kepukStatus === 'cancelled') {
+            $query->whereDoesntHave('graveOrders', function ($orderQuery) {
+                $orderQuery->whereIn('status', ['approved', 'pending']);
+            })
+            ->whereHas('graveOrders', function ($orderQuery) {
+                $orderQuery->where('status', 'cancelled');
+            });
+        }
+    }
+
+    if ($request->filled('image_status')) {
+        if ($request->image_status === 'ada') {
+            $query->where(function ($q) {
+                $q->whereHas('burialPlot', function ($plotQuery) {
+                    $plotQuery->whereNotNull('grave_image')
+                        ->where('grave_image', '!=', '');
+                })
+                ->orWhereHas('assignedBurialPlot', function ($plotQuery) {
+                    $plotQuery->whereNotNull('grave_image')
+                        ->where('grave_image', '!=', '');
+                });
+            });
+        }
+
+        if ($request->image_status === 'tiada') {
+            $query->where(function ($q) {
+                $q->whereHas('burialPlot', function ($plotQuery) {
+                    $plotQuery->where(function ($qq) {
+                        $qq->whereNull('grave_image')
+                           ->orWhere('grave_image', '');
+                    });
+                })
+                ->orWhereHas('assignedBurialPlot', function ($plotQuery) {
+                    $plotQuery->where(function ($qq) {
+                        $qq->whereNull('grave_image')
+                           ->orWhere('grave_image', '');
+                    });
+                });
+            });
+        }
+    }
+
+    $burialRecords = $query
+        ->latest()
+        ->paginate(10)
+        ->withQueryString();
+
+    /*
+    |--------------------------------------------------------------------------
+    | Tetapkan status kepuk untuk paparan jadual
+    |--------------------------------------------------------------------------
+    */
+    $burialRecords->getCollection()->transform(function ($record) {
+        $selectedOrder = $this->getSelectedGraveOrder($record);
+
+        $record->selected_grave_order = $selectedOrder;
+        $record->kepuk_status = $selectedOrder?->status ?? 'belum_tempah';
+        $record->kepuk_status_label = $this->getKepukStatusLabel($record->kepuk_status);
+        $record->kepuk_status_badge = $this->getKepukStatusBadge($record->kepuk_status);
+
+        return $record;
+    });
+
+    return view('admin.burial-records.index', compact(
+        'burialRecords',
+        'totalBurialRecords',
+        'kepukStatusCounts'
+    ));
+}
 
     public function show(DeathReport $deathReport)
     {

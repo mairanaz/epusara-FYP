@@ -29,6 +29,11 @@ class Payment extends Model
         'billplz_paid',
         'billplz_state',
         'billplz_data',
+        'original_user_id',
+        'transferred_from_user_id',
+        'transferred_to_user_id',
+        'transferred_at',
+        'transfer_reason',
     ];
 
     protected $casts = [
@@ -36,6 +41,7 @@ class Payment extends Model
         'paid_at' => 'datetime',
         'billplz_paid' => 'boolean',
         'billplz_data' => 'array',
+        'transferred_at' => 'datetime',
     ];
 
     public function user()
@@ -46,6 +52,21 @@ class Payment extends Model
     public function items()
     {
         return $this->hasMany(PaymentItem::class);
+    }
+
+    public function originalUser()
+    {
+        return $this->belongsTo(User::class, 'original_user_id');
+    }
+
+    public function transferredFromUser()
+    {
+        return $this->belongsTo(User::class, 'transferred_from_user_id');
+    }
+
+    public function transferredToUser()
+    {
+        return $this->belongsTo(User::class, 'transferred_to_user_id');
     }
 
     

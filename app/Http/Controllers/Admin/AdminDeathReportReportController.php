@@ -7,6 +7,7 @@ use App\Models\DeathReport;
 use App\Models\Dependent;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class AdminDeathReportReportController extends Controller
 {
@@ -34,9 +35,6 @@ class AdminDeathReportReportController extends Controller
         |--------------------------------------------------------------------------
         | Status Hidup / Meninggal
         |--------------------------------------------------------------------------
-        | Berdasarkan table awak:
-        | user_profiles.status_kehidupan default = aktif
-        | dependents.status_kehidupan default = aktif
         */
         $aliveStatusValues = ['aktif', 'hidup', 'active'];
         $deceasedStatusValues = ['meninggal', 'meninggal_dunia', 'sudah_meninggal', 'deceased'];
@@ -60,6 +58,65 @@ class AdminDeathReportReportController extends Controller
         |--------------------------------------------------------------------------
         */
         $dependentQuery = Dependent::query();
+
+        /*
+        |--------------------------------------------------------------------------
+        | Helper Filter Jantina
+        |--------------------------------------------------------------------------
+        | user_profiles ada column jantina.
+        | dependents tiada column jantina.
+        |
+        | Jadi untuk dependents, jantina dikira melalui no_kp:
+        | nombor akhir IC ganjil = lelaki
+        | nombor akhir IC genap = perempuan
+        */
+        $applyGenderFilter = function ($query, string $table, ?string $gender) {
+            if (empty($gender)) {
+                return $query;
+            }
+
+            $gender = strtolower($gender);
+
+            /*
+            | Kalau table memang ada column jantina, guna column jantina.
+            */
+            if (Schema::hasColumn($table, 'jantina')) {
+                if (in_array($gender, ['lelaki', 'male'])) {
+                    return $query->whereRaw("LOWER({$table}.jantina) IN (?, ?)", ['lelaki', 'male']);
+                }
+
+                if (in_array($gender, ['perempuan', 'female'])) {
+                    return $query->whereRaw("LOWER({$table}.jantina) IN (?, ?)", ['perempuan', 'female']);
+                }
+
+                return $query;
+            }
+
+            /*
+            | Kalau table tiada column jantina, guna no_kp.
+            */
+            if (Schema::hasColumn($table, 'no_kp')) {
+                $icColumn = "{$table}.no_kp";
+                $cleanIc = "REPLACE(REPLACE(COALESCE({$icColumn}, ''), '-', ''), ' ', '')";
+
+                if (in_array($gender, ['lelaki', 'male'])) {
+                    return $query
+                        ->whereRaw("{$cleanIc} REGEXP '^[0-9]+$'")
+                        ->whereRaw("MOD(CAST(RIGHT({$cleanIc}, 1) AS UNSIGNED), 2) = 1");
+                }
+
+                if (in_array($gender, ['perempuan', 'female'])) {
+                    return $query
+                        ->whereRaw("{$cleanIc} REGEXP '^[0-9]+$'")
+                        ->whereRaw("MOD(CAST(RIGHT({$cleanIc}, 1) AS UNSIGNED), 2) = 0");
+                }
+            }
+
+            /*
+            | Kalau tak boleh tentukan jantina, jangan kira.
+            */
+            return $query->whereRaw('1 = 0');
+        };
 
         /*
         |--------------------------------------------------------------------------
@@ -94,12 +151,23 @@ class AdminDeathReportReportController extends Controller
         |--------------------------------------------------------------------------
         */
         $mainAlive = (clone $mainMemberQuery)
-            ->whereIn('status_kehidupan', $aliveStatusValues)
+            ->where(function ($query) use ($aliveStatusValues, $deceasedStatusValues) {
+                $query->whereIn('status_kehidupan', $aliveStatusValues)
+                    ->orWhereNull('status_kehidupan')
+                    ->orWhereNotIn('status_kehidupan', $deceasedStatusValues);
+            })
             ->count();
 
         $dependentAlive = (clone $dependentQuery)
-            ->whereIn('status_kehidupan', $aliveStatusValues)
-            ->where('status_tanggungan', '!=', 'meninggal')
+            ->where(function ($query) use ($aliveStatusValues, $deceasedStatusValues) {
+                $query->whereIn('status_kehidupan', $aliveStatusValues)
+                    ->orWhereNull('status_kehidupan')
+                    ->orWhereNotIn('status_kehidupan', $deceasedStatusValues);
+            })
+            ->where(function ($query) {
+                $query->whereNull('status_tanggungan')
+                    ->orWhere('status_tanggungan', '!=', 'meninggal');
+            })
             ->count();
 
         $alive = $mainAlive + $dependentAlive;
@@ -147,10 +215,16 @@ class AdminDeathReportReportController extends Controller
         |--------------------------------------------------------------------------
         */
         if (!empty($gender)) {
+            $gender = strtolower($gender);
+
             $deathReportQuery->where(function ($query) use ($gender) {
-                $query->where('jantina', $gender)
-                    ->orWhere('jantina', ucfirst($gender))
-                    ->orWhere('jantina', strtoupper($gender));
+                if (in_array($gender, ['lelaki', 'male'])) {
+                    $query->whereRaw('LOWER(jantina) IN (?, ?)', ['lelaki', 'male']);
+                }
+
+                if (in_array($gender, ['perempuan', 'female'])) {
+                    $query->whereRaw('LOWER(jantina) IN (?, ?)', ['perempuan', 'female']);
+                }
             });
         }
 
@@ -200,24 +274,12 @@ class AdminDeathReportReportController extends Controller
         */
         $maleDeceased = DeathReport::query()
             ->whereYear('tarikh_meninggal', $year)
-            ->where(function ($query) {
-                $query->where('jantina', 'lelaki')
-                    ->orWhere('jantina', 'Lelaki')
-                    ->orWhere('jantina', 'LELAKI')
-                    ->orWhere('jantina', 'male')
-                    ->orWhere('jantina', 'Male');
-            })
+            ->whereRaw('LOWER(jantina) IN (?, ?)', ['lelaki', 'male'])
             ->count();
 
         $femaleDeceased = DeathReport::query()
             ->whereYear('tarikh_meninggal', $year)
-            ->where(function ($query) {
-                $query->where('jantina', 'perempuan')
-                    ->orWhere('jantina', 'Perempuan')
-                    ->orWhere('jantina', 'PEREMPUAN')
-                    ->orWhere('jantina', 'female')
-                    ->orWhere('jantina', 'Female');
-            })
+            ->whereRaw('LOWER(jantina) IN (?, ?)', ['perempuan', 'female'])
             ->count();
 
         /*
@@ -232,14 +294,128 @@ class AdminDeathReportReportController extends Controller
             'death_this_year' => $deathThisYear,
 
             /*
-            | Ini ikut rekod death_reports tahun dipilih.
-            | Lebih sesuai untuk laporan tahunan.
+            | Ini ikut status sebenar ahli dalam sistem.
+            | Supaya jumlah Ahli Utama Meninggal + Tanggungan Meninggal
+            | sama dengan jumlah Meninggal Dunia.
             */
-            'main_deceased' => $mainDeceasedThisYear,
-            'dependent_deceased' => $dependentDeceasedThisYear,
+            'main_deceased' => $mainDeceased,
+            'dependent_deceased' => $dependentDeceased,
+
+            /*
+            | Ini masih ikut death_reports sebab jantina kematian disimpan di sana.
+            */
             'male_deceased' => $maleDeceased,
             'female_deceased' => $femaleDeceased,
         ];
+
+        /*
+        |--------------------------------------------------------------------------
+        | Ringkasan Ahli Mengikut Status
+        |--------------------------------------------------------------------------
+        */
+        $countMainForTable = function (string $lifeStatus, ?string $gender = null) use (
+            $mainMemberQuery,
+            $aliveStatusValues,
+            $deceasedStatusValues,
+            $applyGenderFilter
+        ) {
+            $query = clone $mainMemberQuery;
+
+            if ($lifeStatus === 'alive') {
+                $query->where(function ($sub) use ($aliveStatusValues, $deceasedStatusValues) {
+                    $sub->whereIn('status_kehidupan', $aliveStatusValues)
+                        ->orWhereNull('status_kehidupan')
+                        ->orWhereNotIn('status_kehidupan', $deceasedStatusValues);
+                });
+            }
+
+            if ($lifeStatus === 'dead') {
+                $query->whereIn('status_kehidupan', $deceasedStatusValues);
+            }
+
+            $query = $applyGenderFilter($query, 'user_profiles', $gender);
+
+            return $query->count();
+        };
+
+        $countDependentForTable = function (string $lifeStatus, ?string $gender = null) use (
+            $dependentQuery,
+            $aliveStatusValues,
+            $deceasedStatusValues,
+            $applyGenderFilter
+        ) {
+            $query = clone $dependentQuery;
+
+            if ($lifeStatus === 'alive') {
+                $query->where(function ($sub) use ($aliveStatusValues, $deceasedStatusValues) {
+                    $sub->whereIn('status_kehidupan', $aliveStatusValues)
+                        ->orWhereNull('status_kehidupan')
+                        ->orWhereNotIn('status_kehidupan', $deceasedStatusValues);
+                });
+
+                $query->where(function ($sub) {
+                    $sub->whereNull('status_tanggungan')
+                        ->orWhere('status_tanggungan', '!=', 'meninggal');
+                });
+            }
+
+            if ($lifeStatus === 'dead') {
+                $query->where(function ($sub) use ($deceasedStatusValues) {
+                    $sub->whereIn('status_kehidupan', $deceasedStatusValues)
+                        ->orWhere('status_tanggungan', 'meninggal');
+                });
+            }
+
+            $query = $applyGenderFilter($query, 'dependents', $gender);
+
+            return $query->count();
+        };
+
+        $buildSummaryTableRow = function (string $jenis, $counter) {
+            $hidupLelaki = $counter('alive', 'lelaki');
+            $hidupPerempuan = $counter('alive', 'perempuan');
+
+            $meninggalLelaki = $counter('dead', 'lelaki');
+            $meninggalPerempuan = $counter('dead', 'perempuan');
+
+            return [
+                'jenis' => $jenis,
+
+                'hidup_lelaki' => $hidupLelaki,
+                'hidup_perempuan' => $hidupPerempuan,
+                'jumlah_hidup' => $hidupLelaki + $hidupPerempuan,
+
+                'meninggal_lelaki' => $meninggalLelaki,
+                'meninggal_perempuan' => $meninggalPerempuan,
+                'jumlah_meninggal' => $meninggalLelaki + $meninggalPerempuan,
+
+                'jumlah_ahli' => $hidupLelaki + $hidupPerempuan + $meninggalLelaki + $meninggalPerempuan,
+            ];
+        };
+
+        $mainSummaryRow = $buildSummaryTableRow('Ahli Utama', $countMainForTable);
+        $dependentSummaryRow = $buildSummaryTableRow('Tanggungan', $countDependentForTable);
+
+        $summaryRows = collect([
+            $mainSummaryRow,
+            $dependentSummaryRow,
+        ]);
+
+        $totalSummaryRow = [
+            'jenis' => 'Jumlah',
+
+            'hidup_lelaki' => $summaryRows->sum('hidup_lelaki'),
+            'hidup_perempuan' => $summaryRows->sum('hidup_perempuan'),
+            'jumlah_hidup' => $summaryRows->sum('jumlah_hidup'),
+
+            'meninggal_lelaki' => $summaryRows->sum('meninggal_lelaki'),
+            'meninggal_perempuan' => $summaryRows->sum('meninggal_perempuan'),
+            'jumlah_meninggal' => $summaryRows->sum('jumlah_meninggal'),
+
+            'jumlah_ahli' => $summaryRows->sum('jumlah_ahli'),
+        ];
+
+        $summaryTable = $summaryRows->push($totalSummaryRow);
 
         /*
         |--------------------------------------------------------------------------
@@ -284,23 +460,11 @@ class AdminDeathReportReportController extends Controller
                 ->count();
 
             $monthlyMale = (clone $monthlyBaseQuery)
-                ->where(function ($query) {
-                    $query->where('jantina', 'lelaki')
-                        ->orWhere('jantina', 'Lelaki')
-                        ->orWhere('jantina', 'LELAKI')
-                        ->orWhere('jantina', 'male')
-                        ->orWhere('jantina', 'Male');
-                })
+                ->whereRaw('LOWER(jantina) IN (?, ?)', ['lelaki', 'male'])
                 ->count();
 
             $monthlyFemale = (clone $monthlyBaseQuery)
-                ->where(function ($query) {
-                    $query->where('jantina', 'perempuan')
-                        ->orWhere('jantina', 'Perempuan')
-                        ->orWhere('jantina', 'PEREMPUAN')
-                        ->orWhere('jantina', 'female')
-                        ->orWhere('jantina', 'Female');
-                })
+                ->whereRaw('LOWER(jantina) IN (?, ?)', ['perempuan', 'female'])
                 ->count();
 
             $monthlySummary->push([
@@ -329,6 +493,7 @@ class AdminDeathReportReportController extends Controller
             'memberType',
             'gender',
             'summary',
+            'summaryTable',
             'monthlySummary',
             'deathReports',
             'chartLabels',

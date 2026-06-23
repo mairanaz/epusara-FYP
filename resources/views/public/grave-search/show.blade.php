@@ -180,6 +180,28 @@
 
         /*
         |--------------------------------------------------------------------------
+        | Arahan audio panduan ke lot pusara
+        |--------------------------------------------------------------------------
+        | Digunakan oleh Web Speech API untuk membaca arahan suara
+        | berdasarkan zon, baris dan kod lot pusara yang dipilih.
+        */
+        $selectedPlotCode = $selectedPlot->plot_code ?? '-';
+        $selectedZoneLabel = $mapConfig['label'] ?? 'zon kubur';
+        $selectedRowNumber = $selectedPlot->row_number ?? '-';
+        $selectedLotNumber = $selectedPlot->lot_number ?? '-';
+
+        if ($zone === 'K') {
+            $audioInstruction = "Anda berada di Pintu Masuk Utama. Terus ikut laluan utama di bahagian hadapan kawasan perkuburan. Kemudian ikut laluan rujukan berwarna biru menuju ke Zon Kanak-kanak. Cari baris $selectedRowLabel dan lot pusara bernombor $selectedPlotCode yang ditanda dengan warna hijau.";
+        } elseif ($zone === 'P' || $zone === 'W') {
+            $audioInstruction = "Anda berada di Pintu Masuk Utama. Terus ikut laluan utama sehingga ke kawasan Zon Perempuan. Kemudian ikut laluan rujukan berwarna biru pada pelan. Cari baris $selectedRowLabel dan lot pusara bernombor $selectedPlotCode yang ditanda dengan warna hijau.";
+        } elseif ($zone === 'L') {
+            $audioInstruction = "Anda berada di Pintu Masuk Utama. Terus ikut laluan utama sehingga ke kawasan Zon Lelaki. Gunakan laluan tengah sebagai rujukan arah. Kemudian cari baris $selectedRowLabel dan lot pusara bernombor $selectedPlotCode yang ditanda dengan warna hijau.";
+        } else {
+            $audioInstruction = "Anda berada di Pintu Masuk Utama. Sila ikut laluan rujukan berwarna biru pada pelan untuk menuju ke lot pusara bernombor $selectedPlotCode yang ditanda dengan warna hijau.";
+        }
+
+        /*
+        |--------------------------------------------------------------------------
         | Kedudukan pintu masuk dan laluan panduan
         |--------------------------------------------------------------------------
         | Kedudukan ini menganggap pintu masuk utama berada di bahagian
@@ -1761,6 +1783,98 @@
             padding: 21px 0 25px;
         }
 
+        .privacy-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,.08);
+            color: var(--brand-100);
+            border-radius: 999px;
+            padding: 9px 13px;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+
+        .audio-navigation-card {
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, #ecfdf8 0%, #ffffff 100%);
+            border: 1px solid var(--brand-100);
+        }
+
+        .audio-navigation-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--brand-800);
+            font-size: 14px;
+            font-weight: 900;
+            margin-bottom: 8px;
+        }
+
+        .audio-navigation-text {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid var(--brand-600);
+            border-radius: 14px;
+            padding: 12px 13px;
+            color: #475569;
+            font-size: 12px;
+            line-height: 1.7;
+            margin-bottom: 12px;
+        }
+
+        .audio-navigation-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .audio-btn {
+            border: 0;
+            outline: 0;
+            cursor: pointer;
+            border-radius: 999px;
+            padding: 10px 13px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            transition: .2s ease;
+        }
+
+        .audio-btn-play {
+            background: var(--brand-600);
+            color: #ffffff;
+            box-shadow: 0 10px 20px rgba(15, 124, 105, .18);
+        }
+
+        .audio-btn-play:hover {
+            background: var(--brand-700);
+            transform: translateY(-1px);
+        }
+
+        .audio-btn-stop {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+
+        .audio-btn-stop:hover {
+            background: #fecaca;
+            transform: translateY(-1px);
+        }
+
+        .audio-support-note {
+            margin-top: 9px;
+            color: #64748b;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
         @media (max-width: 992px) {
             .footer-grid {
                 grid-template-columns: 1fr 1fr;
@@ -1813,6 +1927,87 @@
                 text-align: center;
             }
         }
+
+        /* =========================================================
+        Responsive Map Fix - supaya peta tidak terlalu zoom
+        ========================================================= */
+
+        .map-scroll-area {
+            height: clamp(430px, 68vh, 760px);
+            overflow: auto;
+            overscroll-behavior: contain;
+        }
+
+        .map-stage {
+            width: auto !important;
+            min-width: unset !important;
+            min-height: unset !important;
+            padding: 18px;
+        }
+
+        .map-stage-K,
+        .map-stage-P,
+        .map-stage-L {
+            min-width: unset !important;
+            min-height: unset !important;
+        }
+
+        .cemetery-map {
+            transform-origin: top left;
+        }
+
+        .cemetery-svg {
+            max-width: none;
+        }
+
+        /* Tablet */
+        @media (max-width: 992px) {
+            .map-scroll-area {
+                height: clamp(420px, 64vh, 660px);
+            }
+
+            .map-frame {
+                padding: 10px;
+            }
+
+            .map-stage {
+                padding: 14px;
+            }
+        }
+
+        /* Phone */
+        @media (max-width: 767px) {
+            .map-scroll-area {
+                height: 520px;
+                border-radius: 16px;
+            }
+
+            .map-body {
+                padding: 12px;
+            }
+
+            .map-frame {
+                padding: 8px;
+                border-radius: 18px;
+            }
+
+            .map-stage {
+                padding: 10px;
+            }
+
+            .help-pill {
+                font-size: 12px;
+                padding: 9px 12px;
+            }
+        }
+
+        /* Phone kecil */
+        @media (max-width: 480px) {
+            .map-scroll-area {
+                height: 480px;
+            }
+        }
+
     </style>
 
 </head>
@@ -2103,6 +2298,39 @@
                     <div class="selected-note">
                         Garisan panduan pada pelan digunakan sebagai rujukan arah dalam kawasan perkuburan.
                     </div>
+                    <div class="audio-navigation-card">
+                        <div class="audio-navigation-title">
+                            <i class="fa-solid fa-volume-high"></i>
+                            Panduan Audio
+                        </div>
+
+                        <div class="audio-navigation-text">
+                            {{ $audioInstruction }}
+                        </div>
+
+                        <div class="audio-navigation-actions">
+                            <button
+                                type="button"
+                                class="audio-btn audio-btn-play"
+                                onclick="playAudioInstruction(@js($audioInstruction))">
+                                <i class="fa-solid fa-play"></i>
+                                Dengar Panduan
+                            </button>
+
+                            <button
+                                type="button"
+                                class="audio-btn audio-btn-stop"
+                                onclick="stopAudioInstruction()">
+                                <i class="fa-solid fa-stop"></i>
+                                Henti
+                            </button>
+                        </div>
+
+                        <div class="audio-support-note">
+                            Fungsi ini menggunakan suara automatik pelayar web untuk membantu pengguna memahami arah ke lot pusara.
+                        </div>
+                    </div>
+
                 </div>
 
                 <div class="side-card">
@@ -2938,76 +3166,156 @@
             const closeImageModalBtn = document.getElementById('closeImageModalBtn');
 
             let scale = 1;
-            const minScale = 0.10;
+            const minScale = 0.12;
             const maxScale = 2.2;
             const step = 0.15;
+
+            const svgWidth = @json($svgWidth);
+            const svgHeight = @json($svgHeight);
+
+            const selectedMapX = @json($selectedX + ($graveWidth / 2));
+            const selectedMapY = @json($selectedY + ($graveHeight / 2));
+
+            const mapStage = cemeteryMap ? cemeteryMap.closest('.map-stage') : null;
 
             function setFullViewButtonLabel() {
                 if (!fullViewBtn || !mapFullContainer) return;
 
-                const isFullscreen =
-                    document.fullscreenElement === mapFullContainer ||
-                    mapFullContainer.classList.contains('fullscreen-mode');
+                    const isFullscreen =
+                        document.fullscreenElement === mapFullContainer ||
+                        mapFullContainer.classList.contains('fullscreen-mode');
 
-                fullViewBtn.textContent = isFullscreen ? 'Tutup' : 'Full View';
-            }
+                    fullViewBtn.textContent = isFullscreen ? 'Tutup' : 'Full View';
+                }
 
-            async function enterFullView() {
-                if (!mapFullContainer) return;
+                async function enterFullView() {
+                    if (!mapFullContainer) return;
 
-                mapFullContainer.classList.add('fullscreen-mode');
-                document.body.classList.add('map-fullscreen-active');
+                    mapFullContainer.classList.add('fullscreen-mode');
+                    document.body.classList.add('map-fullscreen-active');
 
-                try {
-                    if (mapFullContainer.requestFullscreen) {
-                        await mapFullContainer.requestFullscreen();
+                    try {
+                        if (mapFullContainer.requestFullscreen) {
+                            await mapFullContainer.requestFullscreen();
+                        }
+                    } catch (error) {
+                        console.log('Fullscreen API tidak disokong, guna CSS fullscreen sahaja.');
                     }
-                } catch (error) {
-                    console.log('Fullscreen API tidak disokong, guna CSS fullscreen sahaja.');
+
+                    setFullViewButtonLabel();
+
+                    setTimeout(function () {
+                        setResponsiveInitialView('auto');
+                    }, 250);
                 }
 
-                setFullViewButtonLabel();
-            }
+                async function exitFullView() {
+                    if (!mapFullContainer) return;
 
-            async function exitFullView() {
-                if (!mapFullContainer) return;
-
-                try {
-                    if (document.fullscreenElement) {
-                        await document.exitFullscreen();
+                    try {
+                        if (document.fullscreenElement) {
+                            await document.exitFullscreen();
+                        }
+                    } catch (error) {
+                        console.log('Gagal keluar fullscreen.');
                     }
-                } catch (error) {
-                    console.log('Keluar fullscreen biasa.');
+
+                    mapFullContainer.classList.remove('fullscreen-mode');
+                    document.body.classList.remove('map-fullscreen-active');
+
+                    setFullViewButtonLabel();
+
+                    setTimeout(function () {
+                        setResponsiveInitialView('auto');
+                    }, 250);
                 }
 
-                mapFullContainer.classList.remove('fullscreen-mode');
-                document.body.classList.remove('map-fullscreen-active');
+                async function toggleFullView() {
+                    if (!mapFullContainer) return;
 
-                setFullViewButtonLabel();
+                    const isFullscreen =
+                        document.fullscreenElement === mapFullContainer ||
+                        mapFullContainer.classList.contains('fullscreen-mode');
+
+                    if (isFullscreen) {
+                        await exitFullView();
+                    } else {
+                        await enterFullView();
+                    }
+                }
+
+            function clamp(value, min, max) {
+                return Math.min(Math.max(value, min), max);
             }
 
-            async function toggleFullView() {
-                if (!mapFullContainer) return;
+            function getResponsiveScale() {
+                if (!mapViewer) return 0.5;
 
-                const isFullscreen =
-                    document.fullscreenElement === mapFullContainer ||
-                    mapFullContainer.classList.contains('fullscreen-mode');
+                const viewerWidth = mapViewer.clientWidth - 36;
+                const viewerHeight = mapViewer.clientHeight - 36;
 
-                if (isFullscreen) {
-                    await exitFullView();
-                } else {
-                    await enterFullView();
+                let fitScale = Math.min(
+                    viewerWidth / svgWidth,
+                    viewerHeight / svgHeight
+                );
+
+                /*
+                Minimum scale dikawal supaya peta tidak terlalu kecil di phone.
+                Desktop lebih besar, phone lebih kecil tetapi masih boleh dibaca.
+                */
+                let readableMin = 0.45;
+
+                if (window.innerWidth <= 480) {
+                    readableMin = 0.22;
+                } else if (window.innerWidth <= 767) {
+                    readableMin = 0.26;
+                } else if (window.innerWidth <= 992) {
+                    readableMin = 0.34;
                 }
+
+                return clamp(Math.max(fitScale, readableMin), minScale, 1);
+            }
+
+            function updateStageSize() {
+                if (!mapStage) return;
+
+                const padding = window.innerWidth <= 767 ? 20 : 36;
+
+                mapStage.style.width = `${Math.ceil(svgWidth * scale) + padding}px`;
+                mapStage.style.height = `${Math.ceil(svgHeight * scale) + padding}px`;
             }
 
             function applyZoom() {
                 if (!cemeteryMap) return;
 
                 cemeteryMap.style.transform = `scale(${scale})`;
+                updateStageSize();
 
                 if (zoomLevel) {
                     zoomLevel.textContent = `${Math.round(scale * 100)}%`;
                 }
+            }
+
+            function focusSelectedPlot(behavior = 'smooth') {
+                if (!mapViewer) return;
+
+                const targetLeft = (selectedMapX * scale) - (mapViewer.clientWidth / 2);
+                const targetTop = (selectedMapY * scale) - (mapViewer.clientHeight / 2);
+
+                mapViewer.scrollTo({
+                    left: Math.max(targetLeft, 0),
+                    top: Math.max(targetTop, 0),
+                    behavior: behavior
+                });
+            }
+
+            function setResponsiveInitialView(behavior = 'auto') {
+                scale = getResponsiveScale();
+                applyZoom();
+
+                setTimeout(function () {
+                    focusSelectedPlot(behavior);
+                }, 80);
             }
 
             function zoomIn() {
@@ -3021,22 +3329,25 @@
             }
 
             function resetZoom() {
-                scale = 1;
-                applyZoom();
-
-                if (mapViewer) {
-                    mapViewer.scrollTo({
-                        top: 0,
-                        left: 0,
-                        behavior: 'smooth'
-                    });
-                }
+                setResponsiveInitialView('smooth');
             }
+
+        
 
             if (zoomInBtn) zoomInBtn.addEventListener('click', zoomIn);
             if (zoomOutBtn) zoomOutBtn.addEventListener('click', zoomOut);
             if (resetZoomBtn) resetZoomBtn.addEventListener('click', resetZoom);
             if (fullViewBtn) fullViewBtn.addEventListener('click', toggleFullView);
+
+            setResponsiveInitialView('auto');
+
+            window.addEventListener('resize', function () {
+                clearTimeout(window.mapResizeTimer);
+
+                window.mapResizeTimer = setTimeout(function () {
+                    setResponsiveInitialView('auto');
+                }, 250);
+            });
 
             document.addEventListener('fullscreenchange', function () {
                 if (!mapFullContainer) return;
@@ -3148,6 +3459,79 @@
         });
     </script>
 
+    <script>
+        let selectedMalayVoice = null;
+
+        function loadMalayVoice() {
+            if (!('speechSynthesis' in window)) {
+                return;
+            }
+
+            const voices = window.speechSynthesis.getVoices();
+
+            // Semak senarai voice dalam Console browser
+            console.table(
+                voices.map(voice => ({
+                    name: voice.name,
+                    lang: voice.lang
+                }))
+            );
+
+            // Pilih suara Melayu sahaja. Jangan fallback kepada Indonesia.
+            selectedMalayVoice =
+                voices.find(voice => voice.lang === 'ms-MY') ||
+                voices.find(voice => voice.lang && voice.lang.toLowerCase().startsWith('ms')) ||
+                voices.find(voice => voice.name && /malay|melayu|malaysia/i.test(voice.name)) ||
+                null;
+        }
+
+        if ('speechSynthesis' in window) {
+            loadMalayVoice();
+
+            window.speechSynthesis.onvoiceschanged = function () {
+                loadMalayVoice();
+            };
+        }
+
+        function playAudioInstruction(text) {
+            if (!('speechSynthesis' in window)) {
+                alert('Maaf, pelayar web anda tidak menyokong fungsi panduan audio.');
+                return;
+            }
+
+            window.speechSynthesis.cancel();
+            loadMalayVoice();
+
+            const speech = new SpeechSynthesisUtterance(text);
+
+            // Paksa Bahasa Melayu Malaysia
+            speech.lang = 'ms-MY';
+
+            if (selectedMalayVoice) {
+                speech.voice = selectedMalayVoice;
+            } else {
+                console.warn('Voice Bahasa Melayu tidak dijumpai. Browser akan guna voice default.');
+            }
+
+            speech.rate = 0.85;
+            speech.pitch = 1;
+            speech.volume = 1;
+
+            window.speechSynthesis.speak(speech);
+        }
+
+        function stopAudioInstruction() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        window.addEventListener('beforeunload', function () {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        });
+    </script>
 
 </body>
 </html>

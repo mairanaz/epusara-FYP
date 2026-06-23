@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -15,11 +16,6 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -28,23 +24,16 @@ class User extends Authenticatable
         'account_type',
         'linked_profile_id',
         'linked_dependent_id',
+        'google_id',
+        'avatar',
+        'provider',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
@@ -68,5 +57,25 @@ class User extends Authenticatable
     public function graveOrders()
     {
         return $this->hasMany(GraveOrder::class);
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Jika user ini asalnya daripada dependent yang dinaikkan jadi Ahli Utama
+    |--------------------------------------------------------------------------
+    */
+    public function linkedDependent()
+    {
+        return $this->belongsTo(Dependent::class, 'linked_dependent_id');
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Jika user ini menggantikan Ahli Utama lama
+    |--------------------------------------------------------------------------
+    */
+    public function replacingProfiles()
+    {
+        return $this->hasMany(UserProfile::class, 'replaced_by_user_id');
     }
 }

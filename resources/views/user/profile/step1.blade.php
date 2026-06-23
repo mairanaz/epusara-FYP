@@ -165,14 +165,8 @@
 
                 <div class="stepper-item">
                     <div class="stepper-circle">3</div>
-                    <div class="stepper-title">Maklumat Waris</div>
-                    <div class="stepper-subtitle">Langkah 3</div>
-                </div>
-
-                <div class="stepper-item">
-                    <div class="stepper-circle">4</div>
                     <div class="stepper-title">Bayaran Yuran</div>
-                    <div class="stepper-subtitle">Langkah 4</div>
+                    <div class="stepper-subtitle">Langkah 3</div>
                 </div>
             </div>
         </div>
@@ -276,22 +270,6 @@
                                         </option>
                                     </select>
                                     @error('agama')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label fw-semibold">Warganegara</label>
-                                    <select name="warganegara" class="form-select form-select-lg @error('warganegara') is-invalid @enderror">
-                                        <option value="">-- Sila Pilih --</option>
-                                        <option value="Malaysia" {{ old('warganegara', session('user_profile.step1.warganegara')) == 'Malaysia' ? 'selected' : '' }}>
-                                            Malaysia
-                                        </option>
-                                        <option value="Penduduk Tetap" {{ old('warganegara', session('user_profile.step1.warganegara')) == 'Penduduk Tetap' ? 'selected' : '' }}>
-                                            Penduduk Tetap
-                                        </option>
-                                    </select>
-                                    @error('warganegara')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>

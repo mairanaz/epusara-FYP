@@ -50,9 +50,24 @@ class PaymentController extends Controller
         $plan = $this->normalizePlan($profile->payment_plan);
         $summary = $this->getPaymentSummary($user->id, $plan);
 
-        return view('user.payments.create', compact('profile', 'summary'));
-    }
+        /*
+        |--------------------------------------------------------------------------
+        | Bayaran Bulanan Seterusnya Untuk Paparan Borang
+        |--------------------------------------------------------------------------
+        */
+        $nextMonthlyPeriod = $summary['next_monthly_period'] ?? now()->format('Y-m');
 
+        $nextMonthlyLabel = $nextMonthlyPeriod
+            ? Carbon::createFromFormat('Y-m', $nextMonthlyPeriod)->translatedFormat('F Y')
+            : '-';
+
+        return view('user.payments.create', compact(
+            'profile',
+            'summary',
+            'nextMonthlyPeriod',
+            'nextMonthlyLabel'
+        ));
+    }
     
     public function receipt(Payment $payment)
     {
@@ -62,7 +77,10 @@ class PaymentController extends Controller
 
         $payment->load('items');
 
-        return view('user.payments.receipt', compact('payment'));
+        $plan = $this->normalizePlan($payment->payment_plan);
+        $membership = $this->getMembershipValidity($payment->user_id, $plan);
+
+        return view('user.payments.receipt', compact('payment', 'membership'));
     }
 
     private function getMembershipStartDate(User $user): Carbon
@@ -115,6 +133,90 @@ class PaymentController extends Controller
         return $months;
     }
 
+    /**
+     * Status keahlian hanya mempunyai dua nilai: Aktif / Tidak Aktif.
+     *
+     * Pelan bulanan:
+     * - RM10 mewakili 1 bulan.
+     * - Sah sehingga diambil daripada payment_period bulanan terakhir yang berjaya.
+     *
+     * Pelan tahunan:
+     * - Bayaran yang dibuat pada Mac 2026 sah sehingga Mac 2027.
+     * - cycle_end item tahunan menyimpan bulan sah sehingga tersebut.
+     *
+     * Ahli menjadi Tidak Aktif apabila 6 bulan bayaran telah tertunggak.
+     */
+    private function getMembershipValidity(int $userId, string $plan): array
+    {
+        $paidPaymentIds = Payment::where('user_id', $userId)
+            ->where('status', 'paid')
+            ->pluck('id');
+
+        $validUntil = null;
+
+        if ($plan === 'monthly') {
+            $lastPaidPeriod = PaymentItem::whereIn('payment_id', $paidPaymentIds)
+                ->where('payment_type', 'monthly')
+                ->whereNotNull('payment_period')
+                ->orderByDesc('payment_period')
+                ->value('payment_period');
+
+            if ($lastPaidPeriod) {
+                $validUntil = Carbon::createFromFormat('Y-m', $lastPaidPeriod)->startOfMonth();
+            }
+        } else {
+            $lastYearlyItem = PaymentItem::whereIn('payment_id', $paidPaymentIds)
+                ->where('payment_type', 'yearly')
+                ->orderByDesc('cycle_end')
+                ->orderByDesc('billing_month')
+                ->first();
+
+            if ($lastYearlyItem) {
+                if ($lastYearlyItem->cycle_end) {
+                    $validUntil = Carbon::parse($lastYearlyItem->cycle_end)->startOfMonth();
+                } elseif ($lastYearlyItem->billing_month) {
+                    $validUntil = Carbon::parse($lastYearlyItem->billing_month)
+                        ->startOfMonth()
+                        ->addYear();
+                }
+            }
+        }
+
+        if (!$validUntil) {
+            return [
+                'membership_status' => 'Tidak Aktif',
+                'membership_status_class' => 'danger',
+                'valid_until_period' => null,
+                'valid_until_label' => '-',
+                'next_due_period' => now()->startOfMonth()->format('Y-m'),
+                'next_due_label' => now()->startOfMonth()->translatedFormat('F Y'),
+                'inactive_from_period' => null,
+                'inactive_from_label' => '-',
+            ];
+        }
+
+        $nextDue = $validUntil->copy()->addMonth();
+
+        // Contoh sah sehingga Mei: Jun, Julai, Ogos, September, Oktober masih Aktif;
+        // November ialah bulan tunggakan ke-6 dan status menjadi Tidak Aktif.
+        $inactiveFrom = $nextDue->copy()->addMonths(5);
+
+        $status = now()->startOfMonth()->gte($inactiveFrom)
+            ? 'Tidak Aktif'
+            : 'Aktif';
+
+        return [
+            'membership_status' => $status,
+            'membership_status_class' => $status === 'Aktif' ? 'success' : 'danger',
+            'valid_until_period' => $validUntil->format('Y-m'),
+            'valid_until_label' => $validUntil->translatedFormat('F Y'),
+            'next_due_period' => $nextDue->format('Y-m'),
+            'next_due_label' => $nextDue->translatedFormat('F Y'),
+            'inactive_from_period' => $inactiveFrom->format('Y-m'),
+            'inactive_from_label' => $inactiveFrom->translatedFormat('F Y'),
+        ];
+    }
+
     private function getPaymentSummary($userId, $plan)
     {
         $user = User::with('profile')->findOrFail($userId);
@@ -130,6 +232,8 @@ class PaymentController extends Controller
         $paidPaymentIds = Payment::where('user_id', $userId)
             ->where('status', 'paid')
             ->pluck('id');
+
+        $membership = $this->getMembershipValidity($userId, $plan);
 
         /*
         |--------------------------------------------------------------------------
@@ -215,14 +319,20 @@ class PaymentController extends Controller
         | Bayaran Tahunan Dalam Kitaran Semasa
         |--------------------------------------------------------------------------
         */
-        $yearlyPeriod = $cycleStart->format('Y-m') . '_to_' . $cycleEnd->format('Y-m');
+        // Tempoh tahunan baharu bermula dari bulan transaksi pembayaran.
+        // Contoh transaksi Mac 2026: 2026-03_to_2027-03.
+        $newYearlyStart = now()->startOfMonth();
+        $newYearlyEnd = $newYearlyStart->copy()->addYear();
+        $yearlyPeriod = $newYearlyStart->format('Y-m') . '_to_' . $newYearlyEnd->format('Y-m');
 
-        $annualPaidThisYear = PaymentItem::whereIn('payment_id', $paidPaymentIds)
-            ->where('payment_type', 'yearly')
-            ->where('payment_period', $yearlyPeriod)
-            ->sum('amount');
+        $hasActiveYearlyCoverage = $plan === 'yearly'
+            && !empty($membership['valid_until_period'])
+            && Carbon::createFromFormat('Y-m', $membership['valid_until_period'])
+                ->startOfMonth()
+                ->gte($currentDate);
 
-        $annualBalance = max(0, self::YEARLY_FEE - $annualPaidThisYear);
+        $annualPaidThisYear = $hasActiveYearlyCoverage ? self::YEARLY_FEE : 0;
+        $annualBalance = $hasActiveYearlyCoverage ? 0 : self::YEARLY_FEE;
 
         /*
         |--------------------------------------------------------------------------
@@ -252,6 +362,15 @@ class PaymentController extends Controller
 
         return [
             'plan' => $plan,
+
+            'membership_status' => $membership['membership_status'],
+            'membership_status_class' => $membership['membership_status_class'],
+            'valid_until_period' => $membership['valid_until_period'],
+            'valid_until_label' => $membership['valid_until_label'],
+            'next_due_period' => $membership['next_due_period'],
+            'next_due_label' => $membership['next_due_label'],
+            'inactive_from_period' => $membership['inactive_from_period'],
+            'inactive_from_label' => $membership['inactive_from_label'],
 
             'registration_paid' => $registrationPaid,
             'registration_balance' => $registrationBalance,
@@ -876,6 +995,18 @@ class PaymentController extends Controller
             |--------------------------------------------------------------------------
             */
             if ($plan === 'yearly') {
+
+                /*
+                |--------------------------------------------------------------------------
+                | Tempoh Tahunan Bermula Pada Bulan Bayaran
+                |--------------------------------------------------------------------------
+                | Contoh pembayaran Mac 2026:
+                | cycle_start = Mac 2026, cycle_end = Mac 2027,
+                | sah sehingga = Mac 2027 dan bayaran seterusnya = April 2027.
+                */
+                $cycleStartDate = now()->startOfMonth();
+                $cycleEndDate = $cycleStartDate->copy()->addYear();
+                $yearlyPeriod = $cycleStartDate->format('Y-m') . '_to_' . $cycleEndDate->format('Y-m');
 
                 /*
                 |--------------------------------------------------------------------------

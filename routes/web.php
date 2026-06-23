@@ -13,6 +13,9 @@ use App\Http\Controllers\GraveOrderController;
 use App\Http\Controllers\UserGraveLocationController;
 use App\Http\Controllers\UserUpgradeMembershipController;
 use App\Http\Controllers\PublicGraveSearchController;
+use App\Http\Controllers\DashboardController;
+
+use App\Http\Controllers\Auth\GoogleAuthController;
 
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\AdminDeathReportController;
@@ -24,6 +27,9 @@ use App\Http\Controllers\Admin\AdminGraveOrderController;
 use App\Http\Controllers\Admin\GraveOrderReportController;
 use App\Http\Controllers\Admin\AdminBurialRecordController;
 use App\Http\Controllers\Admin\AdminDeathReportReportController;
+use App\Http\Controllers\Admin\MainMemberSuccessorController;
+use App\Http\Controllers\Admin\AdminMemberReportController;
+use App\Http\Controllers\Admin\AdminDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -34,6 +40,18 @@ use App\Http\Controllers\Admin\AdminDeathReportReportController;
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
+
+/*
+|--------------------------------------------------------------------------
+| GOOGLE LOGIN ROUTES
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/auth/google', [GoogleAuthController::class, 'redirectToGoogle'])
+    ->name('google.login');
+
+Route::get('/auth/google/callback', [GoogleAuthController::class, 'handleGoogleCallback'])
+    ->name('google.callback');
 
 Route::get('/whatsapp/lapor-kematian', [WhatsAppController::class, 'laporKematian'])
     ->name('whatsapp.lapor-kematian');
@@ -68,6 +86,8 @@ Route::get('/dashboard', function () {
 
     return redirect()->route('user.dashboard');
 })->middleware(['auth'])->name('dashboard');
+
+
 
 /*
 |--------------------------------------------------------------------------
@@ -109,24 +129,8 @@ Route::middleware(['auth'])->group(function () {
         |--------------------------------------------------------------------------
         */
 
-        Route::get('/user/dashboard', function () {
-            $user = auth()->user();
-
-            if ($user->role === 'admin') {
-                return redirect()->route('admin.dashboard');
-            }
-
-            if ($user->account_type === null) {
-                return redirect()->route('user.profile.create.step1')
-                    ->with('error', 'Sila lengkapkan profil anda terlebih dahulu.');
-            }
-
-            if ($user->account_type === 'tanggungan') {
-                return redirect()->route('dependent.dashboard');
-            }
-
-            return view('user.dashboard');
-        })->name('user.dashboard');
+        Route::get('/user/dashboard', [DashboardController::class, 'index'])
+        ->name('user.dashboard');
 
         /*
         |--------------------------------------------------------------------------
@@ -134,24 +138,8 @@ Route::middleware(['auth'])->group(function () {
         |--------------------------------------------------------------------------
         */
 
-        Route::get('/dependent/dashboard', function () {
-            $user = auth()->user();
-
-            if ($user->role === 'admin') {
-                return redirect()->route('admin.dashboard');
-            }
-
-            if ($user->account_type === null) {
-                return redirect()->route('user.profile.create.step1')
-                    ->with('error', 'Sila lengkapkan profil anda terlebih dahulu.');
-            }
-
-            if ($user->account_type !== 'tanggungan') {
-                return redirect()->route('user.dashboard');
-            }
-
-            return view('dependent.dashboard');
-        })->name('dependent.dashboard');
+            Route::get('/dependent/dashboard', [DashboardController::class, 'dependentDashboard'])
+        ->name('dependent.dashboard');
 
         Route::get('/dependent/main-member', [UserProfileController::class, 'dependentMainMember'])
             ->name('dependent.main-member');
@@ -178,16 +166,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/step2', [UserProfileController::class, 'postStep2'])
                 ->name('post.step2');
 
-            Route::get('/step3', [UserProfileController::class, 'createStep3'])
+           /* Route::get('/step3', [UserProfileController::class, 'createStep3'])
                 ->name('create.step3');
 
             Route::post('/step3', [UserProfileController::class, 'postStep3'])
-                ->name('post.step3');
+                ->name('post.step3'); */
 
-            Route::get('/step4', [UserProfileController::class, 'createStep4'])
+            Route::get('/step3', [UserProfileController::class, 'createStep4'])
                 ->name('create.step4');
 
-            Route::post('/step4', [UserProfileController::class, 'storeFinal'])
+            Route::post('/step3', [UserProfileController::class, 'storeFinal'])
                 ->name('store.final');
         });
 
@@ -318,9 +306,8 @@ Route::post('/payment/callback', [PaymentGatewayController::class, 'paymentCallb
 
 Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(function () {
 
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [AdminDashboardController::class, 'index'])
+        ->name('dashboard');
 
     /*
     |--------------------------------------------------------------------------
@@ -351,6 +338,18 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
             ->name('fees.show');
 
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | PENGGANTI AHLI UTAMA
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get('/members/{user}/successor', [MainMemberSuccessorController::class, 'show'])
+        ->name('members.successor.show');
+
+    Route::post('/members/{user}/successor', [MainMemberSuccessorController::class, 'store'])
+        ->name('members.successor.store');
 
     /*
     |--------------------------------------------------------------------------
@@ -429,6 +428,8 @@ Route::middleware(['auth', 'isAdmin'])->prefix('admin')->name('admin.')->group(f
     | LAPORAN
     |--------------------------------------------------------------------------
     */
+    Route::get('/reports/members', [AdminMemberReportController::class, 'index'])
+    ->name('reports.members.index');
 
     Route::get('/reports/grave-orders', [GraveOrderReportController::class, 'index'])
         ->name('reports.grave-orders.index');

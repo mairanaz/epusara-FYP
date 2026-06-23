@@ -16,7 +16,6 @@ class AdminKhairatMemberController extends Controller
         |--------------------------------------------------------------------------
         | Status Kehidupan
         |--------------------------------------------------------------------------
-        | Database ada simpan "meninggal_dunia", jadi kita masukkan sekali.
         */
         $aliveStatuses = ['hidup', 'aktif'];
         $deceasedStatuses = ['meninggal', 'meninggal dunia', 'meninggal_dunia'];
@@ -25,17 +24,23 @@ class AdminKhairatMemberController extends Controller
         |--------------------------------------------------------------------------
         | Query Asas - Ahli Utama Sahaja
         |--------------------------------------------------------------------------
-        | Senarai Ahli hanya paparkan ahli utama yang sudah diluluskan / aktif.
-        | Tanggungan tidak dipaparkan di sini.
+        | Papar profile yang:
+        | - status permohonan approved / active
+        | - user masih wujud
+        | - user account_type = utama / main_member / null lama
+        |
+        | Nota:
+        | main_member dimasukkan untuk keselamatan jika ada data lama semasa test.
+        |--------------------------------------------------------------------------
         */
-        $mainMemberQuery = UserProfile::query()
-    ->whereIn('status_permohonan', ['approved', 'active'])
-    ->whereNotExists(function ($query) {
-        $query->selectRaw(1)
-            ->from('dependents')
-            ->whereColumn('dependents.no_kp', 'user_profiles.no_kp')
-            ->where('dependents.status_tanggungan', 'aktif');
-    });
+        $mainMemberQuery = UserProfile::with('user')
+            ->whereIn('status_permohonan', ['approved', 'active'])
+            ->whereHas('user', function ($query) {
+                $query->where(function ($q) {
+                    $q->whereIn('account_type', ['utama', 'main_member'])
+                        ->orWhereNull('account_type');
+                });
+            });
 
         /*
         |--------------------------------------------------------------------------
@@ -73,7 +78,7 @@ class AdminKhairatMemberController extends Controller
         }
 
         if ($request->filled('status_kehidupan')) {
-            if ($request->status_kehidupan === 'hidup') {
+            if (in_array($request->status_kehidupan, ['hidup', 'aktif'])) {
                 $query->where(function ($q) use ($aliveStatuses) {
                     $q->whereNull('status_kehidupan')
                         ->orWhereIn('status_kehidupan', $aliveStatuses);
@@ -111,7 +116,8 @@ class AdminKhairatMemberController extends Controller
 
     public function show(UserProfile $member)
     {
-        $payments = Payment::where('user_id', $member->user_id)
+        $payments = Payment::with('transferredFromUser.profile')
+            ->where('user_id', $member->user_id)
             ->latest()
             ->get();
 

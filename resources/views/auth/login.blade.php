@@ -195,9 +195,12 @@
                         <h1 class="auth-title">Log Masuk</h1>
                         <p class="auth-text">Selamat datang kembali. Sila log masuk ke akaun anda.</p>
 
-                        @if (session('status'))
-                            <div class="alert alert-success rounded-3">
-                                {{ session('status') }}
+                        @if (session('success') || session('status'))
+                            <div class="alert alert-success alert-dismissible fade show rounded-3 mb-3" role="alert">
+                                <i class="ri-checkbox-circle-line me-1"></i>
+                                {{ session('success') ?? session('status') }}
+
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                             </div>
                         @endif
 
@@ -260,6 +263,17 @@
                                 </button>
                             </div>
                         </form>
+
+                         <div class="text-center my-3">
+                            <span class="text-muted">atau</span>
+                        </div>
+
+                        <div class="d-grid">
+                            <a href="{{ route('google.login') }}" class="btn btn-outline-danger btn-lg">
+                                <i class="ri-google-fill me-2"></i>
+                                Log Masuk dengan Google
+                            </a>
+                        </div>
 
                         @if (Route::has('register'))
                             <p class="register-text">

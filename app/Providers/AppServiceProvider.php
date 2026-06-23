@@ -5,6 +5,7 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Pagination\Paginator;
 //use Illuminate\Support\Facades\URL;
+//ni pulak untuk import
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -23,6 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
        /**if (app()->environment('local')) {
             URL::forceScheme('https');
-        } */ 
+        }  */
+        /**kalau pakai link ngrok */
     }
 }

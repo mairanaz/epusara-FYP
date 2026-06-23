@@ -408,10 +408,6 @@
                                             Kemalangan
                                         </option>
 
-                                        <option value="Kes Polis / Bedah Siasat" {{ old('sebab_kematian') == 'Kes Polis / Bedah Siasat' ? 'selected' : '' }}>
-                                            Kes Polis / Bedah Siasat
-                                        </option>
-
                                         <option value="Lain-lain" {{ old('sebab_kematian') == 'Lain-lain' ? 'selected' : '' }}>
                                             Lain-lain
                                         </option>
@@ -465,49 +461,15 @@
                             <div id="kesKhasAlert" class="alert alert-warning border-0 d-none">
                                 <div class="fw-semibold mb-1">Makluman Kes Khas</div>
                                 <div class="small">
-                                    Bagi kematian melibatkan penyakit berjangkit atau kes polis / bedah siasat,
+                                    Bagi kematian melibatkan penyakit berjangkit,
                                     pengurusan jenazah dan tempat mandi jenazah akan ditetapkan kepada
                                     <strong>Hospital / Pihak Berkuasa</strong>.
                                 </div>
                             </div>
 
                             <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">
-                                        Tempat Mandi Jenazah <span class="text-danger">*</span>
-                                    </label>
 
-                                    <div id="lokasiMandiWrapper">
-                                        <select name="lokasi_mandi_jenazah"
-                                                id="lokasi_mandi_jenazah"
-                                                class="form-control">
-                                            <option value="">-- Pilih Tempat Mandi Jenazah --</option>
-
-                                            <option value="Rumah Keluarga / Waris" {{ old('lokasi_mandi_jenazah') == 'Rumah Keluarga / Waris' ? 'selected' : '' }}>
-                                                Rumah Keluarga / Waris
-                                            </option>
-
-                                            <option value="Masjid RTB Ar-Rahman" {{ old('lokasi_mandi_jenazah') == 'Masjid RTB Ar-Rahman' ? 'selected' : '' }}>
-                                                Masjid RTB Ar-Rahman
-                                            </option>
-
-                                            <option value="Hospital" {{ old('lokasi_mandi_jenazah') == 'Hospital' ? 'selected' : '' }}>
-                                                Hospital
-                                            </option>
-
-                                            <option value="Lain-lain" {{ old('lokasi_mandi_jenazah') == 'Lain-lain' ? 'selected' : '' }}>
-                                                Lain-lain
-                                            </option>
-                                        </select>
-                                    </div>
-
-                                    <div id="lokasiMandiReadonly" class="readonly-box d-none">
-                                        Hospital
-                                    </div>
-
-                                    <input type="hidden" id="lokasi_mandi_jenazah_hidden" value="">
-                                </div>
-
+                                {{-- 1. Pihak yang menguruskan jenazah dahulu --}}
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">
                                         Pihak yang Menguruskan Jenazah <span class="text-danger">*</span>
@@ -540,10 +502,49 @@
                                     <input type="hidden" id="pengurusan_jenazah_oleh_hidden" value="">
                                 </div>
 
+                                {{-- 2. Baru tanya tempat mandi jenazah --}}
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">
+                                        Tempat Mandi Jenazah <span class="text-danger">*</span>
+                                    </label>
+
+                                    <div id="lokasiMandiWrapper">
+                                        <select name="lokasi_mandi_jenazah"
+                                                id="lokasi_mandi_jenazah"
+                                                class="form-control">
+                                            <option value="">-- Pilih Tempat Mandi Jenazah --</option>
+
+                                            <option value="Rumah Keluarga / Waris" {{ old('lokasi_mandi_jenazah') == 'Rumah Keluarga / Waris' ? 'selected' : '' }}>
+                                                Rumah Keluarga / Waris
+                                            </option>
+
+                                            <option value="Masjid RTB Ar-Rahmah" {{ old('lokasi_mandi_jenazah') == 'Masjid RTB Ar-Rahmah' ? 'selected' : '' }}>
+                                                Masjid RTB Ar-Rahmah
+                                            </option>
+
+                                            <option value="Hospital" {{ old('lokasi_mandi_jenazah') == 'Hospital' ? 'selected' : '' }}>
+                                                Hospital
+                                            </option>
+
+                                            <option value="Lain-lain" {{ old('lokasi_mandi_jenazah') == 'Lain-lain' ? 'selected' : '' }}>
+                                                Lain-lain
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div id="lokasiMandiReadonly" class="readonly-box d-none">
+                                        Hospital
+                                    </div>
+
+                                    <input type="hidden" id="lokasi_mandi_jenazah_hidden" value="">
+                                </div>
+
+                                {{-- 3. Kemudian lokasi pengkebumian --}}
                                 <div class="col-md-6 mb-3">
                                     <label class="form-label fw-semibold">
                                         Lokasi Pengkebumian <span class="text-danger">*</span>
                                     </label>
+
                                     <select name="lokasi_pengkebumian"
                                             id="lokasi_pengkebumian"
                                             class="form-control">
@@ -558,6 +559,7 @@
                                         </option>
                                     </select>
                                 </div>
+
                             </div>
 
                             <div id="luarRTBSection" class="{{ old('lokasi_pengkebumian') == 'luar_rtb' ? '' : 'd-none' }}">
@@ -967,8 +969,7 @@
         if (!sebabKematian || !kesKhasAlert) return;
 
         const kesKhas = [
-            'Penyakit Berjangkit',
-            'Kes Polis / Bedah Siasat'
+            'Penyakit Berjangkit'
         ];
 
         const isKesKhas = kesKhas.includes(sebabKematian.value);

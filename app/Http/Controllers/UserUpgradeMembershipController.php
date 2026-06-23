@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\UserProfile;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\SuccessorFinalizationService;
 
 class UserUpgradeMembershipController extends Controller
 {
@@ -34,7 +35,7 @@ class UserUpgradeMembershipController extends Controller
         return view('user.upgrade-membership.create', compact('user', 'dependent'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request, SuccessorFinalizationService $successorService)
     {
         $user = Auth::user();
 
@@ -98,6 +99,14 @@ class UserUpgradeMembershipController extends Controller
         $user->update([
             'linked_profile_id' => $profile->id,
         ]);
+
+        $wasFinalizedAsSuccessor = $successorService->finalizeIfMatched($user, $profile);
+
+        if ($wasFinalizedAsSuccessor) {
+            return redirect()
+                ->route('dashboard')
+                ->with('success', 'Akaun anda telah disahkan sebagai Ahli Utama Baharu dan rekod keluarga telah dipindahkan.');
+        }
 
         return redirect()
             ->route('dashboard')

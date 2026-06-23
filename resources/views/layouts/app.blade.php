@@ -60,7 +60,7 @@
             height: 100vh !important;
             z-index: 9999 !important;
             transition: transform 0.3s ease !important;
-            background: #111827 !important;
+            background: #003f3a !important;
             overflow-y: auto !important;
         }
 
@@ -113,7 +113,7 @@
 /* Tajuk */
 .epusara-tour-popover .driver-popover-title {
     margin: 0;
-    padding: 42px 20px 8px;
+    padding: 24px 58px 8px 24px;
     font-size: 19px;
     line-height: 1.35;
     font-weight: 600;
@@ -124,7 +124,7 @@
 .epusara-tour-popover .driver-popover-description {
     margin: 0;
     min-height: 72px;
-    padding: 0 20px 16px;
+    padding: 0 24px 16px;
     font-size: 13px;
     line-height: 1.55;
     color: #4b5563;
@@ -223,22 +223,30 @@
     border-color: #ffffff;
 }
 
-/* Butang Langkau custom */
 .epusara-tour-skip {
     position: absolute;
-    top: 13px;
-    right: 16px;
+    top: 14px;
+    right: 14px;
+    width: 32px;
+    height: 32px;
     padding: 0;
     border: 0;
-    background: transparent;
-    color: #475569;
-    font-size: 12px;
-    font-weight: 700;
+    border-radius: 8px;
+    background: #f1f5f9;
+    color: #64748b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 23px;
+    font-weight: 400;
+    line-height: 1;
     cursor: pointer;
+    transition: all 0.18s ease;
 }
 
 .epusara-tour-skip:hover {
-    color: #0ea5e9;
+    background: #e2e8f0;
+    color: #0f172a;
 }
 
 /* Ruang dots + progress bar */
@@ -297,13 +305,13 @@
     }
 
     .epusara-tour-popover .driver-popover-title {
-        padding: 40px 16px 8px;
+        padding: 22px 54px 8px 18px;
         font-size: 17px;
     }
 
     .epusara-tour-popover .driver-popover-description {
         min-height: 0;
-        padding: 0 16px 16px;
+        padding: 0 18px 16px;
     }
 
     .epusara-tour-popover .driver-popover-navigation-btns button {
@@ -403,6 +411,291 @@
             border-radius: 50% !important;
         }
     }
+    /* =========================================================
+    e-Pusara User Sidebar Design - Green Theme
+    Design sahaja, menu tidak berubah
+    ========================================================= */
+
+    .epusara-user-sidebar {
+        background: #003f3a !important;
+        border-right: 0 !important;
+        box-shadow: 4px 0 18px rgba(15, 23, 42, 0.08);
+    }
+
+    .epusara-user-sidebar .main-sidebar-header {
+        height: 78px !important;
+        background: #003f3a !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.10) !important;
+        padding: 10px 14px !important;
+    }
+
+    .epusara-sidebar-logo-img {
+        height: 42px !important;
+        width: 42px !important;
+        object-fit: contain !important;
+        transform: none !important;
+    }
+
+    .epusara-sidebar-brand {
+        font-size: 21px !important;
+        font-weight: 800 !important;
+        color: #ffffff !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    .epusara-user-sidebar .main-sidebar {
+        background: #003f3a !important;
+        padding: 14px 0 18px !important;
+    }
+
+    .epusara-user-sidebar .main-menu {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #003f3a !important;
+    }
+
+    .epusara-user-sidebar .slide__category {
+        margin: 18px 0 8px !important;
+        padding: 0 22px !important;
+    }
+
+    .epusara-user-sidebar .slide__category:first-child {
+        margin-top: 8px !important;
+    }
+
+    .epusara-user-sidebar .category-name {
+        display: block;
+        color: rgba(209, 250, 229, 0.65) !important;
+        font-size: 10.5px !important;
+        font-weight: 800 !important;
+        letter-spacing: 0.9px;
+        text-transform: uppercase;
+    }
+
+    .epusara-user-sidebar .slide {
+        margin: 0 !important;
+        padding: 0 10px !important;
+        background: transparent !important;
+    }
+
+    .epusara-user-sidebar .side-menu__item {
+        position: relative;
+        width: 100% !important;
+        min-height: 42px;
+        margin: 0 !important;
+        padding: 10px 12px !important;
+        border-radius: 10px !important;
+        background: transparent !important;
+        color: #d1fae5 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        transition: background-color 0.18s ease, color 0.18s ease;
+    }
+
+    .epusara-user-sidebar .side-menu__item:hover {
+        background: rgba(16, 185, 129, 0.18) !important;
+        color: #ffffff !important;
+    }
+
+    .epusara-user-sidebar .side-menu__item.active {
+        background: #0f766e !important;
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        box-shadow: inset 4px 0 0 #99f6e4;
+    }
+
+    .epusara-user-sidebar .side-menu__item.active::after {
+        display: none !important;
+    }
+
+    .epusara-user-sidebar .side-menu__icon {
+        width: 22px !important;
+        min-width: 22px !important;
+        height: 22px !important;
+        margin: 0 !important;
+        color: inherit !important;
+        font-size: 19px !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .epusara-user-sidebar .side-menu__label {
+        color: inherit !important;
+        font-size: 13.5px !important;
+        font-weight: 600 !important;
+        line-height: 1.18 !important;
+        white-space: normal !important;
+    }
+
+    .epusara-user-sidebar .side-menu__item,
+    .epusara-user-sidebar .side-menu__item:hover,
+    .epusara-user-sidebar .side-menu__item:focus,
+    .epusara-user-sidebar .side-menu__item:active {
+        transform: none !important;
+    }
+
+    .epusara-user-sidebar .main-sidebar::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    .epusara-user-sidebar .main-sidebar::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+    }
+
+    .epusara-user-sidebar .main-sidebar::-webkit-scrollbar-thumb {
+        background: rgba(153, 246, 228, 0.35);
+        border-radius: 999px;
+    }
+
+    @media (max-width: 991px) {
+        .epusara-user-sidebar {
+            width: 280px !important;
+            background: #003f3a !important;
+        }
+    }
+
+    .epusara-sidebar-logo-img {
+        height: 42px !important;
+        width: 42px !important;
+        object-fit: contain !important;
+        transform: none !important;
+    }
+
+    .epusara-user-sidebar .main-sidebar-header {
+        height: 74px !important;
+        padding: 10px 14px !important;
+    }
+
+    .epusara-sidebar-brand {
+        font-size: 22px !important;
+        font-weight: 800 !important;
+        color: #ffffff !important;
+        line-height: 1 !important;
+        white-space: nowrap !important;
+    }
+
+    /* Header title kiri */
+    .epusara-header-page-title {
+        line-height: 1.2;
+    }
+
+    .epusara-header-page-title h6 {
+        font-size: 15px;
+        font-weight: 800;
+        color: #0f172a;
+    }
+
+    .epusara-header-page-title small {
+        font-size: 12px;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    /* Biar header nampak kemas */
+    .app-header {
+        border-bottom: 1px solid #e5e7eb !important;
+        background: #ffffff !important;
+    }
+
+    .app-header .header-link {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    /* Profile dropdown lebih kemas */
+    .header-profile-dropdown .dropdown-item {
+        padding: 12px 16px;
+        font-size: 14px;
+        align-items: center;
+    }
+
+    .header-profile-dropdown .dropdown-item:hover {
+        background: #f1f5f9;
+    }
+
+
+    /* Header profile */
+    .epusara-profile-img {
+        object-fit: cover !important;
+        border: 2px solid #d1fae5 !important;
+    }
+
+    .epusara-profile-initial {
+        width: 36px;
+        height: 36px;
+        border-radius: 999px;
+        background: #0f766e;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        font-weight: 800;
+        border: 2px solid #d1fae5;
+    }
+
+    /* Button Panduan - tema hijau */
+    .epusara-guide-btn {
+        border: 1px solid #99f6e4 !important;
+        background: #ecfdf5 !important;
+        color: #0f766e !important;
+    }
+
+    .epusara-guide-btn .header-link-icon,
+    .epusara-guide-btn span {
+        color: #0f766e !important;
+    }
+
+    .epusara-guide-btn:hover {
+        border-color: #0f766e !important;
+        background: #d1fae5 !important;
+        color: #065f46 !important;
+    }
+
+    .epusara-guide-btn:hover .header-link-icon,
+    .epusara-guide-btn:hover span {
+        color: #065f46 !important;
+    }
+
+    /* Profile dropdown - buang warna purple template */
+    .header-profile-dropdown .dropdown-item {
+        color: #334155 !important;
+        background: #ffffff !important;
+    }
+
+    .header-profile-dropdown .dropdown-item i {
+        color: #64748b !important;
+    }
+
+    .header-profile-dropdown .dropdown-item:hover,
+    .header-profile-dropdown .dropdown-item:focus,
+    .header-profile-dropdown .dropdown-item:active {
+        color: #0f766e !important;
+        background: #ecfdf5 !important;
+    }
+
+    .header-profile-dropdown .dropdown-item:hover i,
+    .header-profile-dropdown .dropdown-item:focus i,
+    .header-profile-dropdown .dropdown-item:active i {
+        color: #0f766e !important;
+    }
+
+    .header-profile-dropdown button.dropdown-item:hover,
+    .header-profile-dropdown button.dropdown-item:focus,
+    .header-profile-dropdown button.dropdown-item:active {
+        color: #dc2626 !important;
+        background: #fef2f2 !important;
+    }
+
+    .header-profile-dropdown button.dropdown-item:hover i,
+    .header-profile-dropdown button.dropdown-item:focus i,
+    .header-profile-dropdown button.dropdown-item:active i {
+        color: #dc2626 !important;
+    }
 
 </style>
 
@@ -435,7 +728,25 @@
 
         <div class="main-content app-content">
             <div class="container-fluid">
+
+                @if(session('success'))
+                    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mt-3" role="alert">
+                        <i class="bx bx-check-circle me-1"></i>
+                        {{ session('success') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
+                @if(session('error'))
+                    <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm mt-3" role="alert">
+                        <i class="bx bx-error-circle me-1"></i>
+                        {{ session('error') }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                @endif
+
                 @yield('content')
+
             </div>
         </div>
 
@@ -482,7 +793,9 @@
                 skipButton = document.createElement('button');
                 skipButton.type = 'button';
                 skipButton.className = 'epusara-tour-skip';
-                skipButton.textContent = 'Langkau';
+                skipButton.innerHTML = '&times;';
+                skipButton.setAttribute('aria-label', 'Tutup panduan');
+                skipButton.setAttribute('title', 'Tutup panduan');
 
                 skipButton.addEventListener('click', function () {
                     driverObj.destroy();
@@ -577,6 +890,48 @@
             });
         });
     </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const fullscreenToggle = document.getElementById('fullscreenToggle');
+
+            if (!fullscreenToggle) {
+                return;
+            }
+
+            const openIcon = fullscreenToggle.querySelector('.full-screen-open');
+            const closeIcon = fullscreenToggle.querySelector('.full-screen-close');
+
+            function updateFullscreenIcon() {
+                if (document.fullscreenElement) {
+                    openIcon.classList.add('d-none');
+                    closeIcon.classList.remove('d-none');
+                } else {
+                    openIcon.classList.remove('d-none');
+                    closeIcon.classList.add('d-none');
+                }
+            }
+
+            fullscreenToggle.addEventListener('click', function () {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen()
+                        .then(updateFullscreenIcon)
+                        .catch(function (err) {
+                            console.log('Fullscreen tidak dapat dibuka:', err);
+                        });
+                } else {
+                    document.exitFullscreen()
+                        .then(updateFullscreenIcon)
+                        .catch(function (err) {
+                            console.log('Fullscreen tidak dapat ditutup:', err);
+                        });
+                }
+            });
+
+            document.addEventListener('fullscreenchange', updateFullscreenIcon);
+        });
+    </script>
+
     @stack('scripts')
 </body>
 </html>

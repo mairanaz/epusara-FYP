@@ -450,63 +450,8 @@
             </div>
 
             @unless($isDependent)
-                <div class="col-xl-6">
-                    <div class="formal-card h-100">
-                        <div class="formal-header">E. Maklumat Waris</div>
-                        <div class="formal-body">
-                            <div class="row g-3">
 
-                                <div class="col-12">
-                                    <label class="form-label">Nama Waris</label>
-                                    <input type="text"
-                                           name="nama_waris"
-                                           class="form-control @error('nama_waris') is-invalid @enderror"
-                                           value="{{ old('nama_waris', $profile->nama_waris) }}"
-                                           placeholder="Sila isikan nama waris">
-                                    @error('nama_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-
-                                <div class="col-12">
-                                    <label class="form-label">Hubungan Waris</label>
-                                    <select name="hubungan_waris" class="form-select @error('hubungan_waris') is-invalid @enderror">
-                                        <option value="">-- Sila Pilih --</option>
-                                        <option value="Suami" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Suami' ? 'selected' : '' }}>Suami</option>
-                                        <option value="Isteri" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Isteri' ? 'selected' : '' }}>Isteri</option>
-                                        <option value="Anak" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Anak' ? 'selected' : '' }}>Anak</option>
-                                        <option value="Ibu" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Ibu' ? 'selected' : '' }}>Ibu</option>
-                                        <option value="Bapa" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Bapa' ? 'selected' : '' }}>Bapa</option>
-                                        <option value="Ibu Mertua" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Ibu Mertua' ? 'selected' : '' }}>Ibu Mertua</option>
-                                        <option value="Bapa Mertua" {{ old('hubungan_waris', $profile->hubungan_waris) == 'Bapa Mertua' ? 'selected' : '' }}>Bapa Mertua</option>
-                                    </select>
-                                    @error('hubungan_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-
-                                <div class="col-12">
-                                    <label class="form-label">No. Tel Waris</label>
-                                    <input type="text"
-                                           name="no_tel_waris"
-                                           class="form-control @error('no_tel_waris') is-invalid @enderror"
-                                           value="{{ old('no_tel_waris', $profile->no_tel_waris) }}"
-                                           placeholder="Contoh: 0123456789">
-                                    @error('no_tel_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-
-                                <div class="col-12">
-                                    <label class="form-label">Alamat Waris</label>
-                                    <input type="text"
-                                           name="alamat_waris"
-                                           class="form-control @error('alamat_waris') is-invalid @enderror"
-                                           value="{{ old('alamat_waris', $profile->alamat_waris) }}"
-                                           placeholder="Sila isikan alamat waris">
-                                    @error('alamat_waris') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-12">
+                <div class="col-6">
                     <div class="formal-card">
                         <div class="formal-header">F. Maklumat Bayaran</div>
                         <div class="formal-body">

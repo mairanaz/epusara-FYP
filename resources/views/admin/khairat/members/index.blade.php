@@ -137,6 +137,41 @@
     .member-page .hero-subtitle {
         color: #5b6b7f;
     }
+
+    .member-page .pagination {
+    margin-bottom: 0;
+}
+
+.member-page .pagination svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.member-page .pagination .page-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    padding: 0 12px;
+}
+
+.member-page .pagination .page-item.active .page-link {
+    color: #fff;
+}
+
+.member-page nav svg,
+.member-page .pagination svg {
+    width: 14px !important;
+    height: 14px !important;
+    max-width: 14px !important;
+    max-height: 14px !important;
+}
+
+.member-page .card-footer {
+    padding-top: 12px !important;
+}
 </style>
 
 @php
@@ -231,7 +266,7 @@
                         <label class="form-label fw-semibold">Status Kehidupan</label>
                         <select name="status_kehidupan" class="form-select">
                             <option value="">Semua Status</option>
-                            <option value="hidup" {{ $currentStatusKehidupan == 'hidup' ? 'selected' : '' }}>
+                            <option value="aktif" {{ $currentStatusKehidupan == 'aktif' ? 'selected' : '' }}>
                                 Masih Hidup
                             </option>
                             <option value="meninggal" {{ $currentStatusKehidupan == 'meninggal' ? 'selected' : '' }}>
@@ -298,7 +333,7 @@
                     <tbody>
                         @forelse($members as $index => $member)
                             @php
-                                $statusKehidupan = strtolower($member->status_kehidupan ?? 'hidup');
+                                $statusKehidupan = strtolower($member->status_kehidupan ?? 'aktif');
 
                                 $isDeceased = in_array($statusKehidupan, [
                                     'meninggal',
@@ -338,17 +373,56 @@
                                 </td>
 
                                 <td>
-                                    <span class="badge bg-{{ $statusClass }} status-badge">
-                                        {{ $statusLabel }}
-                                    </span>
+                                    <div class="d-flex flex-column gap-1">
+                                        <span class="badge bg-{{ $statusClass }} status-badge">
+                                            {{ $statusLabel }}
+                                        </span>
+
+                                        @if(!empty($member->replaced_by_user_id))
+                                            <span class="badge bg-success-subtle text-success border">
+                                                Telah Digantikan
+                                            </span>
+                                        @elseif(($member->replacement_status ?? null) === 'pending_registration')
+                                            <span class="badge bg-info-subtle text-info border">
+                                                Menunggu Pendaftaran Pengganti
+                                            </span>
+                                        @elseif($isDeceased)
+                                            <span class="badge bg-warning-subtle text-warning border">
+                                                Menunggu Pengganti
+                                            </span>
+                                        @endif
+                                    </div>
                                 </td>
 
                                 <td class="text-center">
-                                    <a href="{{ route('admin.khairat.members.show', $member) }}"
-                                       class="btn btn-sm btn-outline-info action-btn"
-                                       title="Lihat">
-                                        <i class="bx bx-show"></i>
-                                    </a>
+                                    <div class="d-flex justify-content-center gap-1">
+
+                                        <a href="{{ route('admin.khairat.members.show', $member) }}"
+                                        class="btn btn-sm btn-outline-info action-btn"
+                                        title="Lihat">
+                                            <i class="bx bx-show"></i>
+                                        </a>
+
+                                        @if(
+                                            $isDeceased
+                                            && empty($member->replaced_by_user_id)
+                                            && (($member->replacement_status ?? null) !== 'pending_registration')
+                                        )
+                                            <a href="{{ route('admin.members.successor.show', $member->user_id) }}"
+                                            class="btn btn-sm btn-outline-warning action-btn"
+                                            title="Pilih Ahli Utama Baharu">
+                                                <i class="bx bx-user-plus"></i>
+                                            </a>
+                                        @endif
+
+                                        @if(!empty($member->replaced_by_user_id))
+                                            <span class="btn btn-sm btn-outline-success action-btn"
+                                                title="Telah Digantikan">
+                                                <i class="bx bx-check"></i>
+                                            </span>
+                                        @endif
+
+                                    </div>
                                 </td>
                             </tr>
                         @empty

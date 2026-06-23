@@ -202,14 +202,8 @@
 
                 <div class="stepper-item">
                     <div class="stepper-circle">3</div>
-                    <div class="stepper-title">Maklumat Waris</div>
-                    <div class="stepper-subtitle">Langkah 3</div>
-                </div>
-
-                <div class="stepper-item">
-                    <div class="stepper-circle">4</div>
                     <div class="stepper-title">Bayaran Yuran</div>
-                    <div class="stepper-subtitle">Langkah 4</div>
+                    <div class="stepper-subtitle">Langkah 3</div>
                 </div>
             </div>
         </div>
@@ -261,18 +255,6 @@
                                                           class="form-control form-control-lg @error('alamat_rumah') is-invalid @enderror"
                                                           placeholder="Sila isikan alamat rumah dengan lengkap">{{ old('alamat_rumah', session('user_profile.step2.alamat_rumah')) }}</textarea>
                                                 @error('alamat_rumah')
-                                                    <div class="invalid-feedback">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-
-                                            <div class="col-md-6">
-                                                <label class="form-label fw-semibold">No. Tel Rumah</label>
-                                                <input type="text"
-                                                       name="no_tel_rumah"
-                                                       class="form-control form-control-lg @error('no_tel_rumah') is-invalid @enderror"
-                                                       value="{{ old('no_tel_rumah', session('user_profile.step2.no_tel_rumah')) }}"
-                                                       placeholder="Contoh: 03-12345678">
-                                                @error('no_tel_rumah')
                                                     <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                             </div>

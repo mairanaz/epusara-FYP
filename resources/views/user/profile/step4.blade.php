@@ -161,18 +161,10 @@
                     <div class="stepper-subtitle">Langkah 2</div>
                 </div>
 
-                <div class="stepper-item completed">
-                    <div class="stepper-circle">
-                        <i class="bx bx-check"></i>
-                    </div>
-                    <div class="stepper-title">Maklumat Waris</div>
-                    <div class="stepper-subtitle">Langkah 3</div>
-                </div>
-
                 <div class="stepper-item active">
-                    <div class="stepper-circle">4</div>
+                    <div class="stepper-circle">3</div>
                     <div class="stepper-title">Bayaran Yuran</div>
-                    <div class="stepper-subtitle">Langkah 4</div>
+                    <div class="stepper-subtitle">Langkah 3</div>
                 </div>
             </div>
         </div>
@@ -311,7 +303,7 @@
                         </div>
 
                         <div class="px-4 px-md-5 py-3 border-top d-flex justify-content-between align-items-center">
-                            <a href="{{ route('user.profile.create.step3') }}" class="btn btn-light">
+                            <a href="{{ route('user.profile.create.step2') }}" class="btn btn-light">
                                 Kembali
                             </a>
                             <button class="btn btn-success px-4" type="submit">

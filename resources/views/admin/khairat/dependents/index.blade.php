@@ -126,54 +126,48 @@
     }
 
     .dependent-page .pagination {
-    margin-bottom: 0;
-}
+        margin-bottom: 0;
+    }
 
-.dependent-page .pagination svg {
-    width: 14px !important;
-    height: 14px !important;
-}
+    .dependent-page .pagination svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
 
-.dependent-page .pagination .page-link {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    padding: 0 12px;
-}
+    .dependent-page .pagination .page-link {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        padding: 0 12px;
+    }
 
-.dependent-page .pagination .page-item.active .page-link {
-    color: #fff;
-}
+    .dependent-page .pagination .page-item.active .page-link {
+        color: #fff;
+    }
 
-.dependent-page nav svg,
-.dependent-page .pagination svg {
-    width: 14px !important;
-    height: 14px !important;
-    max-width: 14px !important;
-    max-height: 14px !important;
-}
+    .dependent-page nav svg,
+    .dependent-page .pagination svg {
+        width: 14px !important;
+        height: 14px !important;
+        max-width: 14px !important;
+        max-height: 14px !important;
+    }
 
-.dependent-page .card-footer {
-    padding-top: 12px !important;
-}
+    .dependent-page .card-footer {
+        padding-top: 12px !important;
+    }
 
-.dependent-page .pagination {
-    margin-bottom: 0;
-}
-
-.dependent-page .hero-subtitle {
-    color: #5f6f82;
-}
-
+    .dependent-page .hero-subtitle {
+        color: #5f6f82;
+    }
 </style>
 
 @php
-
     $currentKeyword = request('search');
-    $currentRelation = request('pertalian');
+    $currentStatus = request('status');
 
     function relationBadgeClass($pertalian) {
         return match(strtolower($pertalian ?? '')) {
@@ -189,6 +183,38 @@
             'tidak' => 'bg-danger-subtle text-danger border',
             default => 'bg-light text-dark border',
         };
+    }
+
+    function lifeStatusBadgeClass($status) {
+        return match(strtolower($status ?? 'hidup')) {
+            'meninggal dunia', 'meninggal', 'meninggal_dunia', 'mati', 'deceased', 'dead'
+                => 'bg-danger-subtle text-danger border',
+            default => 'bg-success-subtle text-success border',
+        };
+    }
+
+    function lifeStatusLabel($dependent) {
+        $deathStatuses = [
+            'meninggal',
+            'meninggal_dunia',
+            'meninggal dunia',
+            'mati',
+            'deceased',
+            'dead',
+        ];
+
+        $statusTanggungan = strtolower($dependent->status_tanggungan ?? '');
+        $statusKehidupan = strtolower($dependent->status_kehidupan ?? '');
+
+        if (
+            $dependent->has_death_report ||
+            in_array($statusTanggungan, $deathStatuses) ||
+            in_array($statusKehidupan, $deathStatuses)
+        ) {
+            return 'Meninggal Dunia';
+        }
+
+        return 'Masih Hidup';
     }
 @endphp
 
@@ -211,57 +237,43 @@
 
     {{-- Statistik --}}
     <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
                         <div class="summary-label">Jumlah Tanggungan</div>
                         <div class="summary-value">{{ $totalCount }}</div>
                     </div>
-                    <div class="stats-icon bg-success-subtle text-success">
+                    <div class="stats-icon bg-info-subtle text-info">
                         <i class="bx bx-group"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Anak</div>
-                        <div class="summary-value">{{ $anakCount }}</div>
+                        <div class="summary-label">Masih Hidup</div>
+                        <div class="summary-value">{{ $hidupCount }}</div>
                     </div>
-                    <div class="stats-icon bg-primary-subtle text-primary">
-                        <i class="bx bx-child"></i>
+                    <div class="stats-icon bg-success-subtle text-success">
+                        <i class="bx bx-check-circle"></i>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
-                        <div class="summary-label">Pasangan</div>
-                        <div class="summary-value">{{ $pasanganCount }}</div>
+                        <div class="summary-label">Meninggal Dunia</div>
+                        <div class="summary-value">{{ $meninggalCount }}</div>
                     </div>
-                    <div class="stats-icon bg-warning-subtle text-warning">
-                        <i class="bx bx-heart"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-3 col-md-6">
-            <div class="card stats-card h-100">
-                <div class="card-body d-flex align-items-center justify-content-between">
-                    <div>
-                        <div class="summary-label">Lain-lain</div>
-                        <div class="summary-value">{{ $lainCount }}</div>
-                    </div>
-                    <div class="stats-icon bg-secondary-subtle text-secondary">
-                        <i class="bx bx-user"></i>
+                    <div class="stats-icon bg-danger-subtle text-danger">
+                        <i class="bx bx-x-circle"></i>
                     </div>
                 </div>
             </div>
@@ -274,7 +286,7 @@
             <div class="mb-3">
                 <h5 class="mb-1 fw-bold">Carian Tanggungan</h5>
                 <p class="text-muted mb-0">
-                    Cari berdasarkan nama tanggungan, nombor KP atau nama ahli utama.
+                    Cari berdasarkan nama tanggungan, nombor KP, nombor telefon atau nama ahli utama.
                 </p>
             </div>
 
@@ -292,12 +304,15 @@
                     </div>
 
                     <div class="col-lg-3">
-                        <label class="form-label fw-semibold">Pertalian</label>
-                        <select name="pertalian" class="form-select">
-                            <option value="">Semua Pertalian</option>
-                            <option value="anak" {{ $currentRelation == 'anak' ? 'selected' : '' }}>Anak</option>
-                            <option value="pasangan" {{ $currentRelation == 'pasangan' ? 'selected' : '' }}>Pasangan</option>
-                            <option value="lain-lain" {{ $currentRelation == 'lain-lain' ? 'selected' : '' }}>Lain-lain</option>
+                        <label class="form-label fw-semibold">Status Tanggungan</label>
+                        <select name="status" class="form-select">
+                            <option value="">Semua Status</option>
+                            <option value="hidup" {{ $currentStatus == 'hidup' ? 'selected' : '' }}>
+                                Masih Hidup
+                            </option>
+                            <option value="meninggal" {{ $currentStatus == 'meninggal' ? 'selected' : '' }}>
+                                Meninggal Dunia
+                            </option>
                         </select>
                     </div>
 
@@ -322,7 +337,9 @@
             <div class="px-4 pt-4 pb-2">
                 <h5 class="mb-1 fw-bold">Rekod Tanggungan</h5>
                 <p class="text-muted mb-0">
-                    Paparan semasa: <span class="fw-semibold">{{ $dependents->count() }}</span> tanggungan
+                    Paparan semasa:
+                    <span class="fw-semibold">{{ $dependents->count() }}</span>
+                    tanggungan
                 </p>
             </div>
 
@@ -336,13 +353,16 @@
                             <th>Pertalian</th>
                             <th>Pasangan</th>
                             <th>No. Telefon</th>
+                            <th>Status</th>
                             <th>Ahli Utama</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @forelse($dependents as $index => $dependent)
                             @php
                                 $initial = strtoupper(substr($dependent->name ?? 'A', 0, 1));
+                                $statusLabel = lifeStatusLabel($dependent);
                             @endphp
 
                             <tr>
@@ -371,7 +391,6 @@
                                             $mm = substr($dependent->no_kp, 2, 2);
                                             $dd = substr($dependent->no_kp, 4, 2);
 
-                                            $currentYear = now()->year;
                                             $currentYY = (int) now()->format('y');
 
                                             $year = ((int) $yy <= $currentYY)
@@ -402,7 +421,15 @@
                                     </span>
                                 </td>
 
-                                <td>{{ $dependent->no_tel ?? '-' }}</td>
+                                <td>
+                                    {{ $dependent->no_tel ?? '-' }}
+                                </td>
+
+                                <td>
+                                    <span class="custom-badge {{ lifeStatusBadgeClass($statusLabel) }}">
+                                        {{ $statusLabel }}
+                                    </span>
+                                </td>
 
                                 <td>
                                     <div class="fw-semibold">{{ $dependent->user->name ?? '-' }}</div>
@@ -414,7 +441,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7">
+                                <td colspan="8">
                                     <div class="empty-state">
                                         <i class="bx bx-folder-open fs-1 mb-2 d-block"></i>
                                         Tiada tanggungan dijumpai.

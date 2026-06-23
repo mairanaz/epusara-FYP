@@ -108,6 +108,240 @@
             color: #495057;
             background: #f8f9fa;
         }
+
+        .status-hero {
+            position: relative;
+            overflow: hidden;
+            border-radius: 18px;
+            padding: 22px;
+            border: 1px solid #f6c343;
+            background: linear-gradient(135deg, #fff7df 0%, #ffffff 65%);
+            box-shadow: 0 10px 28px rgba(245, 158, 11, 0.18);
+        }
+
+        .status-hero::before {
+            content: "";
+            position: absolute;
+            top: -45px;
+            right: -45px;
+            width: 150px;
+            height: 150px;
+            background: rgba(245, 158, 11, 0.15);
+            border-radius: 50%;
+        }
+
+        .status-icon {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            background: #f59e0b;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            flex-shrink: 0;
+            box-shadow: 0 8px 18px rgba(245, 158, 11, 0.35);
+        }
+
+        .status-title {
+            font-size: 18px;
+            font-weight: 800;
+            color: #92400e;
+            margin-bottom: 4px;
+        }
+
+        .status-desc {
+            color: #6b7280;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            background: #fffbeb;
+            color: #92400e;
+            border: 1px solid #fcd34d;
+            border-radius: 999px;
+            padding: 7px 13px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            background: #f59e0b;
+            border-radius: 50%;
+            box-shadow: 0 0 0 5px rgba(245, 158, 11, 0.18);
+        }
+
+        .review-steps {
+            display: flex;
+            gap: 12px;
+            margin-top: 18px;
+            flex-wrap: wrap;
+        }
+
+        .review-step {
+            flex: 1;
+            min-width: 160px;
+            background: rgba(255,255,255,0.75);
+            border: 1px solid #fde68a;
+            border-radius: 14px;
+            padding: 12px 14px;
+        }
+
+        .review-step .step-no {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            background: #f59e0b;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .review-step .step-title {
+            font-weight: 700;
+            color: #78350f;
+            font-size: 14px;
+        }
+
+        .review-step .step-text {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 3px;
+        }
+
+        .application-status-card {
+            border: 1px solid #e5e7eb;
+            border-left: 5px solid #0d6efd;
+            border-radius: 14px;
+            background: #ffffff;
+            padding: 20px;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+        }
+
+        .status-main {
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+        }
+
+        .status-main-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: #eef4ff;
+            color: #0d6efd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+
+        .status-main-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .status-main-desc {
+            font-size: 14px;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+
+        .status-badge-soft {
+            background: #eef4ff;
+            color: #0d6efd;
+            border: 1px solid #cfe2ff;
+            padding: 7px 12px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .status-progress-mini {
+            margin-top: 18px;
+            padding-top: 15px;
+            border-top: 1px solid #f1f3f5;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #6b7280;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .progress-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #0d6efd;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        .progress-line {
+            width: 38px;
+            height: 1px;
+            background: #d1d5db;
+        }
+
+        .application-status-card.is-approved {
+            border-left-color: #10b981;
+        }
+
+        .application-status-card.is-approved .status-main-icon {
+            background: #ecfdf5;
+            color: #10b981;
+        }
+
+        .application-status-card.is-approved .status-badge-soft {
+            background: #ecfdf5;
+            color: #047857;
+            border-color: #a7f3d0;
+        }
+
+        .application-status-card.is-approved .progress-circle {
+            background: #10b981;
+        }
+
+        .status-action-box {
+            background: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 12px 14px;
+            min-width: 210px;
+        }
+
+        .status-action-title {
+            font-size: 13px;
+            color: #6b7280;
+            margin-bottom: 8px;
+        }
+
     </style>
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
@@ -129,19 +363,7 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm" role="alert">
-            {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
-    @if(session('error'))
-        <div class="alert alert-danger alert-dismissible fade show border-0 shadow-sm" role="alert">
-            {{ session('error') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
 
     <div class="profile-summary section-spacing" id="tour-profile-summary">
         <div class="row align-items-center g-3">
@@ -167,37 +389,169 @@
     </div>
 
     @if($status === 'pending')
-        <div class="status-box section-spacing" id="tour-profile-status">
-            <div class="fw-semibold mb-1">Permohonan Sedang Disemak</div>
-            <div class="text-muted">
-                Permohonan keahlian anda telah dihantar dan sedang menunggu semakan pihak pentadbiran.
-                @unless($isDependent)
-                    Bayaran yuran hanya boleh dibuat selepas permohonan diluluskan.
-                @endunless
-            </div>
-        </div>
-    @elseif($status === 'approved')
-        @if($isDependent)
-            <div class="status-box section-spacing d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3"
-     id="tour-profile-status">
-                <div class="fw-semibold mb-1">Permohonan Diluluskan</div>
-                <div class="text-muted">
-                    Maklumat anda telah disahkan oleh pihak pentadbiran.
+    <div class="application-status-card section-spacing" id="tour-profile-status">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+            <div class="status-main">
+                <div class="status-main-icon">
+                    <i class="ri-time-line"></i>
                 </div>
-            </div>
-        @else
-            <div class="status-box section-spacing d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+
                 <div>
-                    <div class="fw-semibold mb-1">Permohonan Diluluskan</div>
-                    <div class="text-muted">
-                        Permohonan anda telah diluluskan. Sila teruskan dengan bayaran yuran untuk pengaktifan keahlian.
+                    <div class="status-main-title">
+                        Permohonan Sedang Disemak
+                    </div>
+
+                    <div class="status-main-desc">
+                        Permohonan keahlian anda telah dihantar dan sedang menunggu semakan pihak pentadbiran.
+                        @unless($isDependent)
+                            Bayaran yuran hanya boleh dibuat selepas permohonan diluluskan.
+                        @endunless
                     </div>
                 </div>
-                <a href="{{ route('user.payments.create') }}" class="btn btn-success">
-                    Bayar Yuran
-                </a>
             </div>
-        @endif
+
+            <div class="text-md-end">
+                <div class="status-badge-soft">
+                    Menunggu Semakan
+                </div>
+
+                <div class="small text-muted mt-2">
+                    Tarikh permohonan:
+                    <strong>
+                        {{ $profile->tarikh_permohonan ? \Carbon\Carbon::parse($profile->tarikh_permohonan)->format('d/m/Y') : '-' }}
+                    </strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="status-progress-mini">
+            <div class="progress-item">
+                <span class="progress-circle">1</span>
+                Dihantar
+            </div>
+
+            <div class="progress-line"></div>
+
+            <div class="progress-item">
+                <span class="progress-circle">2</span>
+                Dalam Semakan
+            </div>
+
+            <div class="progress-line"></div>
+
+            <div class="progress-item">
+                <span class="progress-circle" style="background:#d1d5db;">3</span>
+                Keputusan
+            </div>
+        </div>
+    </div>
+    @elseif($status === 'approved')
+    @if($isDependent)
+        <div class="application-status-card is-approved section-spacing" id="tour-profile-status">
+            <div class="d-flex flex-column flex-md-row justify-content-between gap-3">
+                <div class="status-main">
+                    <div class="status-main-icon">
+                        <i class="ri-checkbox-circle-line"></i>
+                    </div>
+
+                    <div>
+                        <div class="status-main-title">
+                            Permohonan Diluluskan
+                        </div>
+
+                        <div class="status-main-desc">
+                            Maklumat anda telah disahkan oleh pihak pentadbiran. Akaun tanggungan anda kini telah direkodkan dalam sistem.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-md-end">
+                    <div class="status-badge-soft">
+                        Diluluskan
+                    </div>
+
+                    <div class="small text-muted mt-2">
+                        Tarikh permohonan:
+                        <strong>
+                            {{ $profile->tarikh_permohonan ? \Carbon\Carbon::parse($profile->tarikh_permohonan)->format('d/m/Y') : '-' }}
+                        </strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="status-progress-mini">
+                <div class="progress-item">
+                    <span class="progress-circle">1</span>
+                    Dihantar
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-item">
+                    <span class="progress-circle">2</span>
+                    Disemak
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-item">
+                    <span class="progress-circle">3</span>
+                    Diluluskan
+                </div>
+            </div>
+        </div>
+    @else
+        <div class="application-status-card is-approved section-spacing" id="tour-profile-status">
+            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+                <div class="status-main">
+                    <div class="status-main-icon">
+                        <i class="ri-checkbox-circle-line"></i>
+                    </div>
+
+                    <div>
+                        <div class="status-main-title">
+                            Permohonan Diluluskan
+                        </div>
+
+                        <div class="status-main-desc">
+                            Permohonan anda telah diluluskan. Sila teruskan bayaran yuran untuk mengaktifkan keahlian.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="status-action-box text-md-end">
+                    <div class="status-action-title">
+                        Tindakan diperlukan
+                    </div>
+
+                    <a href="{{ route('user.payments.create') }}" class="btn btn-success">
+                        Bayar Yuran
+                    </a>
+                </div>
+            </div>
+
+            <div class="status-progress-mini">
+                <div class="progress-item">
+                    <span class="progress-circle">1</span>
+                    Dihantar
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-item">
+                    <span class="progress-circle">2</span>
+                    Disemak
+                </div>
+
+                <div class="progress-line"></div>
+
+                <div class="progress-item">
+                    <span class="progress-circle">3</span>
+                    Diluluskan
+                </div>
+            </div>
+        </div>
+    @endif
     @elseif($status === 'rejected')
         <div class="status-box section-spacing" id="tour-profile-status">
             <div class="fw-semibold mb-1 text-danger">Permohonan Ditolak</div>
@@ -309,38 +663,10 @@
             </div>
         </div>
 
-        @unless($isDependent)
-        <div class="col-12">
-            <div class="formal-card" id="tour-profile-heir">
-                <div class="formal-header">E. Maklumat Waris</div>
-                <div class="formal-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered table-summary mb-0">
-                            <tbody>
-                                <tr>
-                                    <td>Nama Waris</td>
-                                    <td>{{ $profile->nama_waris ?? '-' }}</td>
-                                    <td>Hubungan Waris</td>
-                                    <td>{{ $profile->hubungan_waris ?? '-' }}</td>
-                                </tr>
-                                <tr>
-                                    <td>No. Tel Waris</td>
-                                    <td>{{ $profile->no_tel_waris ?? '-' }}</td>
-                                    <td>Alamat Waris</td>
-                                    <td>{{ $profile->alamat_waris ?? '-' }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        @endunless
-
         <div class="col-12">
             <div class="formal-card" id="tour-profile-application">
                 <div class="formal-header">
-                    {{ $isDependent ? 'E. Maklumat Permohonan' : 'F. Maklumat Permohonan' }}
+                    E. Maklumat Permohonan
                 </div>
                 <div class="formal-body">
                     <div class="table-responsive">
@@ -370,7 +696,7 @@
         @unless($isDependent)
         <div class="col-12">
             <div class="formal-card" id="tour-profile-payment">
-                <div class="formal-header">G. Maklumat Bayaran</div>
+                <div class="formal-header">F. Maklumat Bayaran</div>
                 <div class="formal-body">
                     <div class="table-responsive">
                         <table class="table table-bordered table-summary mb-0">
@@ -473,7 +799,7 @@
                     element: '#tour-profile-personal',
                     popover: {
                         title: 'Maklumat Peribadi',
-                        description: 'Semak maklumat asas anda seperti nama, nombor MyKad, tarikh lahir, jantina, agama dan kewarganegaraan.',
+                        description: 'Semak maklumat asas anda seperti nama, nombor MyKad, tarikh lahir, jantina dan agama.',
                         side: 'right',
                         align: 'start'
                     }
@@ -505,15 +831,7 @@
                         align: 'start'
                     }
                 },
-                {
-                    element: '#tour-profile-heir',
-                    popover: {
-                        title: 'Maklumat Waris',
-                        description: 'Maklumat waris digunakan bagi tujuan urusan khairat dan untuk dihubungi oleh pihak pentadbiran apabila diperlukan.',
-                        side: 'top',
-                        align: 'center'
-                    }
-                },
+            
                 {
                     element: '#tour-profile-application',
                     popover: {
@@ -582,8 +900,6 @@
 
                 steps: availableSteps
             });
-
-            profileTour.drive();
 
             profileTour.drive();
         });

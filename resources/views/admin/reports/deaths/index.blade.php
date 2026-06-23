@@ -156,6 +156,39 @@
         font-weight: 800;
     }
 
+    /* Jadual Ringkasan Ahli Mengikut Status - border lebih jelas */
+    .death-report-page .summary-status-table {
+        border: 1.5px solid #cbd5e1 !important;
+        border-collapse: collapse !important;
+    }
+
+    .death-report-page .summary-status-table th,
+    .death-report-page .summary-status-table td {
+        border: 1.3px solid #cbd5e1 !important;
+        padding: 16px 14px;
+    }
+
+    .death-report-page .summary-status-table thead th {
+        background: #f1f5f9 !important;
+        color: #172554;
+        font-weight: 800;
+    }
+
+    .death-report-page .summary-status-table tbody td {
+        background: #ffffff;
+        color: #111827;
+    }
+
+    .death-report-page .summary-status-table tbody tr:hover td {
+        background: #eef6ff !important;
+    }
+
+    .death-report-page .summary-status-table .total-row td {
+        background: #f1f5f9 !important;
+        font-weight: 800;
+        border-top: 2px solid #94a3b8 !important;
+    }
+
     @media (max-width: 576px) {
         .death-report-page .summary-value {
             font-size: 20px;
@@ -363,114 +396,79 @@
         </div>
     </div>
 
-    {{-- Filter --}}
-    <div class="card filter-card mb-4">
-        <div class="card-body p-4">
-            <div class="mb-3">
-                <h5 class="mb-1 fw-bold">Jana Laporan</h5>
+    {{-- Ringkasan Ahli Mengikut Status --}}
+    <div class="card table-card mb-4">
+        <div class="card-body p-0">
+            <div class="px-4 pt-4 pb-2">
+                <h5 class="mb-1 fw-bold">Ringkasan Ahli Mengikut Status</h5>
                 <p class="text-muted mb-0">
-                    Pilih tapisan untuk lihat laporan kematian mengikut tahun, bulan, jenis ahli dan jantina.
+                    Ringkasan jumlah ahli utama dan tanggungan mengikut status kehidupan serta jantina.
                 </p>
             </div>
 
-            <form method="GET" action="{{ route('admin.reports.deaths.index') }}">
-                <div class="row g-3 align-items-end">
-                    <div class="col-xl-2 col-md-6">
-                        <label class="form-label fw-semibold">Tahun</label>
-                        <select name="year" class="form-select">
-                            @foreach($years as $availableYear)
-                                <option value="{{ $availableYear }}" {{ (int) $year === (int) $availableYear ? 'selected' : '' }}>
-                                    {{ $availableYear }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+            <div class="table-responsive px-3 pb-3">
+                <table class="table table-bordered align-middle text-center mb-0 summary-status-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" class="align-middle text-start">Jenis Ahli</th>
+                            <th colspan="3">Masih Hidup</th>
+                            <th colspan="3">Meninggal Dunia</th>
+                            <th rowspan="2" class="align-middle">Jumlah Ahli</th>
+                        </tr>
+                        <tr>
+                            <th>Lelaki</th>
+                            <th>Perempuan</th>
+                            <th>Jumlah</th>
 
-                    <div class="col-xl-2 col-md-6">
-                        <label class="form-label fw-semibold">Bulan</label>
-                        <select name="month" class="form-select">
-                            <option value="">Semua Bulan</option>
-                            @foreach($monthOptions as $monthNo => $monthName)
-                                <option value="{{ $monthNo }}" {{ (string) $month === (string) $monthNo ? 'selected' : '' }}>
-                                    {{ $monthName }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
+                            <th>Lelaki</th>
+                            <th>Perempuan</th>
+                            <th>Jumlah</th>
+                        </tr>
+                    </thead>
 
-                    <div class="col-xl-2 col-md-6">
-                        <label class="form-label fw-semibold">Jenis Ahli</label>
-                        <select name="member_type" class="form-select">
-                            <option value="">Semua</option>
-                            <option value="utama" {{ ($memberType ?? '') === 'utama' ? 'selected' : '' }}>Ahli Utama</option>
-                            <option value="tanggungan" {{ ($memberType ?? '') === 'tanggungan' ? 'selected' : '' }}>Tanggungan</option>
-                        </select>
-                    </div>
+                    <tbody>
+                        @forelse($summaryTable ?? [] as $row)
+                            <tr class="{{ ($row['jenis'] ?? '') === 'Jumlah' ? 'total-row' : '' }}">
+                                <td class="text-start fw-semibold">
+                                    {{ $row['jenis'] ?? '-' }}
+                                </td>
 
-                    <div class="col-xl-2 col-md-6">
-                        <label class="form-label fw-semibold">Jantina</label>
-                        <select name="gender" class="form-select">
-                            <option value="">Semua</option>
-                            <option value="lelaki" {{ ($gender ?? '') === 'lelaki' ? 'selected' : '' }}>Lelaki</option>
-                            <option value="perempuan" {{ ($gender ?? '') === 'perempuan' ? 'selected' : '' }}>Perempuan</option>
-                        </select>
-                    </div>
+                                <td>{{ $row['hidup_lelaki'] ?? 0 }}</td>
+                                <td>{{ $row['hidup_perempuan'] ?? 0 }}</td>
+                                <td class="fw-semibold">{{ $row['jumlah_hidup'] ?? 0 }}</td>
 
-                    <div class="col-xl-4 col-md-12">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-info btn-wave w-100">
-                                <i class="bx bx-search me-1"></i> Jana
-                            </button>
+                                <td>{{ $row['meninggal_lelaki'] ?? 0 }}</td>
+                                <td>{{ $row['meninggal_perempuan'] ?? 0 }}</td>
+                                <td class="fw-semibold">{{ $row['jumlah_meninggal'] ?? 0 }}</td>
 
-                            <a href="{{ route('admin.reports.deaths.index') }}" class="btn btn-outline-info w-100">
-                                Reset
-                            </a>
-
-                            <a href="{{ route('admin.reports.deaths.index', array_merge(request()->query(), ['export' => 'excel'])) }}"
-                               class="btn btn-success w-100">
-                                <i class="bx bx-file"></i> Excel
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
-            <div class="report-note mt-4">
-                <strong>Tapisan semasa:</strong>
-                Tahun {{ $year }},
-                {{ $selectedMonthName }},
-                {{ $selectedMemberTypeName }},
-                {{ $selectedGenderName }}.
+                                <td class="fw-bold">{{ $row['jumlah_ahli'] ?? 0 }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8">
+                                    <div class="empty-state">
+                                        <i class="bx bx-folder-open fs-1 mb-2 d-block"></i>
+                                        Tiada data ringkasan ahli dijumpai.
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
-        </div>
-    </div>
 
-    {{-- Charts --}}
-    <div class="row g-3 mb-4">
-        <div class="col-xl-8">
-            <div class="card chart-card h-100">
-                <div class="card-body p-4">
-                    <h5 class="mb-1 fw-bold">Graf Kematian Mengikut Bulan</h5>
-                    <p class="text-muted mb-3">
-                        Jumlah kematian bagi setiap bulan dalam tahun {{ $year }}.
-                    </p>
-                    <div id="monthlyDeathChart" class="chart-box"></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-4">
-            <div class="card chart-card h-100">
-                <div class="card-body p-4">
-                    <h5 class="mb-1 fw-bold">Pecahan Status Ahli</h5>
-                    <p class="text-muted mb-3">
-                        Perbandingan ahli masih hidup dan meninggal dunia.
-                    </p>
-                    <div id="lifeStatusChart" class="chart-box"></div>
+            <div class="px-4 pb-4">
+                <div class="report-note">
+                    <strong>Nota:</strong>
+                    Jadual ini memaparkan jumlah ahli utama dan tanggungan yang masih hidup atau telah meninggal dunia
+                    berdasarkan rekod status kehidupan dalam sistem.
                 </div>
             </div>
         </div>
     </div>
+
+   
+
 
     {{-- Ringkasan Bulanan --}}
     <div class="card table-card mb-4">

@@ -206,6 +206,54 @@
         }
 
         $memberName = auth()->user()->name ?? '-';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Status keahlian semasa
+        |--------------------------------------------------------------------------
+        | Nilai ini dihantar oleh PaymentController daripada semua bayaran berjaya.
+        */
+        $membershipStatus = $membership['membership_status'] ?? 'Tidak Aktif';
+        $membershipStatusClass = $membership['membership_status_class'] ?? 'danger';
+        $membershipValidUntilLabel = $membership['valid_until_label'] ?? '-';
+        $membershipNextDueLabel = $membership['next_due_label'] ?? '-';
+
+        /*
+        |--------------------------------------------------------------------------
+        | Sah sehingga untuk transaksi pada resit ini
+        |--------------------------------------------------------------------------
+        */
+        $receiptValidUntilLabel = '-';
+
+        if (strtolower($payment->status) === 'paid') {
+            if ($payment->payment_plan === 'monthly') {
+                $lastMonthlyItem = $payment->items
+                    ->where('payment_type', 'monthly')
+                    ->sortByDesc('payment_period')
+                    ->first();
+
+                if ($lastMonthlyItem && $lastMonthlyItem->payment_period) {
+                    try {
+                        $receiptValidUntilLabel = \Carbon\Carbon::createFromFormat(
+                            'Y-m',
+                            $lastMonthlyItem->payment_period
+                        )->translatedFormat('F Y');
+                    } catch (\Throwable $e) {
+                        $receiptValidUntilLabel = $lastMonthlyItem->payment_period;
+                    }
+                }
+            } elseif ($payment->payment_plan === 'yearly') {
+                $yearlyItem = $payment->items
+                    ->where('payment_type', 'yearly')
+                    ->sortByDesc('cycle_end')
+                    ->first();
+
+                if ($yearlyItem && $yearlyItem->cycle_end) {
+                    $receiptValidUntilLabel = \Carbon\Carbon::parse($yearlyItem->cycle_end)
+                        ->translatedFormat('F Y');
+                }
+            }
+        }
     @endphp
 
     <div class="receipt-card">
@@ -259,6 +307,20 @@
                             <div class="col-md-6">
                                 <div class="receipt-label">Tempoh Bayaran</div>
                                 <div class="receipt-value">{{ $periodLabel }}</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="receipt-label">Bayaran Sah Sehingga</div>
+                                <div class="receipt-value text-success">{{ $receiptValidUntilLabel }}</div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <div class="receipt-label">Status Keahlian Semasa</div>
+                                <div class="receipt-value">
+                                    <span class="badge bg-{{ $membershipStatusClass }}">
+                                        {{ $membershipStatus }}
+                                    </span>
+                                </div>
                             </div>
 
                             <div class="col-md-6">
@@ -386,6 +448,22 @@
                             <tr>
                                 <th>Tempoh</th>
                                 <td>{{ $periodLabel }}</td>
+                            </tr>
+                            <tr>
+                                <th>Bayaran Sah Sehingga</th>
+                                <td class="fw-bold text-success">{{ $receiptValidUntilLabel }}</td>
+                            </tr>
+                            <tr>
+                                <th>Bayaran Seterusnya</th>
+                                <td>{{ $membershipNextDueLabel }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status Keahlian Semasa</th>
+                                <td>
+                                    <span class="badge bg-{{ $membershipStatusClass }}">
+                                        {{ $membershipStatus }}
+                                    </span>
+                                </td>
                             </tr>
                             <tr>
                                 <th>Jumlah</th>

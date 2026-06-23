@@ -53,6 +53,14 @@ class DeathReportController extends Controller
             ->toArray();
 
         $dependents = Dependent::where('user_id', $familyUserId)
+            ->where(function ($query) {
+                $query->where('status_tanggungan', 'aktif')
+                    ->orWhereNull('status_tanggungan');
+            })
+            ->where(function ($query) {
+                $query->whereNull('status_kehidupan')
+                    ->orWhereIn('status_kehidupan', ['aktif', 'hidup', 'active']);
+            })
             ->whereNotIn('no_kp', $reportedNoKps)
             ->get();
 
@@ -263,7 +271,15 @@ class DeathReportController extends Controller
             $data['umur'] = $this->getAgeFromIc($mainProfile->no_kp, $validated['tarikh_meninggal']);
         } else {
             $dependentQuery = Dependent::where('user_id', $familyUserId)
-                ->where('id', $validated['deceased_id']);
+                ->where('id', $validated['deceased_id'])
+                ->where(function ($query) {
+                    $query->where('status_tanggungan', 'aktif')
+                        ->orWhereNull('status_tanggungan');
+                })
+                ->where(function ($query) {
+                    $query->whereNull('status_kehidupan')
+                        ->orWhereIn('status_kehidupan', ['aktif', 'hidup', 'active']);
+                });
 
             if (!$isMainMember && $loggedDependent) {
                 $dependentQuery->where('id', '!=', $loggedDependent->id);
@@ -273,7 +289,7 @@ class DeathReportController extends Controller
 
             if (!$dependent) {
                 return back()->withErrors([
-                    'deceased_id' => 'Pilihan tanggungan tidak sah.'
+                    'deceased_id' => 'Pilihan tanggungan tidak sah atau tanggungan tidak layak.'
                 ])->withInput();
             }
 
