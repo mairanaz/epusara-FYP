@@ -1,66 +1,131 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# ePusara – Khairat Kematian Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A web-based cemetery, death welfare and khairat membership management system developed as a Final Year Project.
 
-## About Laravel
+The system was designed to assist mosque administrators in managing member registrations, dependants, membership payments, death reports and cemetery-related records in a more systematic and efficient manner.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Project Overview
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+ePusara digitalises the management process of Khairat Kematian for Masjid RTB Ar-Rahmah. It provides separate interfaces and functions for administrators, primary members and registered dependants.
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The system aims to reduce manual record management, improve data accuracy and make information easier to access.
 
-## Learning Laravel
+## Key Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- User registration and authentication
+- Primary member and dependant account management
+- Membership application and verification
+- Membership fee and payment record management
+- Death reporting with supporting document uploads
+- Administrator verification of death reports
+- Cemetery lot assignment and burial information
+- Member and dependant search and filtering
+- Role-based dashboards
+- Public grave search and grave information
+- Responsive interface for desktop and mobile devices
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## System Users and Access Levels
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Administrator
 
-## Laravel Sponsors
+- Manage membership applications
+- View registered members and dependants
+- Verify membership payments
+- Review and verify death reports
+- Assign cemetery lots
+- Manage burial records
+- Monitor system information through the administrator dashboard
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Primary Member
 
-### Premium Partners
+- Complete and update personal profile
+- Register and manage dependants
+- Select a membership payment plan
+- View payment records
+- Submit death reports
+- Access cemetery-related information
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+### Dependant
 
-## Contributing
+- Complete and update personal profile
+- View account information
+- Submit death reports
+- Access relevant cemetery information
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Public User (Guest)
 
-## Code of Conduct
+- Access the public homepage without logging in
+- Search for deceased persons and grave information
+- View cemetery location and grave details
+- Access grave visitation guidance
+- Submit an initial death report
+- Contact the administrator through WhatsApp or phone
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Technologies Used
 
-## Security Vulnerabilities
+- Laravel 10
+- PHP
+- MySQL
+- Laravel Breeze
+- Blade Template Engine
+- HTML
+- CSS
+- Bootstrap
+- Tailwind CSS
+- JavaScript
+- Git and GitHub
+- Vite
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## Main Modules
 
-## License
+1. Authentication and User Management
+2. Member Profile Management
+3. Dependant Management
+4. Membership Application Management
+5. Payment Management
+6. Death Report Management
+7. Cemetery Lot Management
+8. Public Grave Search
+9. Administrator Dashboard
+10. User Dashboard
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Databases
+
+The system uses a relational MySQL database with several main entities:
+
+- Users
+- User Profiles
+- Dependants
+- Payments
+- Death Reports
+- Cemetery and Burial Records
+
+The database structure includes primary keys, foreign keys and relationships between members, dependants, payments and death reports.
+
+## My Contributions
+
+As the developer of this project, I was responsible for:
+
+- Analysing system requirements
+- Designing the database structure and ERD
+- Developing Laravel routes, controllers and models
+- Implementing CRUD operations
+- Developing role-based access and dashboards
+- Creating and managing MySQL database relationships
+- Implementing form validation
+- Conducting system testing and bug fixing
+- Improving the user interface and responsive design
+- Managing source code using Git and GitHub
+- Preparing technical documentation
+
+## Installation
+
+### Requirements
+
+Ensure the following software is installed:
+
+- PHP 8.1 or later
+- Composer
+- MySQL
+- Node.js and npm
+
