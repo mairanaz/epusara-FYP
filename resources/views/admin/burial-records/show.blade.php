@@ -115,7 +115,7 @@
 
                         <div class="col-md-6">
                             <div class="text-muted small">Kod Lot</div>
-                            <span class="badge bg-primary fs-6">
+                            <span class="badge bg-info fs-6">
                                 {{ $plot->plot_code }}
                             </span>
                         </div>
@@ -251,7 +251,7 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary rounded-pill">
+                            <button type="submit" class="btn btn-info rounded-pill">
                                 <i class="bx bx-upload me-1"></i> Simpan Gambar Kubur
                             </button>
                         </form>

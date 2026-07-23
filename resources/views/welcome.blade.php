@@ -629,11 +629,11 @@
                                 </span>
 
                                 <h4 class="font-bold text-white text-lg">
-                                    Bayaran Khairat
+                                    Carian Pusara
                                 </h4>
 
                                 <p class="text-xs text-white/75 mt-1">
-                                    Semakan status dan rekod bayaran ahli.
+                                    Melihat lokasi pusara
                                 </p>
                             </div>
                         </div>
@@ -652,11 +652,11 @@
                                 </span>
 
                                 <h4 class="font-bold text-white text-lg">
-                                    Laporan Kematian
+                                    Maklumat Ahli
                                 </h4>
 
                                 <p class="text-xs text-white/75 mt-1">
-                                    Penghantaran maklumat untuk tindakan pentadbir.
+                                    Maklumat profil ahli dan status permohonan keahlian.
                                 </p>
                             </div>
                         </div>
@@ -704,30 +704,11 @@
 
                     <span class="hidden sm:inline-flex items-center gap-2 bg-brand-50 text-brand-700 rounded-full px-4 py-2 text-xs font-bold">
                         <i class="fa-solid fa-images"></i>
-                        5 Paparan
+                        4 Paparan
                     </span>
                 </div>
 
                 <div class="grid md:grid-cols-2 gap-6">
-
-                    {{-- Laptop Featured --}}
-                    <article class="md:col-span-2 group">
-                        <div class="rounded-[28px] bg-sand-50 border border-sand-100 p-4 md:p-6 shadow-card group-hover:-translate-y-1 transition duration-300">
-                            <img src="{{ asset('assets/images/screenshots/laptop-1.jpeg') }}"
-                                alt="Paparan laptop Dashboard e-Pusara"
-                                class="w-full h-auto object-contain rounded-2xl">
-                        </div>
-
-                        <div class="mt-4">
-                            <h4 class="font-bold text-lg text-slate-900">
-                                Dashboard Pengurusan ePusara RTB Bukit Changgang
-                            </h4>
-
-                            <p class="text-sm text-slate-500 mt-1">
-                                Paparan utama bagi melihat fungsi sistem dan rekod penting dengan lebih menyeluruh.
-                            </p>
-                        </div>
-                    </article>
 
                     {{-- Laptop 2 --}}
                     <article class="group">
@@ -738,11 +719,11 @@
                         </div>
 
                         <h4 class="font-bold text-slate-900 mt-4">
-                            Pengurusan Ahli
+                            Bayaran Yuran
                         </h4>
 
                         <p class="text-xs text-slate-500 mt-1">
-                            Rekod ahli dan tanggungan secara tersusun.
+                            Pemantauan bayaran dan resit transaksi.
                         </p>
                     </article>
 
@@ -755,11 +736,11 @@
                         </div>
 
                         <h4 class="font-bold text-slate-900 mt-4">
-                            Bayaran Khairat
+                            Laporan Kematian
                         </h4>
 
                         <p class="text-xs text-slate-500 mt-1">
-                            Pemantauan bayaran dan resit transaksi.
+                            Proses melaporkan kematian si mati.
                         </p>
                     </article>
 
@@ -772,11 +753,11 @@
                         </div>
 
                         <h4 class="font-bold text-slate-900 mt-4">
-                            Laporan Kematian
+                            Lokasi Kubur
                         </h4>
 
                         <p class="text-xs text-slate-500 mt-1">
-                            Proses semakan dan tindakan pentadbir.
+                            Paparan pelan kawasan perkuburan dan panduan kedudukan pusara.
                         </p>
                     </article>
 
@@ -789,11 +770,11 @@
                         </div>
 
                         <h4 class="font-bold text-slate-900 mt-4">
-                            Lokasi Pusara
+                            Tempahan Kepukan
                         </h4>
 
                         <p class="text-xs text-slate-500 mt-1">
-                            Paparan peta dan panduan kedudukan pusara.
+                            paparan tempahan kepukan dan batu nisan.
                         </p>
                     </article>
 

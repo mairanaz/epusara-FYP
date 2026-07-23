@@ -4,6 +4,10 @@
 <div class="container-fluid">
 
     @php
+
+    $isRtbBurial = $deathReport->lokasi_pengkebumian === 'rtb';
+    $isOutsideRtbBurial = $deathReport->lokasi_pengkebumian === 'luar_rtb';
+
         $statusMap = [
             'menunggu_semakan' => ['label' => 'Menunggu Semakan', 'class' => 'warning'],
             'disahkan' => ['label' => 'Disahkan', 'class' => 'success'],
@@ -87,6 +91,20 @@
                     title: 'Berjaya',
                     text: @json(session('success')),
                     confirmButtonText: 'OK'
+                });
+            });
+        </script>
+    @endif
+
+    @if(session('error'))
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Tidak Dibenarkan',
+                    text: @json(session('error')),
+                    confirmButtonText: 'Tutup'
                 });
             });
         </script>
@@ -566,40 +584,52 @@
                             </small>
                         </div>
 
-                        <div id="burialFields">
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">No Lot Kubur</label>
-                                <div class="input-group">
-                                    <input type="text"
-                                        name="burial_lot_no"
-                                        id="burial_lot_no"
-                                        class="form-control"
-                                        value="{{ old('burial_lot_no', $deathReport->burial_lot_no) }}"
-                                        readonly>
+                        @if($isRtbBurial)
+                            <div id="burialFields">
+                                <div class="alert alert-info">
+                                    Laporan ini memilih pengkebumian di Tanah Perkuburan RTB. Admin perlu memilih lot kubur sebelum laporan disahkan.
+                                </div>
 
-                                    @if(!$deathReport->burial_lot_no)
-                                        <a href="{{ route('admin.death-reports.select-plot', $deathReport->id) }}"
-                                        class="btn btn-outline-info">
-                                            Pilih Lot
-                                        </a>
-                                    @else
-                                        <button type="button" class="btn btn-success" disabled>
-                                            Lot Telah Dipilih
-                                        </button>
-                                    @endif
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">No Lot Kubur</label>
+                                    <div class="input-group">
+                                        <input type="text"
+                                            name="burial_lot_no"
+                                            id="burial_lot_no"
+                                            class="form-control"
+                                            value="{{ old('burial_lot_no', $deathReport->burial_lot_no) }}"
+                                            readonly>
+
+                                        @if(!$deathReport->burial_lot_no)
+                                            <a href="{{ route('admin.death-reports.select-plot', $deathReport->id) }}"
+                                            class="btn btn-outline-info">
+                                                Pilih Lot
+                                            </a>
+                                        @else
+                                            <button type="button" class="btn btn-success" disabled>
+                                                Lot Telah Dipilih
+                                            </button>
+                                        @endif
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">Tarikh Kebumi</label>
+                                    <input type="date"
+                                        name="burial_date"
+                                        id="burial_date"
+                                        class="form-control"
+                                        value="{{ old('burial_date', optional($deathReport->burial_date)->format('Y-m-d')) }}"
+                                        readonly>
                                 </div>
                             </div>
-
-                            <div class="mb-3">
-                                <label class="form-label fw-semibold">Tarikh Kebumi</label>
-                                <input type="date"
-                                    name="burial_date"
-                                    id="burial_date"
-                                    class="form-control"
-                                    value="{{ old('burial_date', optional($deathReport->burial_date)->format('Y-m-d')) }}"
-                                    readonly>
+                        @elseif($isOutsideRtbBurial)
+                            <div class="alert alert-secondary">
+                                <div class="fw-semibold mb-1">Pengkebumian Luar Kawasan RTB</div>
+                                Jenazah akan dikebumikan di luar kawasan RTB Bukit Changgang. 
+                                Admin tidak perlu memilih lot kubur untuk laporan ini.
                             </div>
-                        </div>
+                        @endif
 
                         <div class="mb-3">
                             <label class="form-label">Catatan Pentadbir</label>
@@ -628,9 +658,19 @@
         const burialFields = document.getElementById('burialFields');
         const burialLot = document.getElementById('burial_lot_no');
         const burialDate = document.getElementById('burial_date');
+        const isRtbBurial = @json($isRtbBurial);
 
         function toggleBurialFields() {
-            if (!statusField || !burialFields) return;
+            if (!statusField) return;
+
+            if (!isRtbBurial) {
+                if (burialFields) burialFields.style.display = 'none';
+                if (burialLot) burialLot.disabled = true;
+                if (burialDate) burialDate.disabled = true;
+                return;
+            }
+
+            if (!burialFields) return;
 
             if (statusField.value === 'disahkan') {
                 burialFields.style.display = 'block';
@@ -644,7 +684,10 @@
         }
 
         toggleBurialFields();
-        statusField.addEventListener('change', toggleBurialFields);
+
+        if (statusField) {
+            statusField.addEventListener('change', toggleBurialFields);
+        }
     });
 </script>
 @endsection

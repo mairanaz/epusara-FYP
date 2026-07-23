@@ -92,8 +92,6 @@ class GraveOrder extends Model
                     'amount' => 1400.00,
                     'images' => [
                         'assets/images/kepuk/marmar-sahaja-1.jpg',
-                        'assets/images/kepuk/marmar-sahaja-2.jpg',
-                        'assets/images/kepuk/marmar-sahaja-3.jpg',
                     ],
                 ],
 
@@ -103,8 +101,6 @@ class GraveOrder extends Model
                     'amount' => 800.00,
                     'images' => [
                         'assets/images/kepuk/jubin-sahaja-1.jpg',
-                        'assets/images/kepuk/jubin-sahaja-2.jpg',
-                        'assets/images/kepuk/jubin-sahaja-3.jpg',
                     ],
                 ],
 
@@ -114,8 +110,6 @@ class GraveOrder extends Model
                     'amount' => 550.00,
                     'images' => [
                         'assets/images/kepuk/terazo-sahaja-1.jpg',
-                        'assets/images/kepuk/terazo-sahaja-2.jpg',
-                        'assets/images/kepuk/terazo-sahaja-3.jpg',
                     ],
                 ],
 
@@ -160,8 +154,6 @@ class GraveOrder extends Model
                     'amount' => 500.00,
                     'images' => [
                         'assets/images/kepuk/kanak-terazo-nisan-1.jpg',
-                        'assets/images/kepuk/kanak-terazo-nisan-2.jpg',
-                        'assets/images/kepuk/kanak-terazo-nisan-3.jpg',
                     ],
                 ],
 
@@ -182,8 +174,6 @@ class GraveOrder extends Model
                     'amount' => 750.00,
                     'images' => [
                         'assets/images/kepuk/kanak-jubin-sahaja-1.jpg',
-                        'assets/images/kepuk/kanak-jubin-sahaja-2.jpg',
-                        'assets/images/kepuk/kanak-jubin-sahaja-3.jpg',
                     ],
                 ],
 
@@ -193,8 +183,6 @@ class GraveOrder extends Model
                     'amount' => 300.00,
                     'images' => [
                         'assets/images/kepuk/kanak-terazo-sahaja-1.jpg',
-                        'assets/images/kepuk/kanak-terazo-sahaja-2.jpg',
-                        'assets/images/kepuk/kanak-terazo-sahaja-3.jpg',
                     ],
                 ],
 

@@ -372,7 +372,7 @@
     <div class="row g-3">
 
         {{-- Tindakan Pantas --}}
-        <div class="col-xl-5">
+        <div class="col-xl-6">
             <div class="card custom-card h-100 mb-0">
                 <div class="card-header">
                     <h5 class="card-title mb-1">Tindakan Pantas</h5>
@@ -413,76 +413,10 @@
             </div>
         </div>
 
-        {{-- Senarai Tanggungan --}}
-        <div class="col-xl-7">
-            <div class="card custom-card h-100 mb-0">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <div>
-                        <h5 class="card-title mb-1">Tanggungan Aktif & Layak</h5>
-                        <p class="text-muted fs-12 mb-0">
-                            Ringkasan tanggungan yang masih layak di bawah keahlian anda
-                        </p>
-                    </div>
-
-                    <a href="{{ $dependentUrl }}" class="btn btn-sm btn-outline-info">
-                        Lihat Semua
-                    </a>
-                </div>
-
-                <div class="card-body">
-                    @if(isset($dependents) && $dependents->count() > 0)
-                        @foreach($dependents as $dependent)
-                            <div class="dependent-item">
-                                <div class="d-flex align-items-center justify-content-between gap-3">
-                                    <div>
-                                        <h6 class="fw-semibold mb-1">
-                                            {{ $dependent->name ?? '-' }}
-                                        </h6>
-
-                                        <p class="text-muted fs-12 mb-0">
-                                            Pertalian: {{ $dependent->pertalian ?? '-' }}
-                                            @if(!empty($dependent->no_kp))
-                                                · No. KP: {{ $dependent->no_kp }}
-                                            @endif
-                                        </p>
-                                    </div>
-
-                                    @php
-                                        $lifeStatus = strtolower((string) ($dependent->status_kehidupan ?? 'aktif'));
-
-                                        $lifeStatusLabel = match ($lifeStatus) {
-                                            'aktif', 'hidup', 'active' => 'Aktif',
-                                            'meninggal', 'meninggal_dunia', 'deceased' => 'Meninggal Dunia',
-                                            default => ucfirst(str_replace('_', ' ', $lifeStatus)),
-                                        };
-                                    @endphp
-
-                                    <span class="dashboard-badge badge-soft-success">
-                                        {{ $lifeStatusLabel }}
-                                    </span>
-                                </div>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="empty-box">
-                            <i class="bx bx-group fs-2 text-muted"></i>
-                            <h6 class="fw-semibold mt-2 mb-1">Belum Ada Tanggungan</h6>
-                            <p class="text-muted fs-12 mb-3">
-                                Anda belum merekodkan maklumat tanggungan.
-                            </p>
-                            <a href="{{ $dependentUrl }}" class="btn btn-sm btn-primary">
-                                Tambah Tanggungan
-                            </a>
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-
     
 
         {{-- Aktiviti --}}
-        <div class="col-xl-12">
+        <div class="col-xl-6">
             <div class="card custom-card h-100 mb-0">
                 <div class="card-header">
                     <h5 class="card-title mb-1">Aktiviti Terkini</h5>

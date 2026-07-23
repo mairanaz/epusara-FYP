@@ -55,7 +55,19 @@ class GraveOrderController extends Controller
                     });
             })
             ->latest()
-            ->get();
+            ->get()
+            ->filter(function ($report) {
+                /*
+                |--------------------------------------------------------------------------
+                | Tapis si mati yang tiada lot kubur RTB
+                |--------------------------------------------------------------------------
+                | Jika si mati kebumi di luar RTB, final_burial_plot akan null.
+                | Jadi nama tersebut tidak akan dipaparkan dalam dropdown tempahan
+                | kepuk / batu nisan.
+                */
+                return !is_null($report->final_burial_plot);
+            })
+            ->values();
 
         $orderOptions = GraveOrder::orderOptions();
 
@@ -79,7 +91,13 @@ class GraveOrderController extends Controller
         ]);
 
         $mainUserId = $this->getMainUserId();
-        $deathReport = DeathReport::with(['burialPlot', 'assignedBurialPlot', 'dependent'])
+
+        $deathReport = DeathReport::with([
+                'burialPlot',
+                'assignedBurialPlot',
+                'dependent',
+                'graveOrder',
+            ])
             ->where('id', $request->death_report_id)
             ->where('status', 'disahkan')
             ->where(function ($query) use ($mainUserId) {
@@ -89,6 +107,31 @@ class GraveOrderController extends Controller
                     });
             })
             ->firstOrFail();
+
+        $finalBurialPlot = $deathReport->final_burial_plot;
+
+        /*
+        |--------------------------------------------------------------------------
+        | Validation penting: mesti ada lot kubur RTB
+        |--------------------------------------------------------------------------
+        | Ini elak user pilih / paksa submit death_report_id si mati yang
+        | dikebumikan di luar RTB.
+        */
+        if (!$finalBurialPlot) {
+            return back()
+                ->withInput()
+                ->with('error', 'Tempahan kepuk / nisan hanya boleh dibuat untuk si mati yang mempunyai lot kubur di RTB Bukit Changgang.');
+        }
+
+        $alreadyExists = GraveOrder::where('death_report_id', $deathReport->id)
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+
+        if ($alreadyExists) {
+            return redirect()
+                ->route('grave-orders.index')
+                ->with('error', 'Permohonan tempahan untuk si mati ini telah wujud.');
+        }
 
         $umur = is_numeric($deathReport->umur) ? (int) $deathReport->umur : null;
         $burialZone = strtoupper(trim($deathReport->burial_zone ?? ''));
@@ -109,16 +152,6 @@ class GraveOrderController extends Controller
                     : 'Si mati ini dikategorikan sebagai dewasa. Sila pilih tempahan kategori dewasa sahaja.');
         }
 
-        $alreadyExists = GraveOrder::where('death_report_id', $deathReport->id)
-        ->whereIn('status', ['pending', 'approved'])
-        ->exists();
-
-        if ($alreadyExists) {
-            return redirect()
-                ->route('grave-orders.index')
-                ->with('error', 'Permohonan tempahan untuk si mati ini telah wujud.');
-        }
-
         $options = GraveOrder::orderOptions();
 
         if (!isset($options[$request->category][$request->order_type])) {
@@ -129,12 +162,10 @@ class GraveOrderController extends Controller
 
         $selectedOption = $options[$request->category][$request->order_type];
 
-        $finalBurialPlot = $deathReport->final_burial_plot;
-
         GraveOrder::create([
             'user_id' => Auth::id(),
             'death_report_id' => $deathReport->id,
-            'burial_plot_id' => $finalBurialPlot?->id,
+            'burial_plot_id' => $finalBurialPlot->id,
             'category' => $request->category,
             'order_type' => $request->order_type,
             'order_label' => $selectedOption['label'],
@@ -184,17 +215,14 @@ class GraveOrderController extends Controller
     {
         $user = Auth::user();
 
-        // Kalau user login ini ialah akaun tanggungan
         if ($user->linked_dependent_id) {
             $dependent = Dependent::find($user->linked_dependent_id);
 
             if ($dependent) {
-                return $dependent->user_id; // user_id ahli utama
+                return $dependent->user_id;
             }
         }
 
-        // Kalau user login ialah ahli utama
         return $user->id;
     }
-
 }

@@ -37,7 +37,7 @@
             <div class="card custom-card overflow-hidden">
                 <div class="card-body text-center p-4">
                     <div class="mb-3">
-                        <span class="avatar avatar-xxl rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto fs-2">
+                        <span class="avatar avatar-xxl rounded-circle bg-info text-white d-flex align-items-center justify-content-center mx-auto fs-2">
                             {{ strtoupper(substr(old('name', $dependent->name), 0, 1)) }}
                         </span>
                     </div>
@@ -136,8 +136,6 @@
                                     <option value="">-- Pilih Status --</option>
                                     <option value="bujang" {{ old('status_perkahwinan', $dependent->status_perkahwinan) == 'bujang' ? 'selected' : '' }}>Bujang</option>
                                     <option value="berkahwin" {{ old('status_perkahwinan', $dependent->status_perkahwinan) == 'berkahwin' ? 'selected' : '' }}>Berkahwin</option>
-                                    <option value="duda" {{ old('status_perkahwinan', $dependent->status_perkahwinan) == 'duda' ? 'selected' : '' }}>Duda</option>
-                                    <option value="janda" {{ old('status_perkahwinan', $dependent->status_perkahwinan) == 'janda' ? 'selected' : '' }}>Janda</option>
                                 </select>
 
                                 @error('status_perkahwinan')
@@ -150,19 +148,24 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label class="form-label">Tinggal Bersama Ahli Utama?</label>
-                                <select name="tinggal_bersama" id="tinggal_bersama" class="form-select @error('tinggal_bersama') is-invalid @enderror" required>
-                                    <option value="">-- Pilih --</option>
-                                    <option value="1" {{ old('tinggal_bersama', $dependent->tinggal_bersama) == '1' ? 'selected' : '' }}>Ya</option>
-                                    <option value="0" {{ old('tinggal_bersama', $dependent->tinggal_bersama) == '0' ? 'selected' : '' }}>Tidak</option>
-                                </select>
+                                <label class="form-label fw-semibold">Tinggal Bersama Ahli Utama?</label>
+
+                                <input type="text"
+                                    class="form-control"
+                                    value="Ya"
+                                    readonly>
+
+                                <input type="hidden"
+                                    name="tinggal_bersama"
+                                    id="tinggal_bersama"
+                                    value="1">
 
                                 @error('tinggal_bersama')
-                                    <div class="invalid-feedback">{{ $message }}</div>
+                                    <div class="invalid-feedback d-block">{{ $message }}</div>
                                 @enderror
 
                                 <small class="text-muted">
-                                    Ibu/bapa kandung atau mertua wajib tinggal bersama ahli utama.
+                                    Semua tanggungan yang didaftarkan mestilah tinggal bersama atau berada di bawah tanggungan ahli utama.
                                 </small>
                             </div>
 
@@ -174,7 +177,7 @@
                         </div>
 
                         <div class="mt-4 d-flex flex-wrap gap-2">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-info">
                                 <i class="ri-save-line me-1"></i> Simpan Kemaskini
                             </button>
 

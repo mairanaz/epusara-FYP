@@ -13,11 +13,7 @@
     |--------------------------------------------------------------------------
     | Data Paparan Dashboard Tanggungan
     |--------------------------------------------------------------------------
-    | Dashboard ini khusus untuk pengguna tanggungan.
-    | Jika rekod tanggungan belum berjaya dipautkan, paparan tidak lagi
-    | menunjukkan "Belum Ditentukan" yang mengelirukan.
     */
-
     $displayName = $dependentData?->name ?? $currentUser->name ?? 'Tanggungan';
     $mainMemberName = $mainMemberData?->name ?? 'Belum Dipautkan';
 
@@ -33,18 +29,6 @@
 
     $displayIneligibilityReason = $ineligibilityReason ?? null;
     $displayDeathDate = $deathDate ?? null;
-
-    if (!$dependentData) {
-        $displayNoticeClass = 'warning';
-        $displayNoticeIcon = 'bx-error-circle';
-        $displayNoticeTitle = 'Rekod Tanggungan Belum Dipautkan';
-        $displayNoticeMessage = 'Akaun ini telah didaftarkan sebagai tanggungan, tetapi sistem belum berjaya memautkan akaun ini dengan rekod tanggungan di bawah ahli utama. Sila semak nombor kad pengenalan atau hubungi pentadbir.';
-    } else {
-        $displayNoticeClass = $accountNoticeClass ?? 'success';
-        $displayNoticeIcon = $accountNoticeIcon ?? 'bx-check-circle';
-        $displayNoticeTitle = $accountNoticeTitle ?? 'Akaun Tanggungan Aktif';
-        $displayNoticeMessage = $accountNoticeMessage ?? 'Anda berdaftar sebagai tanggungan di bawah ahli utama. Akaun ini tidak perlu membuat bayaran yuran khairat secara berasingan.';
-    }
 
     /*
     |--------------------------------------------------------------------------
@@ -162,36 +146,6 @@
         color: #075f47;
     }
 
-    .member-dashboard .stat-card {
-        border: 1px solid #eef1f5;
-    }
-
-    .member-dashboard .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 14px;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 25px;
-        flex-shrink: 0;
-    }
-
-    .member-dashboard .soft-primary {
-        color: #0c7359;
-        background: #e6f5f0;
-    }
-
-    .member-dashboard .soft-success {
-        color: #168754;
-        background: #e8f7ef;
-    }
-
-    .member-dashboard .soft-info {
-        color: #116b96;
-        background: #e7f4fb;
-    }
-
     .member-dashboard .family-panel {
         border: 1px solid #e8efe9;
         background: #fbfefd;
@@ -271,37 +225,6 @@
         background: #edf0f3;
     }
 
-    .member-dashboard .notice-item {
-        padding: 14px;
-        border-radius: 10px;
-        border: 1px solid #edf2ef;
-        background: #f7faf9;
-    }
-
-    .member-dashboard .notice-success {
-        color: #14804a;
-        background: #eaf8ef;
-        border-color: #c2ecd2;
-    }
-
-    .member-dashboard .notice-danger {
-        color: #bd3434;
-        background: #fff1f1;
-        border-color: #f4c7c7;
-    }
-
-    .member-dashboard .notice-warning {
-        color: #a66700;
-        background: #fff7e1;
-        border-color: #f5dfa8;
-    }
-
-    .member-dashboard .notice-secondary {
-        color: #59636f;
-        background: #f7faf9;
-        border-color: #edf2ef;
-    }
-
     .member-dashboard .quick-action {
         display: block;
         height: 100%;
@@ -372,7 +295,7 @@
         <div>
             <p class="fw-semibold fs-18 mb-1">Dashboard Tanggungan</p>
             <span class="text-muted">
-                Ringkasan status akaun tanggungan dan hubungan dengan ahli utama.
+                Ringkasan maklumat tanggungan dan hubungan dengan ahli utama.
             </span>
         </div>
     </div>
@@ -405,80 +328,6 @@
                         Semak Maklumat Tanggungan
                     </a>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Main Summary Cards --}}
-    <div class="row g-3 mb-4" id="tour-dependent-summary">
-        <div class="col-xl-4 col-md-6">
-            <div class="card custom-card stat-card h-100 mb-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <p class="text-muted mb-1">Status Akaun Tanggungan</p>
-                            <h5 class="fw-semibold mb-2">{{ $displayDependentStatus }}</h5>
-                            <small class="text-muted">Status pautan rekod keluarga</small>
-                        </div>
-
-                        <span class="stat-icon soft-primary">
-                            <i class="bx bx-badge-check"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-4 col-md-6">
-            <div class="card custom-card stat-card h-100 mb-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div>
-                            <p class="text-muted mb-1">Status Rekod</p>
-                            <h5 class="fw-semibold mb-2">{{ $displayLifeStatus }}</h5>
-                            <small class="text-muted">
-                                {{ $displayDeathDate ?: 'Rekod tanggungan semasa' }}
-                            </small>
-                        </div>
-
-                        <span class="stat-icon soft-success">
-                            <i class="bx bx-heart"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-xl-4 col-md-12">
-            <div class="card custom-card stat-card h-100 mb-0">
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between">
-                        <div class="pe-2">
-                            <p class="text-muted mb-1">Ahli Utama</p>
-                            <h5 class="fw-semibold mb-2">{{ $mainMemberName }}</h5>
-                            <small class="text-muted">
-                                Hubungan: {{ $displayRelationship }}
-                            </small>
-                        </div>
-
-                        <span class="stat-icon soft-info">
-                            <i class="bx bx-group"></i>
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Makluman Akaun --}}
-    <div class="notice-item notice-{{ $displayNoticeClass }} mb-4"
-         id="tour-dependent-notice">
-        <div class="d-flex gap-3 align-items-start">
-            <i class="bx {{ $displayNoticeIcon }} fs-4"></i>
-
-            <div>
-                <p class="mb-1 fw-medium">{{ $displayNoticeTitle }}</p>
-                <p class="mb-0 fs-12">{{ $displayNoticeMessage }}</p>
             </div>
         </div>
     </div>
@@ -648,24 +497,6 @@
                     }
                 },
                 {
-                    element: '#tour-dependent-summary',
-                    popover: {
-                        title: 'Ringkasan Status',
-                        description: 'Bahagian ini menunjukkan status tanggungan, status kehidupan dan ahli utama yang berkaitan dengan akaun anda.',
-                        side: 'bottom',
-                        align: 'center'
-                    }
-                },
-                {
-                    element: '#tour-dependent-notice',
-                    popover: {
-                        title: 'Makluman Akaun',
-                        description: 'Semak makluman semasa berkaitan status akaun tanggungan anda melalui bahagian ini.',
-                        side: 'bottom',
-                        align: 'center'
-                    }
-                },
-                {
                     element: '#tour-dependent-family',
                     popover: {
                         title: 'Maklumat Keahlian Keluarga',
@@ -678,7 +509,7 @@
                     element: '#tour-dependent-quick-actions',
                     popover: {
                         title: 'Tindakan Pantas',
-                        description: 'Gunakan menu ini untuk mengakses maklumat diri, keluarga, laporan kematian, lokasi kubur dan tempahan kepuk atau nisan.',
+                        description: 'Gunakan menu ini untuk mengakses maklumat diri, keluarga dan laporan kematian.',
                         side: 'left',
                         align: 'start'
                     }

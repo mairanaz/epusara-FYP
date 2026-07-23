@@ -1,7 +1,75 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container-fluid">
+<style>
+    .dependent-page .summary-card {
+        min-height: 100%;
+    }
+
+    .dependent-page .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dependent-page .table {
+        margin-bottom: 0;
+    }
+
+    .dependent-page .dependent-name-cell {
+        min-width: 220px;
+    }
+
+    .dependent-page .action-buttons {
+        min-width: 220px;
+    }
+
+    @media (max-width: 767.98px) {
+        .dependent-page .page-header-breadcrumb {
+            gap: 1rem;
+        }
+
+        .dependent-page .page-actions {
+            width: 100%;
+        }
+
+        .dependent-page #tour-add-dependent {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .dependent-page .card-body {
+            padding: 1rem;
+        }
+
+        .dependent-page .table {
+            min-width: 1050px;
+            font-size: 13px;
+        }
+
+        .dependent-page .table th,
+        .dependent-page .table td {
+            white-space: nowrap;
+            vertical-align: middle;
+        }
+
+        .dependent-page .badge {
+            font-size: 11px;
+        }
+
+        .dependent-page .btn-sm {
+            font-size: 12px;
+            padding: 0.35rem 0.55rem;
+        }
+
+        .dependent-page .action-buttons {
+            flex-wrap: nowrap !important;
+        }
+    }
+</style>
+
+<div class="container-fluid dependent-page">
 
     <div class="d-md-flex d-block align-items-center justify-content-between my-4 page-header-breadcrumb">
         <div id="tour-dependent-header">
@@ -9,52 +77,38 @@
             <p class="text-muted mb-0">Urus maklumat tanggungan ahli khairat dengan lebih teratur</p>
         </div>
 
-        <div>
+        <div class="page-actions">
             <a href="{{ route('user.dependents.create') }}"
-            id="tour-add-dependent"
-            class="btn btn-info">
+               id="tour-add-dependent"
+               class="btn btn-info">
                 <i class="ri-user-add-line me-1"></i> Tambah Tanggungan
             </a>
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success alert-dismissible fade show" role="alert">
-            <i class="ri-checkbox-circle-line me-1"></i> {{ session('success') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    @if(session('warning'))
-        <div class="alert alert-warning alert-dismissible fade show" role="alert">
-            <i class="ri-error-warning-line me-1"></i> {{ session('warning') }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    @endif
-
-    <div class="row" id="tour-dependent-summary">
-        <div class="col-xl-3 col-md-6 col-sm-6">
-            <div class="card custom-card">
+    <div class="row g-3 mb-4" id="tour-dependent-summary">
+        <div class="col-xl-4 col-md-6 col-sm-6 col-12">
+            <div class="card custom-card summary-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
                             <p class="mb-1 text-muted">Jumlah Tanggungan</p>
                             <h4 class="fw-semibold mb-0">{{ $dependents->count() }}</h4>
                         </div>
-                        <div class="avatar avatar-md bg-primary-transparent">
-                            <i class="ri-team-line fs-18 text-primary"></i>
+                        <div class="avatar avatar-md bg-info-transparent">
+                            <i class="ri-team-line fs-18 text-info"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 col-sm-6">
-            <div class="card custom-card">
+        <div class="col-xl-4 col-md-6 col-sm-6 col-12">
+            <div class="card custom-card summary-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <p class="mb-1 text-muted">Masih Aktif</p>
+                            <p class="mb-1 text-muted">Masih Hidup</p>
                             <h4 class="fw-semibold mb-0">
                                 {{ $dependents->where('status_kehidupan', '!=', 'meninggal_dunia')->count() }}
                             </h4>
@@ -67,8 +121,8 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 col-sm-6">
-            <div class="card custom-card">
+        <div class="col-xl-4 col-md-6 col-sm-6 col-12">
+            <div class="card custom-card summary-card">
                 <div class="card-body">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
@@ -86,15 +140,17 @@
         </div>
     </div>
 
-    <div class="card custom-card" id="tour-dependent-records">
-        <div class="card-header justify-content-between">
-            <div class="card-title">
+    {{-- Rekod Tanggungan --}}
+    <div class="card custom-card mt-2" id="tour-dependent-records">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <div class="card-title mb-0">
                 Rekod Tanggungan
             </div>
+        </div>
 
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-hover table-bordered align-middle text-nowrap">
+                <table class="table table-hover table-bordered align-middle">
                     <thead class="table-light">
                         <tr>
                             <th>#</th>
@@ -108,14 +164,15 @@
                             <th width="220">Tindakan</th>
                         </tr>
                     </thead>
+
                     <tbody>
                         @forelse($dependents as $index => $dependent)
                             <tr @if($index === 0) id="tour-first-dependent-record" @endif>
                                 <td>{{ $index + 1 }}</td>
 
-                                <td>
+                                <td class="dependent-name-cell">
                                     <div class="d-flex align-items-center gap-2">
-                                        <span class="avatar avatar-sm rounded-circle bg-primary text-white d-flex align-items-center justify-content-center">
+                                        <span class="avatar avatar-sm rounded-circle bg-info text-white d-flex align-items-center justify-content-center">
                                             {{ strtoupper(substr($dependent->name, 0, 1)) }}
                                         </span>
                                         <div>
@@ -125,26 +182,37 @@
                                 </td>
 
                                 <td>{{ $dependent->no_kp }}</td>
-                                <td>{{ ucfirst($dependent->pasangan) }}</td>
-                                <td>{{ ucwords($dependent->pertalian) }}</td>
+
+                                <td>
+                                    {{ $dependent->pasangan ? ucfirst($dependent->pasangan) : '-' }}
+                                </td>
+
+                                <td>
+                                    {{ $dependent->pertalian ? ucwords($dependent->pertalian) : '-' }}
+                                </td>
+
                                 <td>{{ $dependent->no_tel ?? '-' }}</td>
 
                                 <td>
                                     @if(($dependent->status_kehidupan ?? 'aktif') === 'meninggal_dunia')
                                         <span class="badge bg-danger">Meninggal Dunia</span>
+
                                         @if($dependent->tarikh_kematian)
                                             <div class="small text-muted mt-1">
                                                 {{ \Carbon\Carbon::parse($dependent->tarikh_kematian)->format('d/m/Y') }}
                                             </div>
                                         @endif
                                     @else
-                                        <span class="badge bg-success">Aktif</span>
+                                        <span class="badge bg-success">Masih Hidup</span>
                                     @endif
                                 </td>
 
                                 <td>
-                                    @if(($dependent->status_tanggungan ?? 'aktif') === 'aktif')
-                                        <span class="badge bg-success">Layak / Aktif</span>
+                                    @if(($dependent->status_kehidupan ?? 'aktif') === 'meninggal_dunia')
+                                        <span class="badge bg-danger">Tidak Aktif</span>
+
+                                    @elseif(($dependent->status_tanggungan ?? 'aktif') === 'aktif')
+                                        <span class="badge bg-success">Aktif</span>
 
                                     @elseif($dependent->status_tanggungan === 'tidak_layak')
                                         <span class="badge bg-danger">Tidak Layak</span>
@@ -170,23 +238,23 @@
                                 </td>
 
                                 <td>
-                                    <div class="d-flex flex-wrap gap-1"
-                                        @if($index === 0) id="tour-dependent-actions" @endif>
+                                    <div class="d-flex flex-wrap gap-1 action-buttons"
+                                         @if($index === 0) id="tour-dependent-actions" @endif>
 
                                         <a href="{{ route('user.dependents.show', $dependent->id) }}"
-                                        class="btn btn-info-light btn-sm">
+                                           class="btn btn-info-light btn-sm">
                                             <i class="ri-eye-line me-1"></i> Lihat
                                         </a>
 
                                         <a href="{{ route('user.dependents.edit', $dependent->id) }}"
-                                        class="btn btn-warning-light btn-sm">
+                                           class="btn btn-warning-light btn-sm">
                                             <i class="ri-pencil-line me-1"></i> Edit
                                         </a>
 
                                         <form action="{{ route('user.dependents.destroy', $dependent->id) }}"
-                                            method="POST"
-                                            class="d-inline"
-                                            onsubmit="return confirm('Adakah anda pasti mahu padam data ini?')">
+                                              method="POST"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Adakah anda pasti mahu padam data ini?')">
                                             @csrf
                                             @method('DELETE')
 
@@ -204,8 +272,12 @@
                                         <div class="avatar avatar-xl bg-light text-muted mb-3">
                                             <i class="ri-team-line fs-2"></i>
                                         </div>
+
                                         <h6 class="mb-1">Tiada tanggungan direkodkan</h6>
-                                        <p class="text-muted mb-3">Sila tambah tanggungan baharu untuk dipaparkan di sini.</p>
+                                        <p class="text-muted mb-3">
+                                            Sila tambah tanggungan baharu untuk dipaparkan di sini.
+                                        </p>
+
                                         <a href="{{ route('user.dependents.create') }}" class="btn btn-info btn-sm">
                                             <i class="ri-user-add-line me-1"></i> Tambah Tanggungan
                                         </a>
@@ -216,8 +288,15 @@
                     </tbody>
                 </table>
             </div>
+
+            <div class="d-block d-md-none mt-2">
+                <small class="text-muted">
+                    Nota: Sila leret jadual ke kiri atau kanan untuk melihat semua maklumat.
+                </small>
+            </div>
         </div>
     </div>
+
 </div>
 @endsection
 
@@ -327,17 +406,18 @@
 
                 onPopoverRender: function () {
                     const currentIndex = dependentTour.getActiveIndex() ?? 0;
-                    window.updateEpusaraTourPopover(
-                        dependentTour,
-                        currentIndex,
-                        availableSteps.length
-                    );
+
+                    if (typeof window.updateEpusaraTourPopover === 'function') {
+                        window.updateEpusaraTourPopover(
+                            dependentTour,
+                            currentIndex,
+                            availableSteps.length
+                        );
+                    }
                 },
 
                 steps: availableSteps
             });
-
-            dependentTour.drive();
 
             dependentTour.drive();
         });

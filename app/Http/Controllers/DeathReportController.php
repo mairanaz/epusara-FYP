@@ -154,9 +154,9 @@ class DeathReportController extends Controller
             'no_tel_pelapor' => ['required', 'string', 'max:255'],
             'pertalian_pelapor' => ['required', 'string', 'max:255'],
 
-            'sijil_mati' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
-            'permit_kebumi' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
-            'dokumen_sokongan' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:2048'],
+            'sijil_mati' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
+            'permit_kebumi' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
+            'dokumen_sokongan' => ['nullable', 'file', 'mimes:jpg,jpeg,png,pdf', 'max:10240'],
         ], [
             'alamat_terakhir.required' => 'Sila nyatakan tempat kematian.',
             'tarikh_meninggal.required' => 'Sila pilih tarikh meninggal.',
@@ -171,6 +171,13 @@ class DeathReportController extends Controller
             'alamat_tanah_perkuburan.required_if' => 'Sila nyatakan alamat penuh tempat pengkebumian jika pengkebumian di luar kawasan.',
             'negeri_tanah_perkuburan.required_if' => 'Sila pilih negeri tempat pengkebumian jika pengkebumian di luar kawasan.',
             'negeri_tanah_perkuburan.in' => 'Negeri tempat pengkebumian yang dipilih tidak sah.',
+            'sijil_mati.max' => 'Saiz fail sijil mati tidak boleh melebihi 10MB.',
+            'permit_kebumi.max' => 'Saiz fail permit kebumi tidak boleh melebihi 10MB.',
+            'dokumen_sokongan.max' => 'Saiz fail dokumen sokongan tidak boleh melebihi 10MB.',
+
+            'sijil_mati.mimes' => 'Fail sijil mati mestilah dalam format JPG, JPEG, PNG atau PDF.',
+            'permit_kebumi.mimes' => 'Fail permit kebumi mestilah dalam format JPG, JPEG, PNG atau PDF.',
+            'dokumen_sokongan.mimes' => 'Fail dokumen sokongan mestilah dalam format JPG, JPEG, PNG atau PDF.',
         ]);
 
          if (($validated['lokasi_pengkebumian'] ?? null) === 'rtb') {

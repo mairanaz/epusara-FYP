@@ -202,7 +202,7 @@
     @endif
 
     <div class="row g-3 mb-4">
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
@@ -216,7 +216,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
@@ -230,7 +230,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        <div class="col-xl-4 col-md-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
@@ -244,7 +244,7 @@
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6">
+        {{-- <div class="col-xl-3 col-md-6">
             <div class="card stats-card h-100">
                 <div class="card-body d-flex align-items-center justify-content-between">
                     <div>
@@ -256,7 +256,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> --}}
     </div>
 
     <div class="card filter-card mb-4">

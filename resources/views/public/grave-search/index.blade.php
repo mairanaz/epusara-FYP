@@ -463,7 +463,7 @@
                 <div class="md:col-span-5 grid gap-5 md:gap-6">
 
                     <article class="relative min-h-[220px] overflow-hidden rounded-[28px] group shadow-soft bg-slate-100">
-                        <img src="{{ asset('assets/images/pusara/laluan-ziarah.jpg') }}"
+                        <img src="{{ asset('assets/images/pusara/laluan-ziarah.jpeg') }}"
                              alt="Laluan pejalan kaki ke kawasan lot pusara"
                              class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-700">
 
@@ -479,7 +479,7 @@
                     </article>
 
                     <article class="relative min-h-[220px] overflow-hidden rounded-[28px] group shadow-soft bg-slate-100">
-                        <img src="{{ asset('assets/images/pusara/kemudahan-awam.jpg') }}"
+                        <img src="{{ asset('assets/images/pusara/kemudahan-awam.jpeg') }}"
                              alt="Kemudahan awam di kawasan perkuburan"
                              class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition duration-700">
 
@@ -489,7 +489,7 @@
                             </h3>
 
                             <p class="text-slate-200 text-xs mt-1">
-                                Maklumat parkir, pintu masuk dan kemudahan berkaitan ziarah.
+                                kemudahan berkaitan ziarah.
                             </p>
                         </div>
                     </article>

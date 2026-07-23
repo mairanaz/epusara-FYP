@@ -426,8 +426,8 @@
             </h5>
 
             <p class="text-muted mb-3">
-                Permohonan tempahan hanya boleh dibuat untuk laporan kematian yang telah diluluskan
-                dan belum mempunyai tempahan kepuk / nisan.
+                Permohonan tempahan hanya boleh dibuat untuk laporan kematian yang telah diluluskan,
+                mempunyai lot kubur di RTB Bukit Changgang dan belum mempunyai tempahan kepuk / nisan.
             </p>
 
             <a href="{{ route('death-reports.index') }}" class="btn btn-info text-white">
@@ -470,7 +470,7 @@
                         </select>
 
                         <div class="small text-muted mt-2">
-                            Hanya laporan kematian yang telah disahkan dan belum mempunyai tempahan aktif akan dipaparkan.
+                            Hanya laporan kematian yang telah disahkan, mempunyai lot kubur RTB dan belum mempunyai tempahan aktif akan dipaparkan.
                         </div>
                     </div>
 

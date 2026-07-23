@@ -78,41 +78,75 @@ class AdminDeathReportController extends Controller
         ));
     }
 
+    private function isRtbBurial(DeathReport $deathReport): bool
+    {
+        return $deathReport->lokasi_pengkebumian === 'rtb';
+    }
+
     public function verify(Request $request, DeathReport $deathReport)
     {
+        $isRtbBurial = $this->isRtbBurial($deathReport);
+
         $validated = $request->validate([
             'verification_category' => ['required', 'in:ahli_khairat,tanggungan,bukan_ahli,warga_asing'],
             'status' => ['required', 'in:disahkan,perlukan_dokumen_tambahan,ditolak'],
-            'burial_lot_no' => ['nullable', 'string', 'max:100', 'required_if:status,disahkan'],
-            'burial_date' => ['nullable', 'date', 'required_if:status,disahkan'],
+            'burial_lot_no' => ['nullable', 'string', 'max:100'],
+            'burial_date' => ['nullable', 'date'],
             'admin_notes' => ['nullable', 'string', 'max:1000'],
         ], [
             'verification_category.required' => 'Sila pilih kategori si mati.',
             'status.required' => 'Sila pilih status semakan.',
-            'burial_lot_no.required_if' => 'No lot kubur wajib diisi apabila status disahkan.',
-            'burial_date.required_if' => 'Tarikh kebumi wajib diisi apabila status disahkan.',
         ]);
 
-        $deathReport->update([
+        /*
+        |--------------------------------------------------------------------------
+        | Jika kebumi dalam RTB, admin wajib pilih lot dahulu
+        |--------------------------------------------------------------------------
+        */
+        if ($validated['status'] === 'disahkan' && $isRtbBurial) {
+            if (!$deathReport->burial_plot_id || !$deathReport->burial_lot_no || !$deathReport->burial_date) {
+                return back()
+                    ->withInput()
+                    ->withErrors([
+                        'burial_lot_no' => 'Sila pilih lot kubur terlebih dahulu untuk pengkebumian dalam kawasan RTB.',
+                    ]);
+            }
+        }
+
+        /*
+        |--------------------------------------------------------------------------
+        | Jika luar RTB, lot kubur tidak diperlukan
+        |--------------------------------------------------------------------------
+        */
+        $updateData = [
             'verification_category' => $validated['verification_category'],
             'status' => $validated['status'],
-            'burial_lot_no' => $validated['status'] === 'disahkan'
-                ? ($validated['burial_lot_no'] ?? null)
-                : null,
-            'burial_date' => $validated['status'] === 'disahkan'
-                ? ($validated['burial_date'] ?? null)
-                : null,
             'admin_notes' => $validated['admin_notes'] ?? null,
             'verified_by' => auth()->id(),
             'verified_at' => now(),
-        ]);
+        ];
+
+        if ($validated['status'] === 'disahkan' && $isRtbBurial) {
+            $updateData['burial_lot_no'] = $deathReport->burial_lot_no;
+            $updateData['burial_date'] = $deathReport->burial_date;
+            $updateData['tarikh_kebumi'] = $deathReport->tarikh_kebumi ?? $deathReport->burial_date;
+        } else {
+            $updateData['burial_plot_id'] = null;
+            $updateData['burial_zone'] = null;
+            $updateData['burial_plot_code'] = null;
+            $updateData['burial_lot_no'] = null;
+            $updateData['burial_date'] = null;
+            $updateData['tarikh_kebumi'] = null;
+        }
+
+        $deathReport->update($updateData);
 
         if ($validated['status'] === 'disahkan') {
             $this->syncDeathStatus($deathReport->fresh());
         }
 
         return redirect()
-            ->route('admin.death-reports.index', $deathReport)
+            ->route('admin.death-reports.index')
             ->with('success', 'Semakan laporan kematian berjaya dikemaskini.');
     }
 
@@ -206,6 +240,12 @@ class AdminDeathReportController extends Controller
 
     public function selectPlot(DeathReport $deathReport)
     {
+        if (!$this->isRtbBurial($deathReport)) {
+            return redirect()
+                ->route('admin.death-reports.show', $deathReport)
+                ->with('error', 'Laporan ini memilih pengkebumian di luar kawasan RTB. Pemilihan lot kubur tidak diperlukan.');
+        }
+
         if ($deathReport->burial_plot_id) {
             return redirect()
                 ->route('admin.death-reports.show', $deathReport)
@@ -231,6 +271,12 @@ class AdminDeathReportController extends Controller
 
     public function storePlot(Request $request, DeathReport $deathReport)
     {
+        if (!$this->isRtbBurial($deathReport)) {
+            return redirect()
+                ->route('admin.death-reports.show', $deathReport)
+                ->with('error', 'Laporan ini memilih pengkebumian di luar kawasan RTB. Pemilihan lot kubur tidak diperlukan.');
+        }
+
         $validated = $request->validate([
             'burial_plot_id' => ['required', 'exists:burial_plots,id'],
             'burial_date' => ['required', 'date'],

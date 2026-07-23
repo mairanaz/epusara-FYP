@@ -235,7 +235,12 @@ class AdminBurialRecordController extends Controller
     public function updateGraveImage(Request $request, DeathReport $deathReport)
     {
         $request->validate([
-            'grave_image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'grave_image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+        ], [
+            'grave_image.required' => 'Sila muat naik gambar kubur.',
+            'grave_image.image' => 'Fail yang dimuat naik mestilah gambar.',
+            'grave_image.mimes' => 'Format gambar mestilah jpg, jpeg, png atau webp.',
+            'grave_image.max' => 'Saiz gambar kubur tidak boleh melebihi 10MB.',
         ]);
 
         $deathReport->load(['burialPlot', 'assignedBurialPlot']);
@@ -259,7 +264,6 @@ class AdminBurialRecordController extends Controller
 
         return back()->with('success', 'Gambar kubur berjaya dikemaskini.');
     }
-
     private function getSelectedGraveOrder(DeathReport $deathReport)
     {
         $orders = $deathReport->graveOrders ?? collect();

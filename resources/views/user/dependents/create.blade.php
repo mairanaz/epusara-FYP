@@ -69,8 +69,6 @@
                             <option value="">-- Pilih Status --</option>
                             <option value="bujang" {{ old('status_perkahwinan') == 'bujang' ? 'selected' : '' }}>Bujang</option>
                             <option value="berkahwin" {{ old('status_perkahwinan') == 'berkahwin' ? 'selected' : '' }}>Berkahwin</option>
-                            <option value="duda" {{ old('status_perkahwinan') == 'duda' ? 'selected' : '' }}>Duda</option>
-                            <option value="janda" {{ old('status_perkahwinan') == 'janda' ? 'selected' : '' }}>Janda</option>
                         </select>
 
                         @error('status_perkahwinan')
@@ -82,20 +80,25 @@
                         </small>
                     </div>
 
-                    <div class="col-md-6">
+                   <div class="col-md-6">
                         <label class="form-label fw-semibold">Tinggal Bersama Ahli Utama?</label>
-                        <select name="tinggal_bersama" id="tinggal_bersama" class="form-select @error('tinggal_bersama') is-invalid @enderror" required>
-                            <option value="">-- Pilih --</option>
-                            <option value="1" {{ old('tinggal_bersama') == '1' ? 'selected' : '' }}>Ya</option>
-                            <option value="0" {{ old('tinggal_bersama') == '0' ? 'selected' : '' }}>Tidak</option>
-                        </select>
+
+                        <input type="text"
+                            class="form-control"
+                            value="Ya"
+                            readonly>
+
+                        <input type="hidden"
+                            name="tinggal_bersama"
+                            id="tinggal_bersama"
+                            value="1">
 
                         @error('tinggal_bersama')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
 
                         <small class="text-muted">
-                            Wajib untuk ibu/bapa kandung atau mertua yang ingin didaftarkan sebagai tanggungan.
+                            Semua tanggungan yang didaftarkan mestilah tinggal bersama atau berada di bawah tanggungan ahli utama.
                         </small>
                     </div>
 

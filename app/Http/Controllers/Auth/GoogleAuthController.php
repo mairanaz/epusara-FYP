@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Models\UserProfile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -26,9 +27,11 @@ class GoogleAuthController extends Controller
 
             if ($user) {
                 $user->update([
+                    'name' => $user->name ?: ($googleUser->getName() ?? $googleUser->getNickname() ?? 'Pengguna Google'),
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
                     'provider' => 'google',
+                    'role' => $user->role ?: 'user',
                 ]);
             } else {
                 $user = User::create([
@@ -38,9 +41,10 @@ class GoogleAuthController extends Controller
                     'google_id' => $googleUser->getId(),
                     'avatar' => $googleUser->getAvatar(),
                     'provider' => 'google',
-
-                    // Kalau sistem awak ada role, guna ini:
                     'role' => 'user',
+
+                    // Biar null dulu supaya user wajib lengkapkan profil
+                    'account_type' => null,
                 ]);
             }
 
@@ -48,23 +52,25 @@ class GoogleAuthController extends Controller
 
             /*
             |--------------------------------------------------------------------------
-            | Redirect selepas login
+            | Check Profile
             |--------------------------------------------------------------------------
-            | Kalau profile belum lengkap, hantar ke page profile.
-            | Kalau sudah lengkap, hantar ke dashboard.
-            |--------------------------------------------------------------------------
+            | Kalau user Google belum ada profile, hantar ke step 1.
             */
+            $hasProfile = UserProfile::where('user_id', $user->id)->exists();
 
-            if (method_exists($user, 'profile') && !$user->profile) {
-                return redirect()->route('profile.create')
+            if (!$hasProfile) {
+                return redirect()
+                    ->route('user.profile.create.step1')
                     ->with('info', 'Sila lengkapkan profil anda dahulu.');
             }
 
-            return redirect()->route('user.dashboard')
+            return redirect()
+                ->route('user.dashboard')
                 ->with('success', 'Berjaya log masuk menggunakan akaun Google.');
 
         } catch (Throwable $e) {
-            return redirect()->route('login')
+            return redirect()
+                ->route('login')
                 ->with('error', 'Log masuk Google tidak berjaya. Sila cuba semula.');
         }
     }
